@@ -1,0 +1,4 @@
+aio-pika
+tgcrypto
+pyrofork
+python-dotenv

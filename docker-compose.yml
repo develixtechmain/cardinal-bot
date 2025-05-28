@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  parser:
+    image: doker.develixtech.com/cardinal/parser:0.0.1-SNAPSHOT
+    environment:
+      TELEGRAM_API_ID:
+      TELEGRAM_API_HASH:
+      RABBITMQ_PASS:
+    depends_on:
+      - rabbitmq
+
+
+  processor:
+    image: doker.develixtech.com/cardinal/processor:0.0.1-SNAPSHOT
+    environment:
+      RABBITMQ_PASS:
+      CLICKHOUSE_PASS:
+      OPENAI_API_KEY:
+      EMBEDDER_URL: http://embedder:7200/api/similarity/search
+      EMBEDDER_KEY:
+    depends_on:
+      - rabbitmq
+      - clickhouse
+
+  rabbitmq:
+    image: "rabbitmq:3"
+    environment:
+      RABBITMQ_DEFAULT_USER: cardinal
+      RABBITMQ_DEFAULT_PASS: 
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+
+  clickhouse:
+      image: clickhouse/clickhouse-server:25.4-alpine
+      environment:
+        CLICKHOUSE_DB: cardinal
+        CLICKHOUSE_USER: cardinal
+        CLICKHOUSE_PASSWORD: 
+      ports:
+        - "8123:8123"
+        - "9000:9000"
+      volumes:
+        - clickhouse-data:/var/lib/clickhouse
+
+volumes:
+  rabbitmq-data:
+  clickhouse-data:
