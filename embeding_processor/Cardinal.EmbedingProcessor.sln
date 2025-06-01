@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cardinal.EmbedingProcessor", "Cardinal.EmbedingProcessor\Cardinal.EmbedingProcessor.csproj", "{86EF5CA5-8CD3-4110-8877-8ADF9E724ADD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{86EF5CA5-8CD3-4110-8877-8ADF9E724ADD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86EF5CA5-8CD3-4110-8877-8ADF9E724ADD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86EF5CA5-8CD3-4110-8877-8ADF9E724ADD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86EF5CA5-8CD3-4110-8877-8ADF9E724ADD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

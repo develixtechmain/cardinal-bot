@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  cardinal-embedding-processor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cardinal-embedding-processor
+    ports:
+      - "18080:8080" # Внешний порт:внутренний порт контейнера (из Dockerfile ENV ASPNETCORE_URLS)
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development # Или Production
+      - ConnectionStrings__Postgres=Host=postgres;Port=5432;Database=emb_proc;Username=app;Password=YRyGe6K1SneslitROY7PxA
+      - EmbeddingsApi__Host=http://embeddings:80 # Адрес сервиса эмбеддингов
+      - Qdrant__Host=http://qdrant:6333 # Адрес Qdrant REST API
+      - Qdrant__CollectionName=leads # Имя коллекции Qdrant
+      # - Qdrant__ApiKey=_I9UwmAWq-F2KnVkXMG8gEnlZnKsckeMYylojuCaME8 # Если Qdrant требует API ключ
+    depends_on:
+      - postgres
+      - qdrant
+      - embeddings
+    restart: unless-stopped
+
+  embeddings:
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.4
+    container_name: embeddings-service
+    environment:
+      - MODEL_ID=intfloat/multilingual-e5-base
+      - NUM_WORKERS=2 # Настройте в соответствии с вашими ресурсами CPU
+    ports:
+      - "10080:80"
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: qdrant-db
+    restart: unless-stopped
+    ports:
+      - "10633:6333" # REST API
+      - "10634:6334" # gRPC API
+    volumes:
+      - ./qdrant_data:/qdrant/storage
+    # Если вы хотите использовать API ключ для Qdrant, раскомментируйте и настройте:
+    # command: ["./qdrant", "--api-key", "_I9UwmAWq-F2KnVkXMG8gEnlZnKsckeMYylojuCaME8"]
+    # environment:
+    #   - QDRANT__SERVICE__API_KEY=_I9UwmAWq-F2KnVkXMG8gEnlZnKsckeMYylojuCaME8
+
+  postgres:
+    image: postgres:16
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: YRyGe6K1SneslitROY7PxA # Используем сгенерированный пароль
+      POSTGRES_DB: emb_proc
+    ports:
+      - "10543:5432"
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data
+
+volumes:
+  pg_data:
+  qdrant_data: 

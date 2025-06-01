@@ -1,0 +1,6 @@
+@Cardinal.EmbedingProcessor_HostAddress = http://localhost:5169
+
+GET {{Cardinal.EmbedingProcessor_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
