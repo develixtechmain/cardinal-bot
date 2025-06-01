@@ -33,7 +33,14 @@ public class LearningController : ControllerBase
 
         var qdrantClient = _httpFactory.CreateClient();
         var qdrantHost = _config["Qdrant:Host"];
-        var collectionName = _config["Qdrant:CollectionName"] ?? "leads"; // Get from config or use default
+        var collectionName = _config["Qdrant:CollectionName"];
+        var qdrantApiKey = _config["Qdrant:ApiKey"];
+
+        // Добавляем ключ API в заголовки, если он есть
+        if (!string.IsNullOrEmpty(qdrantApiKey))
+        {
+            qdrantClient.DefaultRequestHeaders.Add("api-key", qdrantApiKey);
+        }
 
         // 1. Fetch current points from Qdrant
         var fetchUrl = $"{qdrantHost}/collections/{collectionName}/points";
@@ -109,7 +116,14 @@ public class LearningController : ControllerBase
 
         var qdrantClient = _httpFactory.CreateClient();
         var qdrantHost = _config["Qdrant:Host"];
-        var collectionName = _config["Qdrant:CollectionName"] ?? "leads"; // Get from config or use default
+        var collectionName = _config["Qdrant:CollectionName"];
+        var qdrantApiKey = _config["Qdrant:ApiKey"];
+
+        // Добавляем ключ API в заголовки, если он есть
+        if (!string.IsNullOrEmpty(qdrantApiKey))
+        {
+            qdrantClient.DefaultRequestHeaders.Add("api-key", qdrantApiKey);
+        }
 
         // 1. Fetch current points from Qdrant
         var fetchUrl = $"{qdrantHost}/collections/{collectionName}/points";

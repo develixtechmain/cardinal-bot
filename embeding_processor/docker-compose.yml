@@ -14,7 +14,14 @@ services:
       - EmbeddingsApi__Host=http://embeddings:80 # Адрес сервиса эмбеддингов
       - Qdrant__Host=http://qdrant:6333 # Адрес Qdrant REST API
       - Qdrant__CollectionName=leads # Имя коллекции Qdrant
-      # - Qdrant__ApiKey=_I9UwmAWq-F2KnVkXMG8gEnlZnKsckeMYylojuCaME8 # Если Qdrant требует API ключ
+      - ApiKey=d4f8c9b1-8a7b-4e6e-9f0d-0c1b2a3f4e5d # Ключ API для аутентификации
+      - Qdrant__ApiKey=a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d # Ключ API для Qdrant
+      # Новые параметры поиска (закомментированы, будут использоваться значения по умолчанию из appsettings.json, если не заданы здесь)
+      # - Search__TopN=1000
+      # - Search__ScoreThreshold=0.85
+      # - Search__BayesianAlpha=1.0
+      # - Search__BayesianBeta=1.0
+      # - Search__MinGroupScoreSumThreshold=0.6
     depends_on:
       - postgres
       - qdrant
@@ -40,10 +47,9 @@ services:
       - "10634:6334" # gRPC API
     volumes:
       - ./qdrant_data:/qdrant/storage
-    # Если вы хотите использовать API ключ для Qdrant, раскомментируйте и настройте:
-    # command: ["./qdrant", "--api-key", "_I9UwmAWq-F2KnVkXMG8gEnlZnKsckeMYylojuCaME8"]
-    # environment:
-    #   - QDRANT__SERVICE__API_KEY=_I9UwmAWq-F2KnVkXMG8gEnlZnKsckeMYylojuCaME8
+    command: ["./qdrant", "--api-key", "a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d"]
+    environment:
+      - QDRANT__SERVICE__API_KEY=a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d
 
   postgres:
     image: postgres:16

@@ -43,7 +43,15 @@ public class VectorsController : ControllerBase
         }).ToArray();
 
         var qdrantClient = _http.CreateClient();
-        var qdrantUrl = _config["Qdrant:Host"] + "/collections/leads/points";
+        var qdrantCollectionName = _config["Qdrant:CollectionName"];
+        var qdrantUrl = $"{_config["Qdrant:Host"]}/collections/{qdrantCollectionName}/points";
+        var qdrantApiKey = _config["Qdrant:ApiKey"];
+
+        if (!string.IsNullOrEmpty(qdrantApiKey))
+        {
+            qdrantClient.DefaultRequestHeaders.Add("api-key", qdrantApiKey);
+        }
+
         var qdrantResp = await qdrantClient.PutAsJsonAsync(qdrantUrl, new { points = qdrantPointsToCreate });
         if (!qdrantResp.IsSuccessStatusCode)
             return StatusCode(500, "Qdrant insert error");
@@ -55,7 +63,15 @@ public class VectorsController : ControllerBase
     public async Task<IActionResult> DeleteByTask(Guid taskId)
     {
         var qdrantClient = _http.CreateClient();
-        var qdrantUrl = _config["Qdrant:Host"] + "/collections/leads/points/delete";
+        var qdrantCollectionName = _config["Qdrant:CollectionName"];
+        var qdrantUrl = $"{_config["Qdrant:Host"]}/collections/{qdrantCollectionName}/points/delete";
+        var qdrantApiKey = _config["Qdrant:ApiKey"];
+
+        if (!string.IsNullOrEmpty(qdrantApiKey))
+        {
+            qdrantClient.DefaultRequestHeaders.Add("api-key", qdrantApiKey);
+        }
+
         var filter = new
         {
             filter = new
@@ -85,13 +101,21 @@ public class VectorsController : ControllerBase
         if (embeddingData == null) return StatusCode(500, "No embedding data");
 
         var qdrantClient = _http.CreateClient();
-        var qdrantUrl = _config["Qdrant:Host"] + "/collections/leads/points/search";
+        var qdrantCollectionName = _config["Qdrant:CollectionName"];
+        var qdrantUrl = $"{_config["Qdrant:Host"]}/collections/{qdrantCollectionName}/points/search";
+        var qdrantApiKey = _config["Qdrant:ApiKey"];
+
+        if (!string.IsNullOrEmpty(qdrantApiKey))
+        {
+            qdrantClient.DefaultRequestHeaders.Add("api-key", qdrantApiKey);
+        }
+
         var searchBody = new
         {
             vector = embeddingData[0],
-            top = 1000,
+            top = _config.GetValue<int>("Search:TopN", 1000),
             with_payload = true,
-            score_threshold = 0.85 
+            score_threshold = _config.GetValue<double>("Search:ScoreThreshold", 0.85)
         };
         var qdrantResp = await qdrantClient.PostAsJsonAsync(qdrantUrl, searchBody);
         if (!qdrantResp.IsSuccessStatusCode)
@@ -100,9 +124,9 @@ public class VectorsController : ControllerBase
         var qdrantResult = await qdrantResp.Content.ReadFromJsonAsync<QdrantSearchResponse>(); 
         if (qdrantResult == null || qdrantResult.Result == null) return StatusCode(500, "No Qdrant result or empty result array");
         
-        const double alpha = 1.0;
-        const double beta = 1.0;
-        const double MinGroupScoreSumThreshold = 0.6; 
+        var alpha = _config.GetValue<double>("Search:BayesianAlpha", 1.0);
+        var beta = _config.GetValue<double>("Search:BayesianBeta", 1.0);
+        var minGroupScoreSumThreshold = _config.GetValue<double>("Search:MinGroupScoreSumThreshold", 0.6);
 
         var groupedAndFiltered = qdrantResult.Result 
             .Select(x => 
@@ -123,7 +147,7 @@ public class VectorsController : ControllerBase
                 Tags = g.Select(x => new SearchResponseTagDto { Id = x.Point.Id, Score = x.CombinedScore }).ToList(), 
                 SumOfCombinedScores = g.Sum(x => x.CombinedScore) 
             })
-            .Where(g => g.SumOfCombinedScores > MinGroupScoreSumThreshold) 
+            .Where(g => g.SumOfCombinedScores > minGroupScoreSumThreshold) 
             .Select(g => new SearchResponseItemDto 
             {
                 TaskId = g.TaskId,

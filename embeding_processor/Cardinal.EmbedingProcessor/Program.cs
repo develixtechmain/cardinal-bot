@@ -1,4 +1,5 @@
 using Cardinal.EmbedingProcessor.Db;
+using Cardinal.EmbedingProcessor.Security;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,7 +7,14 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddControllers();
+
+// Регистрируем ApiKeyAuthFilter
+builder.Services.AddScoped<ApiKeyAuthFilter>();
+
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ApiKeyAuthFilter>(); // Применяем фильтр глобально
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
