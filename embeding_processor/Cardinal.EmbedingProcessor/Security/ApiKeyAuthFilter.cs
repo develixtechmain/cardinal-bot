@@ -9,7 +9,7 @@ namespace Cardinal.EmbedingProcessor.Security
 {
     public class ApiKeyAuthFilter : IAsyncAuthorizationFilter
     {
-        private const string ApiKeyHeaderName = "X-Api-Key";
+        private const string ApiKeyHeaderName = "X-API-KEY";
         private readonly IConfiguration _configuration;
 
         public ApiKeyAuthFilter(IConfiguration configuration)
