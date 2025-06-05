@@ -137,6 +137,7 @@ public class VectorsController : ControllerBase
                 {
                     Point = x, 
                     TaskId = x.Payload.TaskId, 
+                    UserId = x.Payload.UserId,
                     CombinedScore = combinedScore
                 };
             })
@@ -144,13 +145,17 @@ public class VectorsController : ControllerBase
             .Select(g => new
             {
                 TaskId = g.Key,
-                Tags = g.Select(x => new SearchResponseTagDto { Id = x.Point.Id, Score = x.CombinedScore }).ToList(), 
+                UserId = g.First().UserId,
+                Score = g.Select(p => p.CombinedScore).Sum(),
+                Tags = g.Select(x => new SearchResponseTagDto { Id = x.Point.Id}).ToList(), 
                 SumOfCombinedScores = g.Sum(x => x.CombinedScore) 
             })
             .Where(g => g.SumOfCombinedScores > minGroupScoreSumThreshold) 
             .Select(g => new SearchResponseItemDto 
             {
                 TaskId = g.TaskId,
+                UserId = g.UserId,
+                Score = (float)g.Score,
                 Tags = g.Tags
             })
             .ToList();
