@@ -1,0 +1,4 @@
+pg_data
+qdrant_data
+*.log
+.git
