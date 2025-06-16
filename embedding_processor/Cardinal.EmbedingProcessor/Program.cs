@@ -24,6 +24,12 @@ builder.Services.AddDbContextPool<AppDbContext>(options =>
 builder.Services.AddHttpClient(); 
 
 var app = builder.Build();
+
+var ctx = app.Services.GetRequiredService<AppDbContext>();
+
+await ctx.Database.EnsureCreatedAsync();
+await ctx.Database.MigrateAsync();
+
 app.UseSwagger();
 app.UseSwaggerUI();
 app.MapControllers();

@@ -148,7 +148,7 @@ public class VectorsController : ControllerBase
                 UserId = g.First().UserId,
                 Score = g.Select(p => p.CombinedScore).Sum(),
                 Tags = g.Select(x => new SearchResponseTagDto { Id = x.Point.Id}).ToList(), 
-                SumOfCombinedScores = g.Sum(x => x.CombinedScore) 
+                SumOfCombinedScores = g.Max(x => x.CombinedScore) 
             })
             .Where(g => g.SumOfCombinedScores > minGroupScoreSumThreshold) 
             .Select(g => new SearchResponseItemDto 
