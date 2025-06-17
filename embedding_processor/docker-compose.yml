@@ -9,7 +9,7 @@ services:
     ports:
       - "18080:8080" # Внешний порт:внутренний порт контейнера (из Dockerfile ENV ASPNETCORE_URLS)
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development # Или Production
+      - ASPNETCORE_ENVIRONMENT=Production # Или Development
       - ConnectionStrings__Postgres=Host=postgres;Port=5432;Database=emb_proc;Username=app;Password=YRyGe6K1SneslitROY7PxA
       - EmbeddingsApi__Host=http://embeddings:80 # Адрес сервиса эмбеддингов
       - Qdrant__Host=http://qdrant:6333 # Адрес Qdrant REST API

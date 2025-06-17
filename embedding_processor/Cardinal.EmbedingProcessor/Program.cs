@@ -28,7 +28,6 @@ var app = builder.Build();
 var scope = app.Services.CreateScope();
 var ctx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-await ctx.Database.EnsureCreatedAsync();
 await ctx.Database.MigrateAsync();
 
 app.UseSwagger();
