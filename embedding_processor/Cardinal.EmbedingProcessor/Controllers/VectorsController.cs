@@ -1,5 +1,6 @@
 using Cardinal.EmbedingProcessor.Dtos;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Cardinal.EmbedingProcessor.Controllers;
 
@@ -138,7 +139,8 @@ public class VectorsController : ControllerBase
                     Point = x, 
                     TaskId = x.Payload.TaskId, 
                     UserId = x.Payload.UserId,
-                    CombinedScore = combinedScore
+                    CombinedScore = combinedScore,
+                    Text = x.Payload.Tag
                 };
             })
             .GroupBy(x => x.TaskId) 
@@ -146,9 +148,9 @@ public class VectorsController : ControllerBase
             {
                 TaskId = g.Key,
                 UserId = g.First().UserId,
-                Score = g.Select(p => p.CombinedScore).Sum(),
-                Tags = g.Select(x => new SearchResponseTagDto { Id = x.Point.Id}).ToList(), 
-                SumOfCombinedScores = g.Max(x => x.CombinedScore) 
+                Score = g.Select(p => p.CombinedScore).Max(),
+                Tags = g.Select(x => new SearchResponseTagDto { Id = x.Point.Id, Text = x.Text}).ToList(), 
+                SumOfCombinedScores = g.Sum(x => x.CombinedScore),
             })
             .Where(g => g.SumOfCombinedScores > minGroupScoreSumThreshold) 
             .Select(g => new SearchResponseItemDto 

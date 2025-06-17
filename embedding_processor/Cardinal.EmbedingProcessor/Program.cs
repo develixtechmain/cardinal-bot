@@ -9,11 +9,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 // Регистрируем ApiKeyAuthFilter
-builder.Services.AddScoped<ApiKeyAuthFilter>();
+//builder.Services.AddScoped<ApiKeyAuthFilter>();
 
 builder.Services.AddControllers(options =>
 {
-    options.Filters.Add<ApiKeyAuthFilter>(); // Применяем фильтр глобально
+    //options.Filters.Add<ApiKeyAuthFilter>(); // Применяем фильтр глобально
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
