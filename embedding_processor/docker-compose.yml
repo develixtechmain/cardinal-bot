@@ -37,6 +37,8 @@ services:
       - POOLING=mean
     ports:
       - "10080:80"
+    volumes:
+      - embeddings_data:/data
     restart: unless-stopped
 
   qdrant:
@@ -47,7 +49,7 @@ services:
       - "10633:6333" # REST API
       - "10634:6334" # gRPC API
     volumes:
-      - ./qdrant_data:/qdrant/storage
+      - qdrant_data:/qdrant/storage
     environment:
       - QDRANT__SERVICE__API_KEY=a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d
 
@@ -62,8 +64,10 @@ services:
     ports:
       - "10543:5432"
     volumes:
-      - ./pg_data:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data
 
 volumes:
   pg_data:
-  qdrant_data: 
+  qdrant_data:
+  embeddings_data:
+

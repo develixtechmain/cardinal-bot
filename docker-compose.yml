@@ -40,12 +40,26 @@ services:
         CLICKHOUSE_DB: cardinal
         CLICKHOUSE_USER: cardinal
         CLICKHOUSE_PASSWORD: 
+        RABBITMQ_VM_MEMORY_HIGH_WATERMARK: 0.6
       ports:
         - "8123:8123"
         - "9000:9000"
       volumes:
         - clickhouse-data:/var/lib/clickhouse
 
+  postgresql:
+    image: "postgres:17.4-alpine3.21"
+    restart: "unless-stopped"
+    environment:
+      POSTGRES_DB: cardinal
+      POSTGRES_USER: cardinal
+      POSTGRES_PASSWORD:
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+
 volumes:
   rabbitmq-data:
   clickhouse-data:
+  postgresql-data:

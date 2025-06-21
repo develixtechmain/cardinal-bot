@@ -1,12 +1,11 @@
-aio-pika
 langchain
 langchain_openai
 langchain_community
-clickhouse-driver
-python-dateutil
 python-dotenv
 pydantic
 numpy
 httpx
 asyncpg
 cachetools
+fastapi
+uvicorn
