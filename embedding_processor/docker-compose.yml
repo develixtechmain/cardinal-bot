@@ -29,7 +29,7 @@ services:
     restart: unless-stopped
 
   embeddings:
-    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.4
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.7
     container_name: embeddings-service
     environment:
       - MODEL_ID=intfloat/multilingual-e5-base
