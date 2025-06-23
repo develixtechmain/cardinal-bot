@@ -34,7 +34,7 @@ services:
     environment:
       - MODEL_ID=intfloat/multilingual-e5-base
       - NUM_WORKERS=2 # Настройте в соответствии с вашими ресурсами CPU
-      - POOLING=mean
+      - POOLING=max
     ports:
       - "10080:80"
     volumes:
