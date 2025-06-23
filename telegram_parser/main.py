@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import os
 
 import aio_pika
@@ -14,8 +15,8 @@ rabbitmq_connection: aio_pika.RobustConnection
 rabbitmq_channel: AbstractRobustChannel
 queue_name = "tg_queue"
 
+logger = logging.getLogger(__name__)
 
-# @app.on_message(filters.text & ~filters.me)
 async def process_message(_, message):
     global rabbitmq_channel
 
@@ -39,9 +40,9 @@ async def process_message(_, message):
                 body=json.dumps(payload).encode(),
                 delivery_mode=aio_pika.DeliveryMode.PERSISTENT,
             ))
-        print(f"[>] Sent message {message.id} from {message.chat.id} to RabbitMQ")
+        logger.info(f"[>] Sent message {message.id} from {message.chat.id} to RabbitMQ")
     except Exception as e:
-        print(f"[!] Failed to send message {message.id} from {message.chat.id} to RabbitMQ: {e}")
+        logger.info(f"[!] Failed to send message {message.id} from {message.chat.id} to RabbitMQ: {e}")
 
 
 async def init_rabbitmq():
@@ -61,13 +62,18 @@ async def init_rabbitmq():
 
 
 async def main():
-    print("Bot startup initiated.")
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+    )
+
+    logger.info("Bot startup initiated.")
 
     try:
         await init_rabbitmq()
-        print(f"Connected to RabbitMQ.")
+        logger.info(f"Connected to RabbitMQ.")
     except Exception as e:
-        print(f"Failed to connect to RabbitMQ: {e}")
+        logger.info(f"Failed to connect to RabbitMQ: {e}")
         return
 
     session = os.environ.get("PYRO_SESSION", "session")
@@ -86,17 +92,19 @@ async def main():
     )
 
     app.add_handler(MessageHandler(process_message, filters.text & ~filters.me))
-    print("Message listener assigned.")
+    logger.info("Message listener assigned.")
 
     try:
         await app.start()
-        print("Bot started.")
+        logger.info("Bot started.")
         await idle()
+    except Exception as e:
+        logger.error(f"[!] Unexpected exception: {e}")
     finally:
         await app.stop()
-        print("Bot stopped.")
+        logger.info("Bot stopped.")
         await rabbitmq_connection.close()
-        print("RabbitMQ connection closed.")
+        logger.info("RabbitMQ connection closed.")
 
 
 if __name__ == "__main__":

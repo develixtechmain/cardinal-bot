@@ -1,0 +1,69 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environments
+.env/
+venv/
+.venv/
+
+# Mac OS & system files
+.DS_Store
+Thumbs.db
+
+# Git and other VCS
+.git/
+.gitignore
+.gitattributes
+
+# Secrets / config
+*.env
+.env.*
+*.secret
+*.pem
+*.key
+
+# Bytecode / coverage / test artifacts
+*.log
+*.pot
+*.pyc
+*.pyo
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+.pytest_cache/
+.mypy_cache/
+.cache/
+*.sqlite3
+*.db
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+*.egg
+*.whl
+
+# Docker-related
+Dockerfile.dev
+docker-compose.yml
+docker-compose.override.yml
+
+# IDE/project files
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+
+# Node/Frontend (если есть)
+node_modules/
+*.tsbuildinfo
+
+# Jupyter
+.ipynb_checkpoints/

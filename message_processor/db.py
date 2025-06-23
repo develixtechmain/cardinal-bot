@@ -1,0 +1,175 @@
+import asyncio
+import json
+import os
+import uuid
+
+import asyncpg
+import clickhouse_driver
+from cachetools import LRUCache
+from clickhouse_driver import Client
+from dateutil.parser import isoparse
+
+from utils import validate_env
+
+click: clickhouse_driver.Client
+pool: asyncpg.pool.Pool
+users_cache = LRUCache(maxsize=100)
+
+
+async def fetch_user_by_id(user_id: uuid.UUID):
+    if user_id in users_cache:
+        return users_cache[user_id]
+
+    user = await fetch_user_from_db(user_id)
+    if user:
+        users_cache[user_id] = user
+        return user
+    raise Exception(f"User {user_id} not found")
+
+
+async def fetch_user_from_db(user_id: uuid.UUID):
+    async with pool.acquire() as conn:
+        result = await conn.fetch("SELECT * FROM users WHERE id = $1", user_id)
+        if result:
+            return result[0]
+        return None
+
+
+async def get_user_stats(user_id, cutoff):
+    async with pool.acquire() as conn:
+        stats = await conn.fetch("""
+            SELECT 
+                COUNT(1) AS total_recommendations,
+                COUNT(CASE WHEN created_at > $2 THEN 1 END) AS recent_recommendations,
+                MAX(created_at) AS last_recommendation_at
+            FROM recommendations WHERE user_id = $1
+        """, user_id, cutoff)
+
+    if stats:
+        return stats[0]
+    else:
+        return {
+            "total_recommendations": 0,
+            "recent_recommendations": 0,
+            "last_recommendation_at": None
+        }
+
+
+async def save_in_clickhouse(message):
+    chat_id = str(message['chat_id'])
+    user_id = str(message['user_id'])
+    message_id = message['message_id']
+    created_at = isoparse(message['created_at'])
+
+    click_data = [
+        [
+            chat_id, str(message['chat_title']), str(message['chat_username']),
+            user_id, str(message['user_username']), str(message['user_firstname']), str(message['user_lastname']),
+            int(message_id), str(message["text"]), created_at
+        ]
+    ]
+    try:
+        click.execute("""
+            INSERT INTO telegram_messages 
+            (chat_id, chat_title, chat_username, 
+            user_id, user_username, user_firstname, user_lastname, 
+            message_id, text, created_at)
+            VALUES
+        """, click_data)
+        print(f"Message {message_id} from {chat_id} saved to ClickHouse")
+    except Exception as e:
+        print(f"Failed to save message {message_id} from {chat_id} to ClickHouse: {e}")
+    return chat_id, message_id
+
+
+async def save_recommendation(user, recommendation):
+    async with pool.acquire() as conn:
+        query = """
+            INSERT INTO recommendations (user_id, recommendation)
+            VALUES($1, $2)
+            RETURNING id;
+        """
+        return await conn.fetchval(query, user['id'], json.dumps(recommendation))
+
+
+async def init_click():
+    global click
+
+    validate_env("CLICKHOUSE_PASS")
+
+    password = os.environ["CLICKHOUSE_PASS"]
+
+    click = Client(
+        host=os.environ.get("CLICKHOUSE_HOST", "clickhouse"),
+        database=os.environ.get("CLICKHOUSE_DATABASE", "cardinal"),
+        user=os.environ.get("CLICKHOUSE_USER", "cardinal"),
+        password=password,
+    )
+    click.execute("""
+    CREATE TABLE IF NOT EXISTS telegram_messages (
+        chat_id String,
+        chat_title String,
+        chat_username String,
+        user_id String,
+        user_username String,
+        user_firstname String,
+        user_lastname String,
+        message_id UInt64,
+        text String,
+        created_at DateTime
+    ) ENGINE = MergeTree()
+    ORDER BY (chat_id, message_id)
+    """)
+
+
+async def init_postgresql():
+    global pool
+
+    validate_env("DB_PASS")
+
+    password = os.environ["DB_PASS"]
+
+    pool = await asyncpg.create_pool(
+        user=os.environ.get("DB_USER", "cardinal"),
+        password=password,
+        database=os.environ.get("DB_NAME", "cardinal"),
+        host=os.environ.get("DB_HOST", "postgresql"),
+        port=os.environ.get("DB_PORT", 5432),
+        min_size=10,
+        max_size=20
+    )
+
+    await asyncio.gather(*[_create_users_table(), _create_recommendations_table()])
+
+
+async def _create_users_table():
+    async with pool.acquire() as conn:
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+                user_id BIGINT NOT NULL,
+                first_name VARCHAR(255) NOT NULL,
+                last_name VARCHAR(255) NOT NULL,
+                username VARCHAR(255) NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+            )
+        """)
+
+
+async def _create_recommendations_table():
+    async with pool.acquire() as conn:
+        await conn.execute("""
+            CREATE TABLE IF NOT EXISTS recommendations (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+                user_id UUID NOT NULL,
+                recommendation JSONB NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+            )
+        """)
+
+
+async def disconnect():
+    await click.disconnect()
+    print("ClickHouse connection closed.")
+    await pool.close()
+    print("PostgreSQL pool closed.")

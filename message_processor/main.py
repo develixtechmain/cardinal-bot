@@ -1,19 +1,19 @@
 import asyncio
 import json
 import os
+from datetime import datetime, timedelta
 
 import aio_pika
-import clickhouse_driver
-import httpx
 from aio_pika.abc import AbstractRobustChannel, AbstractRobustQueue
-from clickhouse_driver import Client
-from dateutil.parser import isoparse
 from dotenv import load_dotenv
 from langchain.chains import LLMChain
-from langchain_core.messages import SystemMessage, HumanMessage
-from langchain_core.prompts import SystemMessagePromptTemplate
-from langchain_openai.chat_models import ChatOpenAI
-from pydantic import SecretStr
+
+import ai
+import db
+import embedding
+from ai import check_lead
+from embedding import search_candidates
+from utils import validate_env
 
 load_dotenv()
 
@@ -22,156 +22,114 @@ rabbitmq_channel: AbstractRobustChannel
 rabbitmq_queue: AbstractRobustQueue
 queue_name = "tg_queue"
 
-llm: ChatOpenAI
-click: clickhouse_driver.Client
+
+async def process_message(body, message: aio_pika.abc.AbstractIncomingMessage):
+    try:
+        await _process_message(body)
+        await message.ack()
+    except Exception as e:
+        print(f"Failed to process message: {e}")
+        await message.reject(requeue=False)
 
 
-async def process_message(body: bytes, message: aio_pika.abc.AbstractIncomingMessage):
-    async with message.process():
-        try:
-            message = json.loads(body)
-        except Exception as e:
-            print(f"Invalid JSON format: {e}")
-            return
+async def _process_message(body: bytes):
+    try:
+        message = json.loads(body)
+    except Exception as e:
+        raise Exception(f"Failed to read message: {e}")
 
-        headers = {
-            "Content-Type": "application/json",
-            "X-API-KEY": os.environ["EMBEDDER_KEY"],
-        }
-        async with httpx.AsyncClient() as client:
-            resp_data = {"is_found": True, "embedded": []}
-            # try:
-            #     resp = await client.post(os.environ["EMBEDDER_URL"], json={"message":message["text"]}, headers=headers)
-                # resp.raise_for_status()
-                # resp_data = resp.json()
-            # except Exception as e:
-            #     print(f"Failed to process request to foo: {e}")
-            #     raise
+    search_response = await search_candidates(message['text'])
+    if not search_response:
+        return
 
-        is_found = resp_data.get("is_found", False)
-        if not isinstance(is_found, bool):
-            print("Unexpected response: is_found not bool")
-            raise ValueError("Expected 'is_found' to be a boolean")
+    is_lead = await check_lead(message)
+    if not is_lead:
+        return
 
-        if not is_found:
-            return
+    try:
+        await db.save_in_clickhouse(message)
+    except Exception as e:
+        raise Exception(f"Failed to save lead message to ClickHouse: {e}")
 
-        text = message['text']
-        system_prompt = SystemMessagePromptTemplate.from_template((
-            "You must respond strictly with plaintext only: `true` or `false`. "
-            "Evaluate whether the input message is a job offer or lead. This includes: "
-            "— Messages offering employment, freelance work, collaboration, gigs, or any form of professional opportunity. "
-            "— Messages expressing interest in services, collaboration, or potential business engagement. "
-            "Do not explain your answer. Do not include any additional words, characters, or formatting. "
-            "Respond with exactly `true` or `false`."
-        )).format()
+    try:
+        selected_candidate = await select_candidate(search_response)
+    except Exception as e:
+        raise Exception(f"Failed to find candidate for {message['message_id']} from {message['chat_id']}: {e}")
 
-        messages = [
-            system_prompt,
-            HumanMessage(content=text)
-        ]
+    rating = selected_candidate["rating"] * 0.9
 
-        try:
-            result = (await llm.ainvoke(messages)).content
-        except Exception as e:
-            print(f"Failed to process message {message['message_id']} from {message['chat_id']} via llm: {e}")
-            result = "false"
+    tasks = []
+    for candidate in search_response:
+        if candidate["rating"] > rating:
+            print(f"User {candidate['userId']} selected for recommendation.")
+            tasks.append(save_recommendation(candidate, message))
 
-        print(f"LLM result: {result}")
+    await asyncio.gather(*tasks)
 
-        if result.strip().lower() == "true":
-            chat_id = str(message['chat_id'])
-            chat_title = str(message['chat_title'])
-            chat_username = str(message['chat_username'])
 
-            user_id = str(message['user_id'])
-            user_username = str(message['user_username'])
-            user_firstname = str(message['user_firstname'])
-            user_lastname = str(message['user_lastname'])
+async def save_recommendation(candidate, recommendation):
+    try:
+        user = await db.fetch_user_by_id(candidate["userId"])
+        recommendation_id = await db.save_recommendation(user, recommendation)
+        await embedding.confirm_recommendation(recommendation_id, candidate),
+    except Exception as e:
+        raise Exception(f"Failed to recommend {recommendation['message_id']} from {recommendation['chat_id']} to user {candidate['userId']}: {e}")
 
-            message_id = message['message_id']
-            created_at = isoparse(message['created_at'])
 
-            click_data = [
-                [
-                    chat_id, chat_title, chat_username,
-                    user_id, user_username, user_firstname, user_lastname,
-                    int(message_id), str(text), resp_data['embedded'], created_at
-                ]
-            ]
+async def select_candidate(candidates):
+    now = datetime.now()
+    cutoff = now - timedelta(hours=24)
+    selected_candidate = None
 
-            try:
-                click.execute("""
-                    INSERT INTO telegram_messages 
-                    (chat_id, chat_title, chat_username, 
-                    user_id, user_username, user_firstname, user_lastname, 
-                    message_id, text, text_vector, created_at)
-                    VALUES
-                """, click_data)
-                print(f"Message {message_id} from {chat_id} saved to ClickHouse")
-            except Exception as e:
-                print(f"Failed to save message {message_id} from {chat_id} to ClickHouse: {e}")
+    tasks = []
+    for candidate in candidates:
+        tasks.append(calculate_rating(now, cutoff, candidate))
+
+    await asyncio.gather(*tasks)
+
+    for candidate in candidates:
+        if selected_candidate is None or candidate["rating"] > selected_candidate["rating"]:
+            selected_candidate = candidate
+
+    return selected_candidate
+
+
+async def calculate_rating(now, cutoff, candidate):
+    try:
+        stats = await db.get_user_stats(candidate["userId"], cutoff)
+    except Exception as e:
+        raise Exception(f"Failed to fetch user stats: {e}")
+
+    if stats["last_recommendation_at"]:
+        time_since_last = now - stats["last_recommendation_at"]
+        time_factor = max(0, 1 - (time_since_last.total_seconds() / 3600))
+    else:
+        time_factor = 0
+
+    loyalty_bonus = min(0.1, stats["total_recommendations"] / 10000)
+    candidate["rating"] = (
+            0.3 * (1 / (stats["recent_recommendations"] + 1)) +
+            0.3 * candidate["score"] +
+            0.25 * (1 - time_factor) +
+            0.15 * loyalty_bonus
+    )
 
 
 async def init_rabbitmq():
     global rabbitmq_channel, rabbitmq_connection, rabbitmq_queue
+
+    validate_env("RABBITMQ_PASS")
 
     host = os.environ.get("RABBITMQ_HOST", "rabbitmq")
     port = os.environ.get("RABBITMQ_PORT", 5672)
     vhost = os.environ.get("RABBITMQ_VHOST", "/")
     user = os.environ.get("RABBITMQ_USER", "cardinal")
     password = os.environ["RABBITMQ_PASS"]
-    if not password:
-        raise ValueError("Переменная окружения 'RABBITMQ_PASS' не установлена или пуста!")
 
     rabbitmq_connection = await aio_pika.connect_robust(f"amqp://{user}:{password}@{host}:{port}{vhost}")
     rabbitmq_channel = await rabbitmq_connection.channel()
     rabbitmq_queue = await rabbitmq_channel.declare_queue(queue_name, durable=True)
 
-
-async def init_click():
-    global click
-    password = os.environ["CLICKHOUSE_PASS"]
-    if not password:
-        raise ValueError("Переменная окружения 'CLICKHOUSE_PASS' не установлена или пуста!")
-    click = Client(
-        host=os.environ.get("CLICKHOUSE_HOST", "clickhouse"),
-        database=os.environ.get("CLICKHOUSE_DATABASE", "cardinal"),
-        user=os.environ.get("CLICKHOUSE_USER", "cardinal"),
-        password=password,
-    )
-    click.execute("""
-    CREATE TABLE IF NOT EXISTS telegram_messages (
-        chat_id String,
-        chat_title String,
-        chat_username String,
-        user_id String,
-        user_username String,
-        user_firstname String,
-        user_lastname String,
-        message_id UInt64,
-        text String,
-        text_vector Array(Float32),
-        created_at DateTime
-    ) ENGINE = MergeTree()
-    ORDER BY (chat_id, message_id)
-    """)
-
-
-async def init_llm():
-    global llm
-
-    ai_key = os.environ["OPENAI_API_KEY"]
-    if not ai_key:
-        raise ValueError("Переменная окружения 'CLICKHOUSE_PASSWORD' не установлена или пуста!")
-
-    llm = ChatOpenAI(
-        api_key=SecretStr(ai_key)
-    )
-
-def validate_env(env):
-    if not os.environ[env]:
-        raise ValueError(f"Переменная окружения '{env}' не установлена или пуста!")
 
 async def main():
     global rabbitmq_queue
@@ -186,24 +144,30 @@ async def main():
         return
 
     try:
-        await init_click()
+        await db.init_click()
         print(f"Connected to ClickHouse.")
     except Exception as e:
         print(f"Failed to connect to ClickHouse: {e}")
         return
 
     try:
-        await init_llm()
+        await db.init_postgresql()
+        print(f"Connected to PostgreSQL.")
+    except Exception as e:
+        print(f"Failed to connect to PostgreSQL: {e}")
+        return
+
+    try:
+        await ai.init_llm()
         print(f"LLM initiated.")
     except Exception as e:
         print(f"Failed init LLM : {e}")
         return
 
     try:
-        for env in ["EMBEDDER_URL", "EMBEDDER_KEY"]:
-            validate_env(env)
+        embedding.init_embedding()
     except Exception as e:
-        print(f"Failed to init llm: {e}")
+        print(f"Failed to configure: {e}")
         return
 
     print(f"Listener started.")
@@ -213,8 +177,7 @@ async def main():
             async for message in queue_iter:
                 asyncio.create_task(process_message(message.body, message))
     finally:
-        await click.disconnect()
-        print("ClickHouse connection closed.")
+        await db.disconnect()
         await rabbitmq_connection.close()
         print("RabbitMQ connection closed.")
 
