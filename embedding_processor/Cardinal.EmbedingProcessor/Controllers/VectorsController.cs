@@ -10,11 +10,13 @@ public class VectorsController : ControllerBase
 {
     private readonly IHttpClientFactory _http;
     private readonly IConfiguration _config;
+    private readonly VectorPooler _pooler;
 
-    public VectorsController(IHttpClientFactory http, IConfiguration config)
+    public VectorsController(IHttpClientFactory http, IConfiguration config, VectorPooler pooler)
     {
         _http = http;
         _config = config;
+        _pooler = pooler;
     }
 
     [HttpPost("tags")]
@@ -93,14 +95,19 @@ public class VectorsController : ControllerBase
     [HttpPost("search")]
     public async Task<ActionResult<List<SearchResponseItemDto>>> Search([FromBody] SearchMessageRequest req)
     {
+        var split = req.Message.SplitByTokensSlidingWindow();
+        
         var embedClient = _http.CreateClient();
         var embeddingUrl = _config["EmbeddingsApi:Host"] + "/embed";
-        var embeddingResp = await embedClient.PostAsJsonAsync(embeddingUrl, new { inputs = new[] { req.Message } });
+        
+        var embeddingResp = await embedClient.PostAsJsonAsync(embeddingUrl, new { inputs = split });
         if (!embeddingResp.IsSuccessStatusCode)
             return StatusCode(500, "Embedding service error");
         var embeddingData = await embeddingResp.Content.ReadFromJsonAsync<float[][]>();
         if (embeddingData == null) return StatusCode(500, "No embedding data");
 
+        var pooledEmbeddingData = _pooler.PoolVectors(embeddingData);
+        
         var qdrantClient = _http.CreateClient();
         var qdrantCollectionName = _config["Qdrant:CollectionName"];
         var qdrantUrl = $"{_config["Qdrant:Host"]}/collections/{qdrantCollectionName}/points/search";
@@ -113,7 +120,7 @@ public class VectorsController : ControllerBase
 
         var searchBody = new
         {
-            vector = embeddingData[0],
+            vector = pooledEmbeddingData,
             top = _config.GetValue<int>("Search:TopN", 1000),
             with_payload = true,
             score_threshold = _config.GetValue<double>("Search:ScoreThreshold", 0.85)

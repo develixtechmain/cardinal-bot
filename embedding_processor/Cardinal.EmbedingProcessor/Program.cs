@@ -1,3 +1,4 @@
+using Cardinal.EmbedingProcessor;
 using Cardinal.EmbedingProcessor.Db;
 using Cardinal.EmbedingProcessor.Security;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ builder.Services.AddOpenApi();
 
 // Регистрируем ApiKeyAuthFilter
 builder.Services.AddScoped<ApiKeyAuthFilter>();
+builder.Services.AddSingleton<VectorPooler>();
 
 builder.Services.AddControllers(options =>
 {
