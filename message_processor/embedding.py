@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 import string
 import uuid
@@ -18,15 +19,16 @@ bad_lock = asyncio.Lock()
 headers: dict
 timeout = httpx.Timeout(connect=10.0, read=10.0, write=10.0, pool=10)
 
+logger = logging.getLogger(__name__)
 
 async def search_candidates(message: string):
     global good, bad
 
-    id = uuid.uuid4()
+    request_id = uuid.uuid4()
     async with httpx.AsyncClient() as client:
         try:
             resp = await client.post(embedder_search_url, json={"message": message}, headers=headers, timeout=timeout)
-            print(f"{id} Response status: {resp.status_code}, Response: {resp.text}")
+            logger.debug(f"{request_id} Response status: {resp.status_code}, Response: {resp.text}")
             resp.raise_for_status()
             resp_data = resp.json()
             async with good_lock:
@@ -34,19 +36,19 @@ async def search_candidates(message: string):
         except httpx.RequestError as e:
             async with bad_lock:
                 bad += 1
-                print(f"{id} Request error (e.g., timeout, network): {e}",
+                logger.debug(f"{request_id} Request error (e.g., timeout, network): {e}",
                       f"Good {good}, bad {bad}")
             resp_data = []
         except ValueError as e:
             async with bad_lock:
                 bad += 1
-                print(f"{id} JSON decode error: {e}",
+                logger.debug(f"{request_id} JSON decode error: {e}",
                       f"Good {good}, bad {bad}")
             resp_data = []
         except Exception as e:
             async with bad_lock:
                 bad += 1
-                print(f"{id} Unexpected error: {e}, type: {type(e)}",
+                logger.debug(f"{request_id} Unexpected error: {e}, type: {type(e)}",
                       f"Good {good}, bad {bad}")
             resp_data = []
         return resp_data
@@ -60,7 +62,7 @@ async def confirm_recommendation(recommendation_id, selected_candidate):
                 "submittedTaskId": selected_candidate['taskId'],
                 "submittedVectors": [tag["id"] for tag in selected_candidate["tags"]]
             }, headers=headers, timeout=timeout)
-            print(f"Response status: {resp.status_code}, Response: {resp.text}")
+            logger.debug(f"Response status: {resp.status_code}, Response: {resp.text}")
             resp.raise_for_status()
         except Exception as e:
             raise Exception(f"Failed to confirm recommendation: {e}")

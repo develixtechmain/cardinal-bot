@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import uuid
 
@@ -12,6 +13,7 @@ pool: asyncpg.pool.Pool
 users_cache = LRUCache(maxsize=100)
 onboarding_cache = LRUCache(maxsize=100)
 
+logger = logging.getLogger(__name__)
 
 async def fetch_user_by_id(user_id: uuid.UUID):
     if user_id in users_cache:
@@ -112,4 +114,4 @@ async def init_postgresql():
 
 async def disconnect():
     await pool.close()
-    print("PostgreSQL pool closed.")
+    logger.info("PostgreSQL pool closed.")

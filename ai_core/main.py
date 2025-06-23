@@ -1,3 +1,4 @@
+import logging
 import uuid
 from contextlib import asynccontextmanager
 from typing import List
@@ -12,23 +13,24 @@ import ai
 import db
 import embedding
 
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app):
-    print("AI Core startup initiated.")
+    logger.info("AI Core startup initiated.")
 
     try:
         dotenv.load_dotenv()
 
         try:
             await db.init_postgresql()
-            print(f"Connected to PostgreSQL.")
+            logger.info(f"Connected to PostgreSQL.")
         except Exception as e:
             raise RuntimeError(f"Failed to connect to PostgreSQL: {e}")
 
         try:
             await ai.init_llm()
-            print(f"LLM initiated.")
+            logger.info(f"LLM initiated.")
         except Exception as e:
             raise RuntimeError(f"Failed init LLM : {e}")
 
@@ -37,15 +39,15 @@ async def lifespan(app):
         except Exception as e:
             raise RuntimeError(f"Failed to configure: {e}")
 
-        print(f"AI Core started.")
+        logger.info(f"AI Core started.")
 
         yield
     except Exception as e:
-        print(f"Unexpected error during lifespan: {e}")
+        logger.error(f"Unexpected error during lifespan: {e}")
         raise
     finally:
         await db.disconnect()
-        print(f"AI Core stopped.")
+        logger.info(f"AI Core stopped.")
 
 
 app = FastAPI(lifespan=lifespan)
@@ -88,6 +90,11 @@ async def complete_onboarding(onboarding_id: UUID):
 
 
 def main():
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+    )
+
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
 
 

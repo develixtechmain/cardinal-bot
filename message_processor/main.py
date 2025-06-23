@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import os
 from datetime import datetime, timedelta
 
@@ -22,13 +23,14 @@ rabbitmq_channel: AbstractRobustChannel
 rabbitmq_queue: AbstractRobustQueue
 queue_name = "tg_queue"
 
+logger = logging.getLogger(__name__)
 
 async def process_message(body, message: aio_pika.abc.AbstractIncomingMessage):
     try:
         await _process_message(body)
         await message.ack()
     except Exception as e:
-        print(f"Failed to process message: {e}")
+        logger.warn(f"Failed to process message: {e}")
         await message.reject(requeue=False)
 
 
@@ -38,6 +40,8 @@ async def _process_message(body: bytes):
     except Exception as e:
         raise Exception(f"Failed to read message: {e}")
 
+    logger.debug(f"Received message: {message['text']}")
+
     search_response = await search_candidates(message['text'])
     if not search_response:
         return
@@ -46,10 +50,7 @@ async def _process_message(body: bytes):
     if not is_lead:
         return
 
-    try:
-        await db.save_in_clickhouse(message)
-    except Exception as e:
-        raise Exception(f"Failed to save lead message to ClickHouse: {e}")
+    await db.save_in_clickhouse(message)
 
     try:
         selected_candidate = await select_candidate(search_response)
@@ -61,7 +62,7 @@ async def _process_message(body: bytes):
     tasks = []
     for candidate in search_response:
         if candidate["rating"] > rating:
-            print(f"User {candidate['userId']} selected for recommendation.")
+            logger.info(f"User {candidate['userId']} selected for recommendation.")
             tasks.append(save_recommendation(candidate, message))
 
     await asyncio.gather(*tasks)
@@ -134,43 +135,48 @@ async def init_rabbitmq():
 async def main():
     global rabbitmq_queue
 
-    print("Listener startup initiated.")
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+    )
+
+    logger.info("Listener startup initiated.")
 
     try:
         await init_rabbitmq()
-        print(f"Connected to RabbitMQ.")
+        logger.info(f"Connected to RabbitMQ.")
     except Exception as e:
-        print(f"Failed to connect to RabbitMQ: {e}")
+        logger.error(f"Failed to connect to RabbitMQ: {e}")
         return
 
     try:
         await db.init_click()
-        print(f"Connected to ClickHouse.")
+        logger.info(f"Connected to ClickHouse.")
     except Exception as e:
-        print(f"Failed to connect to ClickHouse: {e}")
+        logger.error(f"Failed to connect to ClickHouse: {e}")
         return
 
     try:
         await db.init_postgresql()
-        print(f"Connected to PostgreSQL.")
+        logger.info(f"Connected to PostgreSQL.")
     except Exception as e:
-        print(f"Failed to connect to PostgreSQL: {e}")
+        logger.error(f"Failed to connect to PostgreSQL: {e}")
         return
 
     try:
         await ai.init_llm()
-        print(f"LLM initiated.")
+        logger.info(f"LLM initiated.")
     except Exception as e:
-        print(f"Failed init LLM : {e}")
+        logger.error(f"Failed init LLM : {e}")
         return
 
     try:
         embedding.init_embedding()
     except Exception as e:
-        print(f"Failed to configure: {e}")
+        logger.error(f"Failed to configure: {e}")
         return
 
-    print(f"Listener started.")
+    logger.info(f"Listener started.")
 
     try:
         async with rabbitmq_queue.iterator() as queue_iter:
@@ -179,7 +185,7 @@ async def main():
     finally:
         await db.disconnect()
         await rabbitmq_connection.close()
-        print("RabbitMQ connection closed.")
+        logger.info("RabbitMQ connection closed.")
 
 
 if __name__ == "__main__":

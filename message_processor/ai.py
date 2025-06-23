@@ -1,3 +1,4 @@
+import logging
 import os
 
 from langchain_core.messages import HumanMessage
@@ -9,6 +10,7 @@ from utils import validate_env
 
 llm: ChatOpenAI
 
+logger = logging.getLogger(__name__)
 
 async def check_lead(message):
     system_prompt = SystemMessagePromptTemplate.from_template((
@@ -26,11 +28,11 @@ async def check_lead(message):
     try:
         result = (await llm.ainvoke(messages)).content
     except Exception as e:
-        print(f"Failed to process message {message['message_id']} from {message['chat_id']} via llm: {e}")
+        logger.warning(f"Failed to process message {message['message_id']} from {message['chat_id']} via llm: {e}")
         result = "false"
 
     is_lead = "true" in result.strip().lower()
-    print(f"LLM result: {is_lead}")
+    logger.debug(f"LLM result: {is_lead}")
     return is_lead
 
 

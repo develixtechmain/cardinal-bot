@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import os
 import uuid
 
@@ -15,6 +16,7 @@ click: clickhouse_driver.Client
 pool: asyncpg.pool.Pool
 users_cache = LRUCache(maxsize=100)
 
+logger = logging.getLogger(__name__)
 
 async def fetch_user_by_id(user_id: uuid.UUID):
     if user_id in users_cache:
@@ -76,9 +78,9 @@ async def save_in_clickhouse(message):
             message_id, text, created_at)
             VALUES
         """, click_data)
-        print(f"Message {message_id} from {chat_id} saved to ClickHouse")
+        logger.info(f"Message {message_id} from {chat_id} saved to ClickHouse")
     except Exception as e:
-        print(f"Failed to save message {message_id} from {chat_id} to ClickHouse: {e}")
+        logger.warning(f"Failed to save message {message_id} from {chat_id} to ClickHouse: {e}")
     return chat_id, message_id
 
 
@@ -170,6 +172,6 @@ async def _create_recommendations_table():
 
 async def disconnect():
     await click.disconnect()
-    print("ClickHouse connection closed.")
+    logger.info("ClickHouse connection closed.")
     await pool.close()
-    print("PostgreSQL pool closed.")
+    logger.info("PostgreSQL pool closed.")
