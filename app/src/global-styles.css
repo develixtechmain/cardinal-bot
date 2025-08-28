@@ -1,0 +1,296 @@
+html, body {
+    color: white;
+    height: var(--tg-vh);
+    background-color: #070707;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    font-family: 'Anonymous Pro', monospace, Courier, monospace;
+    font-weight: 400;
+}
+
+#root {
+    height: 100%;
+    width: 100%;
+    overflow-x: hidden;
+}
+
+*::-webkit-scrollbar {
+    width: 0;
+}
+
+/* Typography */
+:root {
+    --font-primary: 'Anonymous Pro', monospace;
+    --font-secondary: 'Organetto', sans-serif;
+    --font-ui: 'SF UI Display', sans-serif;
+}
+
+.font-primary {
+    font-family: 'Anonymous Pro', monospace;
+}
+
+.font-secondary {
+    font-family: 'Organetto', sans-serif;
+}
+
+.font-ui {
+    font-family: 'SF UI Display', sans-serif;
+}
+
+/* Font sizes */
+.fs-8 {
+    font-size: 8px;
+}
+
+.fs-9 {
+    font-size: 9px;
+}
+
+.fs-10 {
+    font-size: 10px;
+}
+
+.fs-11 {
+    font-size: 11px;
+}
+
+.fs-12 {
+    font-size: 12px;
+}
+
+.fs-13 {
+    font-size: 13px;
+}
+
+.fs-14 {
+    font-size: 14px;
+}
+
+.fs-15 {
+    font-size: 15px;
+}
+
+.fs-16 {
+    font-size: 16px;
+}
+
+.fs-17 {
+    font-size: 17px;
+}
+
+.fs-18 {
+    font-size: 18px;
+}
+
+.fs-20 {
+    font-size: 20px;
+}
+
+.fs-25 {
+    font-size: 25px;
+}
+
+.fs-30 {
+    font-size: 30px;
+}
+
+/* Line heights */
+.lh-100p {
+    line-height: 100%;
+}
+
+.lh-8 {
+    line-height: 8px;
+}
+
+.lh-10 {
+    line-height: 10px;
+}
+
+.lh-11 {
+    line-height: 11px;
+}
+
+.lh-12 {
+    line-height: 12px;
+}
+
+.lh-14 {
+    line-height: 14px;
+}
+
+.lh-15 {
+    line-height: 15px;
+}
+
+.lh-16 {
+    line-height: 16px;
+}
+
+.lh-18 {
+    line-height: 18px;
+}
+
+.lh-19 {
+    line-height: 19px;
+}
+
+.lh-22 {
+    line-height: 22px;
+}
+
+.lh-24 {
+    line-height: 24px;
+}
+
+.lh-26 {
+    line-height: 26px;
+}
+
+.lh-27 {
+    line-height: 27px;
+}
+
+.lh-29 {
+    line-height: 29px;
+}
+
+.lh-32 {
+    line-height: 32px;
+}
+
+/* Letter spacing */
+.ls--05 {
+    letter-spacing: -0.05em;
+}
+
+.ls--04 {
+    letter-spacing: -0.04em;
+}
+
+.ls--03 {
+    letter-spacing: -0.03em;
+}
+
+.ls--02 {
+    letter-spacing: -0.02em;
+}
+
+.ls-0 {
+    letter-spacing: 0;
+}
+
+.ls--1px {
+    letter-spacing: -1px;
+}
+
+/* Font weight */
+.fw-300 {
+    font-weight: 300;
+}
+
+.fw-400 {
+    font-weight: 400;
+}
+
+.fw-500 {
+    font-weight: 500;
+}
+
+.fw-600 {
+    font-weight: 600;
+}
+
+.fw-700 {
+    font-weight: 700;
+}
+
+/* Anonymous Pro */
+@font-face {
+    font-family: 'Anonymous Pro';
+    src: url('./assets/fonts/AnonymousPro-Regular.ttf') format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Anonymous Pro';
+    src: url('./assets/fonts/AnonymousPro-Bold.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+/* Organetto */
+@font-face {
+    font-family: 'Organetto';
+    src: url('./assets/fonts/organetto-bold-exp 2.ttf') format('truetype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+/* SF UI Display */
+@font-face {
+    font-family: 'SF UI Display';
+    src: url('./assets/fonts/sf-ui-display-ultralight-58646b19bf205.otf') format('opentype');
+    font-weight: 100;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SF UI Display';
+    src: url('./assets/fonts/sf-ui-display-thin-58646e9b26e8b.otf') format('opentype');
+    font-weight: 200;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SF UI Display';
+    src: url('./assets/fonts/sf-ui-display-light-58646b33e0551.otf') format('opentype');
+    font-weight: 300;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SF UI Display';
+    src: url('./assets/fonts/SF UI Display Regular.ttf') format('opentype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SF UI Display';
+    src: url('./assets/fonts/sf-ui-display-medium-58646be638f96.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SF UI Display';
+    src: url('./assets/fonts/sf-ui-display-semibold-58646eddcae92.otf') format('opentype');
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SF UI Display';
+    src: url('./assets/fonts/sf-ui-display-bold-58646a511e3d9.otf') format('opentype');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SF UI Display';
+    src: url('./assets/fonts/sf-ui-display-heavy-586470160b9e5.otf') format('opentype');
+    font-weight: 800;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'SF UI Display';
+    src: url('./assets/fonts/sf-ui-display-black-58646a6b80d5a.otf') format('opentype');
+    font-weight: 900;
+    font-style: normal;
+}

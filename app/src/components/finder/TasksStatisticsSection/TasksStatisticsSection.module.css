@@ -1,0 +1,235 @@
+.purple {
+    color: #7211F8;
+}
+
+.container {
+    margin-top: 14px;
+    box-sizing: border-box;
+    border-radius: 32px;
+    background-color: #141414;
+    width: 100%;
+    padding: 13px;
+    height: 260px;
+    margin-bottom: 2px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    max-height: 30px;
+}
+
+.header > img {
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
+}
+
+.usernameContainer {
+    background-color: #F2F2F2;
+    padding: 6px 11px;
+    border-radius: 15px;
+}
+
+.username {
+    color: black;
+    font-size: 13px;
+    line-height: 18px;
+    letter-spacing: 0;
+}
+
+.eagleContainer {
+    display: flex;
+    width: 36px;
+    height: 30px;
+    justify-content: center;
+    align-items: center;
+    color: #767676;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 15px;
+}
+
+.stats {
+    margin-top: 21px;
+    min-height: 63px;
+    max-height: 63px;
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+}
+
+.block {
+    flex: 1;
+}
+
+.tariffSection {
+    display: flex;
+    flex-direction: column;
+    min-height: 46px;
+    max-height: 46px;
+    background-color: var(--background-color);
+    border-radius: 19px;
+    border: 1px solid var(--background-color);
+    padding: 9px 9px 8px 7px;
+}
+
+.daysLeftHeader {
+    display: flex;
+    align-items: end;
+    min-height: 16px;
+    max-height: 16px;
+}
+
+.daysLeftHeaderText {
+    margin-left: 9px;
+    margin-top: 4px;
+    padding-bottom: 1px;
+    flex: 1;
+    font-family: var(--font-ui);
+    font-size: 9px;
+    font-weight: 500;
+    line-height: 12px;
+    letter-spacing: -0.03em;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.daysLeftText {
+    display: flex;
+    align-items: normal;
+    min-height: 0;
+    margin: 7px 0 9px 9px;
+    color: var(--color);
+    font-family: var(--font-secondary);
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 15px;
+    letter-spacing: -0.02em;
+}
+
+.daysLeftSubtext {
+    font-size: 9px;
+    padding-top: 1px;
+}
+
+.statsSection {
+    display: flex;
+    min-height: 51px;
+    max-height: 51px;
+    background-color: #202020;
+    border-radius: 19px;
+    border: 1px solid #FFFFFF17;
+    padding: 6px 16px 6px 16px;
+    align-items: center;
+}
+
+.leadsCountSection {
+    display: flex;
+    flex-direction: column;
+}
+
+.leadsCountTitle {
+    color: #767676;
+    font-family: var(--font-ui);
+    font-size: 9px;
+    font-weight: 500;
+    line-height: 24px;
+    letter-spacing: -0.03em;
+}
+
+.leadsCount {
+    color: #F2F2F2;
+    font-family: var(--font-secondary);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 32px;
+    letter-spacing: -0.02em;
+}
+
+.tasksSection {
+    cursor: pointer;
+    margin-top: 6px;
+    height: 98px;
+    display: flex;
+    flex-direction: row;
+    padding: 8px;
+    background-color: #202020;
+    border: 1px solid #FFFFFF17;
+    border-radius: 19px;
+}
+
+.tasksListSection {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.tasksListSectionTitle {
+    flex: 1;
+    margin-left: 6px;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 24px;
+    letter-spacing: -0.03em;
+}
+
+.taskBlock {
+    height: 23px;
+    min-width: 0;
+    display: inline-flex;
+    flex-direction: row;
+    gap: 7px;
+    padding: 3px 11px;
+    background-color: #2E2E2E;
+    border-radius: 11px;
+    align-items: center;
+    overflow: hidden;
+    margin: 0 auto 0 0;
+}
+
+.taskBlock > span {
+    overflow: hidden;
+    display: inline-block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--task-color);
+    font-size: 15px;
+    line-height: 24px;
+    letter-spacing: -0.03em;
+}
+
+.dot {
+    height: 4px;
+    width: 4px;
+    border-radius: 50%;
+}
+
+.active {
+    background-color: #BEF811;
+}
+
+.disabled {
+    background-color: #F81B11;
+}
+
+.tasksMoveSection {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.moveButton {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    color: #F2F2F2;
+    min-width: 133px;
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 13px;
+    letter-spacing: -1px;
+}

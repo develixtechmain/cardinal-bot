@@ -1,0 +1,83 @@
+.purple {
+    color: #7211F8;
+}
+
+.container {
+    margin-top: 23px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.title {
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 24px;
+    letter-spacing: -0.03em;
+}
+
+.buttonsContainer {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    height: 79px;
+}
+
+.learningButton {
+    flex: 1;
+    padding: 10px;
+    background-color: #141414;
+    border-radius: 24px;
+    display: flex;
+    flex-direction: row;
+    justify-items: start;
+    gap: 20px;
+}
+
+.learningLabel {
+    display: flex;
+    flex-direction: row;
+    gap: 13px;
+    align-items: center;
+    justify-content: center;
+}
+
+.learning {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 11px;
+    line-height: 14px;
+    letter-spacing: -0.03em;
+    text-align: start;
+}
+
+.learningDescription {
+    color: #FFFFFF60;
+    font-size: 7px;
+    line-height: 7px;
+    letter-spacing: -0.03em;
+}
+
+.briefingButton {
+    flex: 1;
+    gap: 13px;
+    padding: 27px 19px 27px 19px;
+    background-color: #141414;
+    border-radius: 24px;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.briefing {
+    font-size: 11px;
+    line-height: 14px;
+    letter-spacing: -0.03em;
+    text-align: start;
+}
+
+.markedText {
+    font-weight: 700;
+}

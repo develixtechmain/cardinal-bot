@@ -13,6 +13,7 @@ timeout = httpx.Timeout(connect=10.0, read=10.0, write=10.0, pool=10)
 
 logger = logging.getLogger(__name__)
 
+
 async def save_tags(user_id, tags):
     async with httpx.AsyncClient() as client:
         try:

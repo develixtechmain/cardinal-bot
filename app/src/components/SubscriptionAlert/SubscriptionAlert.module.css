@@ -1,0 +1,36 @@
+.red {
+    color: #F81B11;
+}
+
+.title {
+    color: #767676;
+    font-family: var(--font-secondary);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 18px;
+    letter-spacing: -0.03em;
+}
+
+.container {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    padding: 11px 62px 17px 23px;
+    gap: 15px;
+    background-color: #F81B111A;
+    border-left: 2px solid #F81B11;
+    border-radius: 7px;
+}
+
+.containerHeader {
+    display: flex;
+    font-weight: 700;
+    line-height: 20px;
+}
+
+.descriptionText {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 15px;
+    letter-spacing: -0.04em;
+}

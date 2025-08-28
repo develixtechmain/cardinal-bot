@@ -1,0 +1,30 @@
+.red {
+    color: red;
+}
+
+.container {
+    gap: 8px;
+    padding: 19px 20px 28px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0 15px 0 15px;
+    align-items: center;
+    border: 1px solid #F81B11;
+    background-color: #F81B1133;
+    border-radius: 30px;
+    font-family: var(--font-ui);
+    font-size: 22px;
+    font-weight: 590;
+    line-height: 28px;
+    letter-spacing: -1px;
+    text-align: center;
+}
+
+.description {
+    font-family: var(--font-primary);
+    font-size: 22px;
+    font-weight: 590;
+    line-height: 28px;
+    letter-spacing: -1px;
+}

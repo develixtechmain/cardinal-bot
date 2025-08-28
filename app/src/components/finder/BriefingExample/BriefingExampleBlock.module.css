@@ -1,0 +1,29 @@
+.container {
+    padding: 6px;
+    gap: 11px;
+    display: flex;
+    flex-direction: row;
+    background-color: #202020;
+    border-radius: 11px;
+}
+
+.text {
+    gap: 11px;
+    display: flex;
+    flex-direction: column;
+}
+
+.title {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 16px;
+    letter-spacing: -0.03em;
+}
+
+.description {
+    padding-right: 30px;
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 14px;
+    letter-spacing: 0;
+}

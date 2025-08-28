@@ -1,0 +1,15 @@
+python-dotenv
+pydantic
+email-validator
+numpy
+httpx
+asyncpg
+cachetools
+fastapi
+uvicorn
+
+starlette
+PyJWT
+aiogram
+prometheus-client
+prometheus-fastapi-instrumentator

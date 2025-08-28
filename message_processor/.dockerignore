@@ -29,8 +29,6 @@ Thumbs.db
 # Bytecode / coverage / test artifacts
 *.log
 *.pot
-*.pyc
-*.pyo
 .coverage
 coverage.xml
 htmlcov/

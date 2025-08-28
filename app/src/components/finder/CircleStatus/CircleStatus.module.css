@@ -1,0 +1,56 @@
+.container {
+    position: relative;
+    height: 180px;
+    width: 100%;
+}
+
+.leadsCircle {
+    position: relative;
+    width: 143px;
+    height: 145px;
+    background-color: var(--background-color);
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.coreCount {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: var(--font-secondary);
+    font-size: 51px;
+    font-weight: 700;
+    line-height: 32px;
+    letter-spacing: -0.02em;
+    color: var(--count-color);
+}
+
+.leadsCount {
+    position: absolute;
+    color: var(--count-color);
+    font-family: var(--font-secondary);
+    font-size: 10px;
+    line-height: 32px;
+    letter-spacing: -0.02em;
+}
+
+.leadsActive {
+    border: 1px solid #7211f8;
+}
+
+.smallCircle {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.active {
+    background-color: #7211f8;
+}
+
+.disabled {
+    background-color: #202020;
+}

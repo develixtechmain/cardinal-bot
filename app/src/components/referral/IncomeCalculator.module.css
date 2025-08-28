@@ -1,0 +1,202 @@
+.container {
+    width: calc(100% - 32px);
+    display: flex;
+    flex-direction: column;
+    padding: 13px;
+    background-color: #141414;
+    border: 1px solid #BEF811;
+    border-radius: 32px;
+    position: relative;
+}
+
+.title {
+    padding-left: 7px;
+    font-family: var(--font-secondary);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 20px;
+    letter-spacing: -0.03em;
+}
+
+.subtitle {
+    padding: 6px 60px 25px 7px;
+    margin-top: 6px;
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 16px;
+    letter-spacing: -1px;
+}
+
+.incomeBlock {
+    position: relative;
+}
+
+.incomeTitle {
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 24px;
+    letter-spacing: -0.03em;
+}
+
+.incomeValue {
+    text-wrap: nowrap;
+    font-family: var(--font-secondary);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 32px;
+    letter-spacing: -0.02em;
+}
+
+.count {
+    height: 61px;
+    display: flex;
+    flex-direction: column;
+    padding: 6px 16px;
+    color: #F2F2F2;
+    background-color: #202020;
+    border: 1px solid #FFFFFF17;
+    border-radius: 19px;
+    position: relative;
+    z-index: 1;
+}
+
+.summary {
+    position: absolute;
+    top: 0;
+    left: 37%;
+    width: calc(63vw - 74px);
+    transform: translateX(0);
+    height: 61px;
+    display: flex;
+    flex-direction: column;
+    padding: 6px 16px;
+    color: #BEF811;
+    background-color: #364213;
+    border: 1px solid #BEF811;
+    border-radius: 19px;
+    z-index: 2;
+}
+
+.incomeSubtitle {
+    margin-left: 200px;
+    margin-right: 9px;
+    color: #FFFFFF6B;
+    font-size: 7px;
+    font-weight: 400;
+    line-height: 9px;
+    letter-spacing: -0.03em;
+}
+
+.sliderWrapper {
+    margin-top: 32px;
+    padding: 0 14px;
+    position: relative;
+    box-sizing: border-box;
+    height: 50px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    background-color: #BEF81133;
+    border-radius: 19px;
+}
+
+.sliderBubble {
+    position: absolute;
+    top: -30px;
+    transform: translateX(-50%);
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    color: #141414;
+    font-family: var(--font-secondary);
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 20px;
+    letter-spacing: -0.03em;
+    white-space: nowrap;
+    pointer-events: none;
+    background-image: url("/assets/referral/bubble.svg");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+.sliderBubble::after {
+    content: none;
+}
+
+/*.sliderBubble {*/
+/*    position: absolute;*/
+/*    top: -20px;*/
+/*    transform: translateX(-50%);*/
+/*    background: #BEF811;*/
+/*    color: #141414;*/
+/*    font-family: var(--font-secondary);*/
+/*    font-size: 14px;*/
+/*    font-weight: 700;*/
+/*    line-height: 20px;*/
+/*    letter-spacing: -0.03em;*/
+/*    padding: 4px;*/
+/*    border-radius: 8px;*/
+/*    white-space: nowrap;*/
+/*}*/
+
+/*.sliderBubble::after {*/
+/*    content: '';*/
+/*    position: absolute;*/
+/*    bottom: -5px;*/
+/*    left: 50%;*/
+/*    transform: translateX(-50%);*/
+/*    border-width: 5px 5px 0 5px;*/
+/*    border-style: solid;*/
+/*    border-color: #BEF811 transparent;*/
+/*}*/
+
+.slider {
+    flex: 1;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    outline: none;
+    background: transparent;
+    border-radius: 100px;
+    height: 12px;
+}
+
+.slider::-webkit-slider-runnable-track {
+    height: 12px;
+    background: transparent;
+    border-radius: 100px;
+}
+
+.slider::-moz-range-track {
+    height: 12px;
+    background: transparent;
+    border-radius: 100px;
+}
+
+.slider::-webkit-slider-thumb {
+    margin-top: -3px;
+    -webkit-appearance: none;
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    background-color: #BEF811;
+    -webkit-mask: radial-gradient(circle 5px at 50% 50%, transparent 99%, #000 100%);
+    mask: radial-gradient(circle 5px at 50% 50%, transparent 99%, #000 100%);
+    cursor: pointer;
+    border: none;
+}
+
+.slider::-moz-range-thumb {
+    margin-top: -3px;
+    width: 19px;
+    height: 19px;
+    border-radius: 50%;
+    background-color: #BEF811;
+    mask: radial-gradient(circle 5px at 50% 50%, transparent 99%, #000 100%);
+    cursor: pointer;
+    border: none;
+}

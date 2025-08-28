@@ -1,0 +1,28 @@
+.purple {
+    color: #7211F8;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 19px;
+    background-color: #202020;
+    border-radius: 33px;
+}
+
+.toolsSection {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.footer {
+    color: #6E6E6E;
+    font-family: var(--font-ui);
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 12px;
+    letter-spacing: -0.03em;
+}

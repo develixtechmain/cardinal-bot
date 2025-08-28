@@ -1,0 +1,61 @@
+.red {
+    color: red;
+}
+
+.container {
+    gap: 8px;
+    padding: 40px 16px 18px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: 0 15px 0 15px;
+    align-items: center;
+    border: 1px solid #F81B11;
+    background-color: #F81B1133;
+    border-radius: 30px;
+    letter-spacing: -1px;
+    text-align: center;
+}
+
+.text {
+    padding: 0 8px 0 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 28px;
+}
+
+.header {
+    font-family: var(--font-secondary);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 18px;
+    letter-spacing: -0.03em;
+}
+
+.description {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 15px;
+    letter-spacing: -0.04em;
+}
+
+.advice {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 15px;
+    letter-spacing: -0.04em;
+}
+
+.subscriptionExpiredButtonText {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 24px;
+    letter-spacing: -0.03em;
+}

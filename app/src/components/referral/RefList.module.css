@@ -1,0 +1,87 @@
+.container {
+    width: 100%;
+    display: inline-block;
+}
+
+.title {
+    margin-bottom: 3px;
+    font-family: var(--font-ui);
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 24px;
+    letter-spacing: -0.03em;
+}
+
+.noRefsBlock {
+    gap: 13px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 21px 19px;
+    background-color: #202020;
+    border-radius: 25px;
+}
+
+.noRefsText {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    letter-spacing: 0;
+}
+
+.noRefsTitle {
+    font-size: 17px;
+    line-height: 16px;
+}
+
+.noRefsDescription {
+    font-size: 11px;
+    line-height: 11px;
+}
+
+.refsBlock {
+    margin-left: 3px;
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 10px 10px 10px 12px;
+    background-color: #202020;
+    border-radius: 25px;
+}
+
+.ref {
+    font-size: 7px;
+    font-weight: 700;
+    line-height: 18px;
+    letter-spacing: 0;
+}
+
+.refAvatar {
+    border-radius: 100px;
+}
+
+.refStatus {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 15px;
+}
+
+.refsButton {
+    margin-left: auto;
+    flex-shrink: 0;
+    cursor: pointer;
+    color: #FFFFFF8F;
+    padding: 17px 24px;
+    border: 1px solid #2E2E2E;
+    border-radius: 15px;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 32px;
+    letter-spacing: -0.02em;
+}

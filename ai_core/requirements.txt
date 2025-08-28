@@ -1,4 +1,5 @@
 langchain
+langchain-core
 langchain_openai
 langchain_community
 python-dotenv
@@ -9,3 +10,6 @@ asyncpg
 cachetools
 fastapi
 uvicorn
+
+starlette
+PyJWT

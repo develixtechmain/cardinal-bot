@@ -1,0 +1,28 @@
+.toolsSection {
+    width: 100%;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 19px;
+    letter-spacing: -1px;
+}
+
+.title {
+    margin-bottom: 20px;
+    padding-right: 100px;
+    font-family: var(--font-ui);
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 19px;
+    letter-spacing: -1px;
+}
+
+.titleArrow {
+    color: #7211F8;
+}
+
+.toolsList {
+    width: 100%;
+    padding-top: 2px;
+    display: flex;
+    flex-direction: column;
+}

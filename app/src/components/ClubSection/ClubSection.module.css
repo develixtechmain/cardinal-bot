@@ -1,0 +1,100 @@
+.clubSection {
+    background-color: #141414;
+    border: 1px solid #7211F8;
+    border-radius: 20px;
+    padding: 8px 8px;
+    margin-top: 15px;
+}
+
+.clubHeader {
+    display: flex;
+}
+
+.titleContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-left: 11px;
+    margin-top: 9px;
+}
+
+.title {
+    font-size: 20px;
+    line-height: 18px;
+    letter-spacing: -0.05em;
+}
+
+.separator {
+    color: #7211F8;
+}
+
+.subtitle {
+    color: #FFFFFF70;
+    font-size: 12px;
+    line-height: 12px;
+    letter-spacing: -0.05em;
+}
+
+.benefitsTitle {
+    margin: 19px 0 12px 14px;
+    color: #FFFFFF70;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 12px;
+    letter-spacing: -0.05em;
+}
+
+.benefitsList {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.benefit {
+    display: flex;
+    padding: 11px 90px 11px 10px;
+    align-items: center;
+    justify-content: flex-start;
+    background-color: #202020;
+    border-radius: 11px;
+    gap: 11px;
+}
+
+.benefit > svg {
+    flex-shrink: 0;
+}
+
+.benefitText {
+    font-size: 12px;
+    line-height: 11px;
+    letter-spacing: -0.03em;
+}
+
+.clubAccess {
+    margin: 16px 0;
+    display: flex;
+    gap: 7px;
+    justify-content: center;
+    align-items: center;
+    color: #F8E811;
+    font-size: 12px;
+    line-height: 12px;
+    letter-spacing: -0.05em;
+}
+
+.moveButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #232323;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 32px;
+    letter-spacing: -0.02em;
+}
+
+.enabled {
+    border: 1px solid #7211F8;
+}

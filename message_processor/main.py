@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from langchain.chains import LLMChain
 
 import ai
+import core
 import db
 import embedding
 from ai import check_lead
@@ -30,7 +31,7 @@ async def process_message(body, message: aio_pika.abc.AbstractIncomingMessage):
         await _process_message(body)
         await message.ack()
     except Exception as e:
-        logger.warn(f"Failed to process message: {e}")
+        logger.warning(f"Failed to process message: {e}")
         await message.reject(requeue=False)
 
 
@@ -72,7 +73,8 @@ async def save_recommendation(candidate, recommendation):
     try:
         user = await db.fetch_user_by_id(candidate["userId"])
         recommendation_id = await db.save_recommendation(user, recommendation)
-        await embedding.confirm_recommendation(recommendation_id, candidate),
+        await embedding.confirm_recommendation(recommendation_id, candidate)
+        await core.send_recommendation_to_user(recommendation, candidate)
     except Exception as e:
         raise Exception(f"Failed to recommend {recommendation['message_id']} from {recommendation['chat_id']} to user {candidate['userId']}: {e}")
 

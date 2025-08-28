@@ -1,0 +1,36 @@
+.container {
+    height: var(--header-height);
+    margin-top: 35px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    position: relative;
+    padding-bottom: 22px;
+    justify-content: flex-start;
+}
+
+.header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.backButton {
+    cursor: pointer;
+    color: #7211F8;
+    padding: 7px 11px 7px 7px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 7px;
+    background-color: #7211F833;
+    border-radius: 15px;
+    font-family: var(--font-ui);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 18px;
+    letter-spacing: 1px;
+}

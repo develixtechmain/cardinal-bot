@@ -1,0 +1,13 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: var(--tg-vh);
+    width: 100%;
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: var(--align);
+    z-index: 1000;
+    overflow-y: auto;
+}

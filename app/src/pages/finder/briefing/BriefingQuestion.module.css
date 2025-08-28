@@ -1,0 +1,281 @@
+.container {
+    height: 100%;
+    padding: 24px 16px 0 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    font-family: var(--font-ui);
+}
+
+.question {
+    padding-left: 8px;
+    padding-top: 25px;
+    font-size: 25px;
+    font-weight: 500;
+    line-height: 24px;
+    letter-spacing: -1px;
+}
+
+.description {
+    padding-left: 8px;
+    padding-top: 15px;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 19px;
+    letter-spacing: 0;
+}
+
+.answerInput {
+    align-self: stretch;
+    padding: 11px 0 11px 19px;
+    margin-top: 15px;
+    border: none;
+    color: white;
+    caret-color: #7211F8;
+    background-color: #7474801F;
+    border-radius: 12px;
+
+
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: 0;
+}
+
+.answerInput::placeholder {
+    color: #8E8E93;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: 0;
+}
+
+.answerInput:focus {
+    outline: none;
+}
+
+.inputError {
+    border: 1px solid #F81B11;
+}
+
+.inputError::placeholder {
+    color: red;
+    font-family: var(--font-ui);
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.tip {
+    margin: 12px 0 22px;
+    color: #FFFFFF99;
+    padding-left: 8px;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 19px;
+    letter-spacing: 0;
+}
+
+.tagsTitle {
+    padding-left: 8px;
+    padding-bottom: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 24px;
+    letter-spacing: 0;
+}
+
+.selectionBlock {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 7px 6px;
+    row-gap: 8px;
+    background-color: #7474801F;
+    border-radius: 12px;
+}
+
+.selectionBlock > span {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.selectedButton {
+    cursor: pointer;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    font-family: var(--font-primary);
+    font-size: 13px;
+    line-height: 22px;
+    letter-spacing: 0;
+    background-color: #7211F833;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    gap: 9px;
+    padding: 5px 8px;
+}
+
+.extraSelectionButton {
+    color: #7211F8;
+    border: 1px solid #7211F8;
+    background-color: #7211F833;
+    border-radius: 17px;
+    display: inline-block;
+    min-width: 50px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.selectedButton > span {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.selectionSearchInput {
+    min-width: 100px;
+    flex: 1;
+    border: none;
+    background-color: transparent;
+    border-radius: 12px;
+    color: white;
+    caret-color: #7211F8;
+    outline: none;
+
+
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: 0;
+}
+
+.selectionSearchInput::placeholder {
+    color: #8E8E93;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: 0;
+}
+
+.selectionSearchInput:focus {
+    outline: none;
+}
+
+.selectionTip {
+    padding-left: 8px;
+    margin-top: 20px;
+    margin-bottom: 15px;
+    color: #FFFFFF99;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 19px;
+    letter-spacing: 0;
+}
+
+.selectionButtons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.selectionButton {
+    cursor: pointer;
+    color: white;
+    border: none;
+    border-radius: 17px;
+    font-family: var(--font-primary);
+    font-size: 13px;
+    line-height: 22px;
+    letter-spacing: 0;
+    background-color: #7211F866;
+    padding: 5px 8px;
+}
+
+.notFoundTextContainer {
+    padding: 19px 10px 11px 7px;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 19px;
+    letter-spacing: 0;
+}
+
+.notFoundDescription {
+    color: #FFFFFF99
+}
+
+.addSelectionButton {
+    padding: 5px 10px;
+    font-family: var(--font-primary);
+    font-size: 13px;
+    line-height: 22px;
+    letter-spacing: 0;
+    border: none;
+    color: white;
+    background-color: #7211F866;
+    border-radius: 7px;
+}
+
+.additionalButtons {
+    width: 100%;
+    margin-top: 39px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
+.backButton {
+    cursor: pointer;
+    flex: 1;
+    padding: 16px;
+    border: 1px solid #7211F8;
+    color: #7211F8;
+    background-color: #7211F833;
+}
+
+.nextButton {
+    cursor: pointer;
+    flex: 1;
+    padding: 16px;
+    border: none;
+    color: white;
+    background-color: #7211F8;
+}
+
+.exampleButton {
+    cursor: pointer;
+    padding: 17px;
+    margin-bottom: 25px;
+    border: 1px solid #7211F8;
+    color: #7211F8;
+    background-color: transparent;
+}
+
+.buttonText {
+    align-self: stretch;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: 0;
+    border-radius: 12px;
+}

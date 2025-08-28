@@ -1,0 +1,133 @@
+.container {
+    height: 100%;
+    padding: 0 16px 0 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.headerContainer {
+    margin-top: 34px;
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+}
+
+.headerBlock {
+    min-width: 186px;
+    max-width: 186px;
+    flex: 3;
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    padding: 9px 10px;
+    border: 1px solid #7211F8;
+    background-color: #7211F833;
+    border-radius: 11px;
+    color: #7211F8;
+    font-size: 12px;
+    line-height: 100%;
+    letter-spacing: -0.03em;
+}
+
+.headerText {
+    min-width: 141px;
+    padding-top: 2px;
+    flex: 2;
+    display: flex;
+    flex-wrap: wrap;
+    text-align: left;
+    color: #FFFFFF99;
+    font-size: 10px;
+    line-height: 100%;
+    letter-spacing: -0.03em;
+}
+
+.question {
+    padding-top: 7px;
+    color: #FFFFFF;
+    font-family: var(--font-ui);
+    font-size: 25px;
+    font-weight: 500;
+    line-height: 26px;
+    letter-spacing: -1px;
+}
+
+.answerInput {
+    padding: 11px 0 11px 16px;
+    margin-top: 18px;
+    border: none;
+    color: white;
+    caret-color: #7211F8;
+    background-color: #7474801F;
+    border-radius: 12px;
+
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: 0;
+}
+
+.answerInput::placeholder {
+    color: #8E8E93;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: 0;
+}
+
+.answerInput:focus {
+    outline: none;
+}
+
+.inputError {
+    border: 1px solid #F81B11;
+}
+
+.inputError::placeholder {
+    color: red;
+    font-family: var(--font-ui);
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.tip {
+    margin: 11px 64px 0 7px;
+    color: #FFFFFF99;
+    padding-left: 5px;
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 19px;
+    letter-spacing: 0;
+}
+
+.additionalButtons {
+    margin-top: 39px;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
+.nextButton {
+    flex: 1;
+    padding: 16px;
+    border: none;
+    color: white;
+    background-color: #7211F8;
+}
+
+.buttonText {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-ui);
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: 0;
+    border-radius: 12px;
+}

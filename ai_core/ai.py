@@ -17,7 +17,10 @@ class Questions(BaseModel):
     questions: List[str]
 
 
-async def process_answer(onboarding, questions):
+async def process_answer(user_id, onboarding, questions):
+    await db.complete_onboarding(user_id, onboarding['id'])
+    return []
+    # return ['Какой-то вопрос', "Опишите типичный процесс создания сайта на Тильде от начала до конца."]
     questions_dict = {item["question"]: item["answer"] for item in json.loads(onboarding['questions'])}
 
     for item in questions:
@@ -26,7 +29,7 @@ async def process_answer(onboarding, questions):
         else:
             questions_dict.pop(item.question, None)
 
-    await db.save_questions(onboarding['id'], questions_dict)
+    await db.save_questions(user_id, onboarding['id'], questions_dict)
 
     input_text = "\n".join([f"Q: {key}\nA: {value}" for key, value in questions_dict.items()])
 
@@ -74,6 +77,8 @@ class MeaningCloud(BaseModel):
 
 
 async def get_cloud_of_meaning(questions):
+    return ['test', 'test2']
+
     input_text = "\n".join([f"Q: {item['question']}\nA: {item['answer']}" for item in json.loads(questions)])
 
     system_prompt = """

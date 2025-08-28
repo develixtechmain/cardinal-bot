@@ -15,6 +15,7 @@ onboarding_cache = LRUCache(maxsize=100)
 
 logger = logging.getLogger(__name__)
 
+
 async def fetch_user_by_id(user_id: uuid.UUID):
     if user_id in users_cache:
         return users_cache[user_id]
@@ -34,20 +35,21 @@ async def fetch_user_from_db(user_id: uuid.UUID):
         return None
 
 
-async def fetch_onboarding_by_id(onboarding_id: uuid.UUID, renew: bool = False):
-    if not renew and onboarding_id in onboarding_cache:
-        return onboarding_cache[onboarding_id]
+async def fetch_onboarding_by_id(user_id: uuid.UUID, onboarding_id: uuid.UUID, renew: bool = False):
+    cache_key = str(user_id) + str(onboarding_id)
+    if not renew and cache_key in onboarding_cache:
+        return onboarding_cache[cache_key]
 
-    onboarding = await fetch_onboarding_from_db(onboarding_id)
+    onboarding = await fetch_onboarding_from_db(user_id, onboarding_id)
     if onboarding:
-        onboarding_cache[onboarding_id] = onboarding
+        onboarding_cache[cache_key] = onboarding
         return onboarding
     raise HTTPException(status_code=404, detail=f"Onboarding {onboarding_id} not found")
 
 
-async def fetch_onboarding_from_db(onboarding_id: uuid.UUID):
+async def fetch_onboarding_from_db(user_id: uuid.UUID, onboarding_id: uuid.UUID):
     async with pool.acquire() as conn:
-        result = await conn.fetch("SELECT * FROM onboardings WHERE id = $1", onboarding_id)
+        result = await conn.fetch("SELECT * FROM user_onboardings WHERE user_id = $1 AND id = $2", user_id, onboarding_id)
         if result:
             return result[0]
         return None
@@ -55,31 +57,32 @@ async def fetch_onboarding_from_db(onboarding_id: uuid.UUID):
 
 async def create_onboarding(user_id):
     async with pool.acquire() as conn:
-        result = await conn.fetch("SELECT * FROM onboardings WHERE user_id = $1", user_id)
+        result = await conn.fetch("SELECT * FROM user_onboardings WHERE user_id = $1 AND status != 'completed'", user_id)
         if result:
             return result[0]
 
-        result = await conn.fetch("INSERT INTO onboardings (user_id) VALUES ($1) RETURNING *", user_id)
+        result = await conn.fetch("INSERT INTO user_onboardings (user_id) VALUES ($1) RETURNING *", user_id)
         if result:
             return result[0]
         raise Exception("Failed to create onboarding")
 
 
-async def save_questions(onboarding_id, questions):
+async def save_questions(user_id: uuid.UUID, onboarding_id: uuid.UUID, questions):
     async with pool.acquire() as conn:
-        await conn.execute("UPDATE onboardings SET questions = $2 WHERE id = $1", onboarding_id, json.dumps([{"question": key, "answer": value} for key, value in questions.items()]))
+        await conn.execute("UPDATE user_onboardings SET questions = $3 WHERE user_id = $1 AND id = $2", user_id, onboarding_id,
+                           json.dumps([{"question": key, "answer": value} for key, value in questions.items()]))
         onboarding_cache.pop(onboarding_id, None)
 
 
-async def complete_onboarding(onboarding_id):
+async def complete_onboarding(user_id: uuid.UUID, onboarding_id: uuid.UUID):
     async with pool.acquire() as conn:
-        await conn.execute("UPDATE onboardings SET status = 'completed' WHERE id = $1", onboarding_id)
+        await conn.execute("UPDATE user_onboardings SET status = 'completed' WHERE user_id = $1 AND id = $2", user_id, onboarding_id)
         onboarding_cache.pop(onboarding_id, None)
 
 
-async def delete_onboarding_by_id(onboarding_id):
+async def delete_onboarding_by_id(user_id: uuid.UUID, onboarding_id: uuid.UUID):
     async with pool.acquire() as conn:
-        await conn.execute("DELETE FROM onboardings WHERE id = $1", onboarding_id)
+        await conn.execute("DELETE FROM user_onboardings WHERE user_id = $1 AND id = $2", user_id, onboarding_id)
         onboarding_cache.pop(onboarding_id, None)
 
 
@@ -101,15 +104,7 @@ async def init_postgresql():
     )
 
     async with pool.acquire() as conn:
-        await conn.execute("""
-            CREATE TABLE IF NOT EXISTS onboardings (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-                user_id UUID NOT NULL,
-                questions JSONB NOT NULL DEFAULT '[]'::jsonb,
-                status VARCHAR(11) NOT NULL DEFAULT 'uncompleted',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-            )
-        """)
+        await conn.execute("SELECT 1")
 
 
 async def disconnect():

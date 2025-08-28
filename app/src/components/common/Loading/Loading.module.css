@@ -1,0 +1,39 @@
+.logo {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo > img {
+    animation: fadeInOut 4s ease-in-out infinite;
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.05;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.percentage {
+    position: absolute;
+    bottom: 65px;
+    right: 0;
+
+    color: #141414;
+    font-size: 160px;
+    line-height: 22px;
+    letter-spacing: -1px;
+}
+
+.percentageContainer {
+    display: flex;
+    flex-direction: row;
+}

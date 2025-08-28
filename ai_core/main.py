@@ -1,32 +1,38 @@
 import logging
-import uuid
 from contextlib import asynccontextmanager
 from typing import List
 from uuid import UUID
 
 import dotenv
 import uvicorn
-from fastapi import FastAPI, HTTPException, status
+from fastapi import Request, FastAPI, HTTPException, status
 from pydantic import BaseModel
+from starlette.middleware.cors import CORSMiddleware
 
 import ai
 import db
 import embedding
+import security
 
 logger = logging.getLogger(__name__)
 
+
 @asynccontextmanager
-async def lifespan(app):
+async def lifespan(_):
     logger.info("AI Core startup initiated.")
 
     try:
         dotenv.load_dotenv()
 
         try:
-            await db.init_postgresql()
-            logger.info(f"Connected to PostgreSQL.")
+            security.init_security()
         except Exception as e:
-            raise RuntimeError(f"Failed to connect to PostgreSQL: {e}")
+            raise RuntimeError(f"Failed to configure security: {e}")
+
+        try:
+            embedding.init_embedding()
+        except Exception as e:
+            raise RuntimeError(f"Failed to configure embedding: {e}")
 
         try:
             await ai.init_llm()
@@ -35,9 +41,10 @@ async def lifespan(app):
             raise RuntimeError(f"Failed init LLM : {e}")
 
         try:
-            embedding.init_embedding()
+            await db.init_postgresql()
+            logger.info(f"Connected to PostgreSQL.")
         except Exception as e:
-            raise RuntimeError(f"Failed to configure: {e}")
+            raise RuntimeError(f"Failed to connect to PostgreSQL: {e}")
 
         logger.info(f"AI Core started.")
 
@@ -52,9 +59,14 @@ async def lifespan(app):
 
 app = FastAPI(lifespan=lifespan)
 
-
-class OnboardingStartRequest(BaseModel):
-    user_id: uuid.UUID
+app.middleware("http")(security.jwt_auth_middleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class Question(BaseModel):
@@ -63,29 +75,29 @@ class Question(BaseModel):
 
 
 @app.post("/api/onboarding/start", status_code=status.HTTP_201_CREATED)
-async def start_onboarding(request: OnboardingStartRequest):
-    user = await db.fetch_user_by_id(request.user_id)
+async def start_onboarding(request: Request):
+    user = await db.fetch_user_by_id(request.state.user_id)
     return await db.create_onboarding(user['id'])
 
 
 @app.post("/api/onboarding/{onboarding_id}/answer")
-async def answer_onboarding(onboarding_id: UUID, questions: List[Question]):
-    onboarding = await db.fetch_onboarding_by_id(onboarding_id, True)
+async def answer_onboarding(request: Request, onboarding_id: UUID, questions: List[Question]):
+    onboarding = await db.fetch_onboarding_by_id(request.state.user_id, onboarding_id, True)
     if onboarding['status'] == 'completed':
         raise HTTPException(status_code=400, detail="Анкета уже заполнена")
 
-    return await ai.process_answer(onboarding, questions)
+    return await ai.process_answer(request.state.user_id, onboarding, questions)
 
 
 @app.post("/api/onboarding/{onboarding_id}/complete")
-async def complete_onboarding(onboarding_id: UUID):
-    onboarding = await db.fetch_onboarding_by_id(onboarding_id, True)
+async def complete_onboarding(request: Request, onboarding_id: UUID):
+    onboarding = await db.fetch_onboarding_by_id(request.state.user_id, onboarding_id, True)
     if onboarding['status'] != 'completed':
         raise HTTPException(status_code=400, detail="Недостаточно заполнена анкета")
 
     tags = await ai.get_cloud_of_meaning(onboarding['questions'])
 
-    await db.delete_onboarding_by_id(onboarding_id)
+    await db.delete_onboarding_by_id(request.state.user_id, onboarding_id)
     return tags
 
 

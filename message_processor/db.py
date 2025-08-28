@@ -1,4 +1,3 @@
-import asyncio
 import json
 import logging
 import os
@@ -17,6 +16,7 @@ pool: asyncpg.pool.Pool
 users_cache = LRUCache(maxsize=100)
 
 logger = logging.getLogger(__name__)
+
 
 async def fetch_user_by_id(user_id: uuid.UUID):
     if user_id in users_cache:
@@ -87,7 +87,7 @@ async def save_in_clickhouse(message):
 async def save_recommendation(user, recommendation):
     async with pool.acquire() as conn:
         query = """
-            INSERT INTO recommendations (user_id, recommendation)
+            INSERT INTO user_recommendations (user_id, recommendation)
             VALUES($1, $2)
             RETURNING id;
         """
@@ -141,33 +141,8 @@ async def init_postgresql():
         max_size=20
     )
 
-    await asyncio.gather(*[_create_users_table(), _create_recommendations_table()])
-
-
-async def _create_users_table():
     async with pool.acquire() as conn:
-        await conn.execute("""
-            CREATE TABLE IF NOT EXISTS users (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-                user_id BIGINT NOT NULL,
-                first_name VARCHAR(255) NOT NULL,
-                last_name VARCHAR(255) NOT NULL,
-                username VARCHAR(255) NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-            )
-        """)
-
-
-async def _create_recommendations_table():
-    async with pool.acquire() as conn:
-        await conn.execute("""
-            CREATE TABLE IF NOT EXISTS recommendations (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-                user_id UUID NOT NULL,
-                recommendation JSONB NOT NULL,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
-            )
-        """)
+        await conn.execute("SELECT 1")
 
 
 async def disconnect():

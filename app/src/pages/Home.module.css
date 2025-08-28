@@ -1,0 +1,22 @@
+.container {
+    padding: 0 16px 0 16px;
+    height: var(--tg-vh);
+}
+
+.subscriptionExpired {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.subscriptionExpiredButtonText {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 24px;
+    letter-spacing: -0.03em;
+}

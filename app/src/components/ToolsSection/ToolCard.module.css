@@ -1,0 +1,62 @@
+.toolCard {
+    align-self: stretch;
+    min-height: 158px;
+    max-height: 158px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #7211F8;
+    background-color: #141414;
+    border-radius: 20px;
+    padding: 7px 11px 0 7px;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+}
+
+.headerText {
+    flex-grow: 1;
+    margin-left: 11px;
+    font-size: 20px;
+    line-height: 18px;
+    letter-spacing: -0.005em;
+}
+
+.headerSeparator {
+    color: #7211F8;
+}
+
+.descriptionBlock {
+    width: 100%;
+    display: flex;
+}
+
+.descriptionText {
+    margin-top: 51px;
+    margin-left: 15px;
+    font-family: var(--font-ui);
+    font-size: 12px;
+    font-weight: 300;
+    line-height: 14px;
+    letter-spacing: -0.03em;
+    opacity: 0.41;
+}
+
+.contactCatcherBackground {
+    position: relative;
+    bottom: 0;
+    right: -10px;
+    height: 128px;
+    width: 181px;
+}
+
+.finderBackground {
+    position: relative;
+    right: -10px;
+    bottom: 0;
+    height: 121px;
+    width: 211px;
+}

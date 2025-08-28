@@ -1,0 +1,51 @@
+.purple {
+    color: #7211F8;
+}
+
+.container {
+    margin: 0 16px 32px 16px;
+    display: flex;
+    flex-direction: column;
+}
+
+.block {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    background-color: #141414;
+    border-radius: 19px;
+}
+
+.header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.headerText {
+    margin-top: 5px;
+    font-family: var(--font-ui);
+    font-size: 18px;
+    line-height: 24px;
+    letter-spacing: -0.03em;
+}
+
+.tasksList {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+
+.moveButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #232323;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 32px;
+    letter-spacing: -0.02em;
+}

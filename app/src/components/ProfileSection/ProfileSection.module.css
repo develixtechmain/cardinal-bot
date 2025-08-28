@@ -1,0 +1,183 @@
+.container {
+    border-radius: 32px;
+    background-color: #141414;
+    padding: 13px 13px var(--bottom-padding) 13px;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    max-height: 30px;
+}
+
+.header > img {
+    width: 30px;
+    height: 30px;
+    border-radius: 15px;
+}
+
+.usernameContainer {
+    background-color: #F2F2F2;
+    padding: 6px 11px;
+    border-radius: 15px;
+}
+
+.username {
+    color: black;
+    font-size: 13px;
+    line-height: 18px;
+    letter-spacing: 0;
+}
+
+.eagleContainer {
+    display: flex;
+    width: 36px;
+    height: 30px;
+    justify-content: center;
+    align-items: center;
+    color: #767676;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 15px;
+}
+
+.expiredSubscription {
+    margin-top: 9px;
+    min-height: 80px;
+    max-height: 80px;
+    background-color: var(--background-color);
+    border-radius: 19px;
+    border: 1px solid var(--background-color);
+    padding: 9px 9px 8px 7px;
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+}
+
+.daysLeftHeader {
+    display: flex;
+    align-items: end;
+    min-height: 16px;
+    max-height: 16px;
+}
+
+.daysLeftHeaderText {
+    margin-left: 9px;
+    margin-top: 4px;
+    padding-bottom: 1px;
+    flex: 1;
+    font-family: var(--font-ui);
+    font-size: 9px;
+    font-weight: 500;
+    line-height: 12px;
+    letter-spacing: -0.03em;
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.daysLeftText {
+    display: flex;
+    align-items: normal;
+    min-height: 0;
+    margin: 7px 0 9px 9px;
+    color: var(--color);
+    font-family: var(--font-secondary);
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 15px;
+    letter-spacing: -0.02em;
+}
+
+.daysLeftSubtext {
+    font-size: 9px;
+    padding-top: 1px;
+}
+
+.subscriptionButton {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 33px;
+    max-height: 33px;
+    color: var(--color);
+    background-color: var(--background-color);
+    border-radius: 19px;
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 18px;
+    letter-spacing: -0.03em;
+}
+
+.goodSubscription {
+    margin-top: 9px;
+    min-height: 99px;
+    max-height: 99px;
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+}
+
+.goodTariffSection {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 80px;
+    max-height: 80px;
+    background-color: var(--background-color);
+    border-radius: 19px;
+    border: 1px solid var(--background-color);
+    padding: 9px 9px 8px 7px;
+}
+
+.trialContainer {
+    cursor: pointer;
+    min-height: 86px;
+    max-height: 86px;
+    flex: 1;
+    background-color: #202020;
+    border-radius: 19px;
+    border: 1px solid #BEF811A6;
+    padding: 7px 7px 6px 7px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+}
+
+.trialInfo {
+    min-height: 23px;
+    max-height: 23px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--background-color);
+    border-radius: 11px;
+    color: #BEF811;
+    gap: 6px;
+    font-size: 12px;
+    letter-spacing: -0.03em;
+}
+
+.trialButton {
+    min-height: 54px;
+    max-height: 54px;
+    color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 2px;
+    background-color: #BEF811;
+    border-radius: 11px;
+    font-family: var(--font-ui);
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 13px;
+    letter-spacing: -0.03em;
+}
+
+@media (max-width: 380px) {
+    .subscriptionButton {
+        font-size: 9px;
+    }
+}

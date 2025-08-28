@@ -1,0 +1,7 @@
+.delimiter {
+    height: 1px;
+    background-color: #212121;
+    margin: 15px auto 15px;
+    min-width: 60%;
+    max-width: 60%;
+}

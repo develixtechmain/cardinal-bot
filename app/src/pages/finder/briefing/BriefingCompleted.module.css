@@ -1,0 +1,132 @@
+.container {
+    padding: 50px 16px 0 16px;
+    position: relative;
+    height: var(--tg-vh);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    overflow-x: hidden;
+    background: radial-gradient(circle at bottom, #7211F8FC 16%, #070707 100%);
+}
+
+.backgroundLogo {
+    overflow: hidden;
+    position: absolute;
+    top: 42dvh;
+    left: 0;
+    width: 100%;
+    transform: none;
+    z-index: 0;
+}
+
+.backgroundLogo img {
+    object-fit: fill;
+    width: 100%;
+    height: 370px;
+    display: block;
+}
+
+.progress {
+    margin-bottom: 21px;
+    z-index: 1;
+}
+
+.logo {
+    padding-bottom: 20px;
+    z-index: 1;
+}
+
+.textContainer {
+    padding: 0 60px;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    gap: 8px
+}
+
+.title {
+    font-family: var(--font-secondary);
+    font-size: 25px;
+    font-weight: 700;
+    line-height: 29px;
+    letter-spacing: -1px;
+    z-index: 1;
+}
+
+.subtitle {
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 15px;
+    letter-spacing: 0;
+    z-index: 1;
+}
+
+.subtitleHeader {
+    font-weight: 600;
+}
+
+.descriptionContainer {
+    display: flex;
+    flex-direction: row;
+    margin-left: 60px;
+}
+
+.description {
+    margin: 16px 15px 14px 0;
+    display: flex;
+    flex-direction: column;
+    text-align: start;
+    gap: 12px;
+    padding: 8px 14px;
+    border-left: 2px solid #7211F8;
+    background-color: #7211F81A;
+    border-radius: 7px;
+    font-size: 12px;
+    line-height: 11px;
+    letter-spacing: -0.03em;
+    z-index: 1;
+}
+
+.descriptionHeader {
+    font-size: 15px;
+}
+
+.leadsButton {
+    cursor: pointer;
+    margin-top: 60px;
+    width: 100%;
+    min-height: 52px;
+    max-height: 52px;
+    border: 1px solid #FFFFFF;
+    color: white;
+    background-color: #FFFFFF33;
+    border-radius: 12px;
+    font-family: var(--font-ui);
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: -1px;
+    z-index: 1;
+}
+
+.clientButton {
+    cursor: pointer;
+    width: 100%;
+    min-height: 52px;
+    max-height: 52px;
+    margin-top: 6px;
+    margin-bottom: 16px;
+    border: none;
+    color: black;
+    background-color: white;
+    border-radius: 12px;
+    font-family: var(--font-ui);
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: -1px;
+    z-index: 1;
+}

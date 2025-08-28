@@ -1,0 +1,114 @@
+.purple {
+    color: #7211F8;
+}
+
+.overlay {
+    padding: 16px 32px;
+    overflow-y: hidden;
+}
+
+.container {
+    padding: 9px 10px 16px 20px;
+    background: linear-gradient(to bottom, #202020, #0D0D0D);
+    border-radius: 23px;
+    height: auto;
+    overflow-y: auto;
+}
+
+.header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: start;
+    font-family: var(--font-ui);
+    font-size: 25px;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: -1px;
+}
+
+.headerDescription {
+    margin-top: 20px;
+    margin-right: 8;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 14px;
+    letter-spacing: -1px;
+}
+
+.blockHeader {
+    font-family: var(--font-ui);
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 25px;
+    letter-spacing: -1px;
+}
+
+.question {
+    margin-top: 3px;
+    margin-right: 12px;
+    padding: 3px 10px 2px 11px;
+    gap: 7px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    background: linear-gradient(to right, #7211F8, #430A92);
+    border-radius: 11px;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 24px;
+    letter-spacing: -0.03em;
+}
+
+.description {
+    margin: 6px 19px 12px 0;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 14px;
+    letter-spacing: 0;
+}
+
+.example {
+    margin-top: 9px;
+    position: relative;
+    border-radius: 11px;
+    padding: 12px;
+    background: linear-gradient(#202020, #141414);
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 16px;
+    letter-spacing: -0.03em;
+    z-index: 0;
+}
+
+.example::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 11px;
+    padding: 1px;
+    background: linear-gradient(to bottom, #6B00FF, #400099);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: destination-out;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.useHintButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #7211F8;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 32px;
+    letter-spacing: -0.02em;
+
+}
