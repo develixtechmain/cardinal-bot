@@ -29,7 +29,7 @@ services:
     restart: unless-stopped
 
   embeddings:
-    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.7
+    image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.8
     container_name: embeddings-service
     environment:
       - MODEL_ID=intfloat/multilingual-e5-base
@@ -42,7 +42,7 @@ services:
     restart: unless-stopped
 
   qdrant:
-    image: qdrant/qdrant:latest
+    image: qdrant/qdrant:v1.15.4
     container_name: qdrant-db
     restart: unless-stopped
     ports:
@@ -54,7 +54,7 @@ services:
       - QDRANT__SERVICE__API_KEY=a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d
 
   postgres:
-    image: postgres:16
+    image: 17.6-alpine3.22
     container_name: postgres-db
     restart: always
     environment:

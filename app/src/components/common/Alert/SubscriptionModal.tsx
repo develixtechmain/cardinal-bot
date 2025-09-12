@@ -9,7 +9,7 @@ interface SubscriptionModalProps {
     onClose: () => void;
 }
 
-const excluded = ["/", "/subscription"];
+const excluded = ["/", "/subscription", "/referral"];
 
 const SubscriptionModal: React.FC<SubscriptionModalProps> = ({isOpen, onClose}) => {
     const [location, navigate] = useLocation();

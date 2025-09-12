@@ -14,14 +14,19 @@ import {RefsList} from "../components/referral/RefsList";
 import BottomSection from "../components/common/BottomSection/BottomSection";
 import Delimiter from "../components/common/Delimiter/Delimiter";
 import {IncomeCalculator} from "../components/referral/IncomeCalculator";
+import {TARIFF_PRICES} from "../utils/consts";
+import {purchaseFromBalance} from "../api/base";
 
 const Referral: React.FC = () => {
     const [, navigate] = useLocation();
     const refsLoading = useRef<boolean>(false);
+    const refPurchasing = useRef<boolean>(false);
 
     const user = useStore(s => s.user);
+    const setUser = useStore(s => s.setUser);
     const refs = useReferral(s => s.refs);
     const setRefs = useReferral(s => s.setRefs);
+    const setSubscription = useStore(s => s.setSubscription);
 
     const [loading, setLoading] = React.useState(true);
 
@@ -66,6 +71,19 @@ const Referral: React.FC = () => {
         document.execCommand("copy");
         document.body.removeChild(input);
     };
+
+    const handlePurchaseByBalance = async () => {
+        if (refPurchasing.current) return
+        refPurchasing.current = true;
+        try {
+            if (user!.balance < TARIFF_PRICES["1"]) return;
+            const subscription = await purchaseFromBalance();
+            setSubscription(subscription);
+            setUser({...user!, balance: user!.balance - 4900})
+        } finally {
+            refPurchasing.current = false;
+        }
+    }
 
     return (
         <div className={styles.container}>
@@ -120,35 +138,39 @@ const Referral: React.FC = () => {
                     Когда приглашённый зарегистрируется и оплатит сервис — ты получаешь до 50% от его оплаты на свой баланс.
                 </div>
 
+                {/*TODO URL partner*/}
                 <WideButton color="#transparent" text={
-                    <div className={styles.partnerRulesButton}>
+                    <div className={styles.button}>
                         <img height="px" width="px" src="/assets/referral/partner-rules.svg" alt=" "/>
                         Правила партнерской програмы
                     </div>
-                } buttonStyle={{minHeight: 39, maxHeight: 39}} style={{
+                } buttonStyle={{minHeight: 39, maxHeight: 39, color: "#FFFFFF66"}} style={{
+                    marginTop: 5,
                     borderRadius: 19,
-                    borderColor: "#FFFFFF66"
+                    border: "1px solid #FFFFFF66"
                 }} onClick={() => navigate("https://google.com")}/>
             </div>
 
-            {/*TODO*/}
-            <WideButton color={"#BEF81133"} text={
-                <div className={styles.paySubscriptionButton}>
+            <WideButton color="#BEF81133" textColor="#BEF811" text={
+                <div className={styles.button}>
                     <MoveArrow height="24px" width="24px" color="#BEF811"/>
                     Оплатить тариф с баланса
                 </div>
             } buttonStyle={{minHeight: 50, maxHeight: 50}} style={{
                 borderRadius: 19
-            }} onClick={() => navigate("https://google.com")}/>
+            }} onClick={handlePurchaseByBalance}/>
 
-            {/*TODO*/}
+            {/*TODO URL withdraw balance*/}
             <WideButton color={"transparent"} text={
-                <div className={styles.withdrawBalanceButton}>
-                    <img height="19px" width="13px" src="/assets/money.svg" alt=" "/>
+                <div className={styles.button}>
+                    <img height="13px" width="19px" src="/assets/money.svg" alt=" "/>
                     Вывести баланс
                 </div>
             } buttonStyle={{minHeight: 48, maxHeight: 48}} style={{
-                borderRadius: 19
+                marginTop: 3,
+                marginBottom: 17,
+                borderRadius: 19,
+                border: "1px solid #FFFFFF"
             }} onClick={() => navigate("https://google.com")}/>
 
             <RefsList refs={refs!}/>

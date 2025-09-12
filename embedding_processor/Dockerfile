@@ -29,6 +29,7 @@ ENV ASPNETCORE_URLS=http://+:8080
 
 # Открываем порт, который слушает приложение
 EXPOSE 8080
+LABEL loki.include=true loki.service.name=embeddings_processor
 
 # Запускаем приложение
 ENTRYPOINT ["dotnet", "Cardinal.EmbedingProcessor.dll"] 

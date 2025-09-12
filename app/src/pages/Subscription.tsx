@@ -4,10 +4,12 @@ import styles from "./Subscription.module.css";
 import BottomSection from "../components/common/BottomSection/BottomSection";
 import Delimiter from "../components/common/Delimiter/Delimiter";
 import WideButton from "../components/common/Buttons/WideButton";
-import {subscriptionBenefits} from "../utils/consts";
+import {subscriptionBenefits, TARIFF_PRICES_NORMALIZED} from "../utils/consts";
 import Mark from "../assets/icons/mark.svg";
 import Header from "../components/common/Header/Header";
 
+import Money from "../assets/subscription/money.svg"
+import FullEagle from "../assets/subscription/full-eagle.svg"
 import AllInclusive from "../assets/subscription/all-inclusive.svg"
 import Web from "../assets/subscription/web.svg"
 import ContactCatcher from "../assets/subscription/contact-catcher.svg"
@@ -15,11 +17,11 @@ import FeaturesBackground from "../assets/subscription/features-background.svg"
 
 const Subscription: React.FC = () => {
     const [, navigate] = useLocation();
-    const [months, setMonths] = useState<number>(6);
+    const [months, setMonths] = useState<number>(1);
 
-    const subscriptionButton = <WideButton color={"#7211F8"} text={
+    const subscriptionButton = <WideButton color={months === 12 ? "#BEF811" : "#7211F8"} textColor={months === 12 ? "black" : "white"} text={
         <div className={styles.subscriptionButton}>
-            <img height="21px" width="15px" src="/assets/money.svg" alt=" "/>
+            <Money height="21px" width="15px" color={months === 12 ? "black" : "white"}/>
             Оформить подписку
         </div>
     } buttonStyle={{minHeight: 47, maxHeight: 47}} style={{
@@ -29,6 +31,7 @@ const Subscription: React.FC = () => {
     const contentColor = months === 1 ? "#7211F8" : months === 3 ? "white" : "#BEF811";
     const borderFromColor = months === 1 ? "#452A6B" : months === 3 ? "#452A6B" : "#452A6B";
     const borderToColor = months === 1 ? "#230D42" : months === 3 ? "#230D42" : "#BEF811";
+    const featuresTitleColor = months === 1 ? "#7211F8" : months === 3 ? "#141414" : "#260E46";
     const featuresColor = months === 1 ? "#2E2E2E" : months === 3 ? "#7211F8" : "#BEF811";
     const featuresBackgroundColor = months === 1 ? "#7211F8" : months === 3 ? "white" : "#260E46";
 
@@ -89,19 +92,35 @@ const Subscription: React.FC = () => {
             </div>
 
             <div className={styles.featuresContainer}>
-                <div className={styles.featuresTitle} style={{"--background-color": featuresColor} as React.CSSProperties}>ПОДПИСКА</div>
+                <div className={styles.featuresTitle} style={{"--background-color": featuresTitleColor} as React.CSSProperties}>ПОДПИСКА</div>
+                {months === 3 ?
+                    <div className={styles.priceEconomy} style={{border: "1px solid white"}}>
+                            <span>
+                                <span>🔥 Экономия </span>
+                                <span style={{fontWeight: 700}}>2 200 ₽</span>
+                            </span>
+                    </div>
+                    : months === 12 && <div className={styles.priceEconomy} style={{backgroundColor: "#260E46"}}>
+                            <span>
+                                <span>🔥 Экономия </span>
+                                <span style={{color: "#BEF811"}}>16 800 ₽</span>
+                            </span>
+                </div>}
 
                 <div className={styles.priceBlock} style={{"--background-color": featuresColor} as React.CSSProperties}>
-                    {months === 1 ? <span>
-                        <span className={styles.purple}>4900 ₽ </span>
-                        <span style={{fontSize: 15}}>/мес</span>
-                    </span> : months === 3 ? <div>
-
-                    </div> : <div>
-
-                    </div>}
+                    <span style={{height: 30}}>
+                        {months === 1 ? <span>
+                            <span className={styles.purple}>{TARIFF_PRICES_NORMALIZED["1"]} ₽ </span>
+                            <span style={{fontSize: 15}}>/мес</span>
+                        </span> : <div style={{marginTop: -5}}>
+                            {months === 3 ?
+                                <span>{TARIFF_PRICES_NORMALIZED["3"]} ₽</span> :
+                                <span style={{color: "#260E46"}}>{TARIFF_PRICES_NORMALIZED["12"]} ₽</span>
+                            }
+                        </div>}
+                    </span>
                 </div>
-                <div className={styles.featuresSeparator}></div>
+                <div className={styles.featuresSeparator}/>
                 <div className={styles.featuresBlock} style={{"--background-color": featuresColor} as React.CSSProperties}>
                     <div className={styles.featuresBackground}><FeaturesBackground color={featuresBackgroundColor}/></div>
                     <div className={styles.features}>
@@ -139,15 +158,16 @@ const Subscription: React.FC = () => {
                 </div>
             </div>
 
-            <WideButton color={"transparent"} text={
+            {/*TODO URL about tariff*/}
+            <WideButton color={"transparent"} textColor={months === 12 ? "#BEF811" : "#7211F8"} text={
                 <div className={styles.aboutButton}>
-                    <img height="19px" width="33px" src="/assets/full-eagle.svg" alt=" "/>
+                    <FullEagle height="19px" width="33px" color={months === 12 ? "#BEF811" : "#7211F8"}/>
                     Подробнее о тарифе
                 </div>
             } buttonStyle={{minHeight: 45, maxHeight: 45}} style={{
                 margin: "10px 0",
                 borderRadius: 19,
-                border: "1px solid #7211F8"
+                border: `1px solid ${months === 12 ? "#BEF811" : "#7211F8"}`
             }} onClick={() => navigate("https://google.com")}/>
 
             {subscriptionButton}

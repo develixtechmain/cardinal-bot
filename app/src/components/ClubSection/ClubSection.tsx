@@ -75,6 +75,7 @@ const ClubSection: React.FC = () => {
                         <MoveArrowIcon color="#7211F8"/>
                         <span style={{color: "#7211F8"}}>Перейти в канал</span>
                     </div>
+                //     TODO URL to channel
                 } buttonStyle={{borderRadius: 12, height: 50}} onClick={() => navigate("https://google.com")}/>
                 : <WideButton color="#3C3C3C" text={
                     <div className={styles.moveButton}>

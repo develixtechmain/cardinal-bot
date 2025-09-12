@@ -118,6 +118,7 @@ const TaskBlock: React.FC<TaskBlockProps> = ({task, stats}) => {
                     {task.active ? "Пауза" : "Запуск"}
                     <ActionImg height="7px" width="8px" color={task.active ? "#FFFFFF66" : "#BEF811"}/>
                 </div>
+                {/*TODO URL learn*/}
                 <div className={styles.editButton} onClick={() => navigate("https://google.com")}>
                     <img height="24px" width="20px" src={`/assets/finder/task/edit.svg`} alt=" "/>
                     Дообучить
@@ -134,7 +135,7 @@ const TaskBlock: React.FC<TaskBlockProps> = ({task, stats}) => {
                     <img height="15px" width="17px" src="/assets/finder/task/forward.svg" alt=" "/>
                     <span style={{color: "white"}}>Перейти к лидам</span>
                 </div>
-            } buttonStyle={{borderRadius: 14, height: 50}} onClick={() => navigate("https://google.com")}/>
+            } buttonStyle={{borderRadius: 14, height: 50}} onClick={() => Telegram.WebApp.openTelegramLink("https://t.me/TesterinoTester_bot")}/>
         </div>
     )
 }

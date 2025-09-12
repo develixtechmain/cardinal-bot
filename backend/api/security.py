@@ -152,11 +152,11 @@ def parse_user_id(token: str):
             raise HTTPException(status_code=401, detail="Invalid token: missing sub")
         return user_id
     except Exception as e:
-        raise HTTPException(status_code=401, detail=f"Invalid token: {e}")
+        raise HTTPException(status_code=401, detail=f"Invalid token") from e
 
 
 def init_security():
-    global jwt_secret_key, bot_token, api_key, webhook_key
+    global jwt_secret_key, bot_token, api_key, webhook_key, lava_key
     validate_env("SECURITY_KEY")
     jwt_secret_key = os.environ["SECURITY_KEY"]
     validate_env("BOT_TOKEN")

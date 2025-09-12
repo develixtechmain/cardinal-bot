@@ -145,7 +145,7 @@ const App: React.FC = () => {
             <Switch>
                 <Route path="/" component={() => <ProtectedRoute><Home/></ProtectedRoute>}/>
                 <Route path="/subscription" component={() => <ProtectedRoute><Subscription/></ProtectedRoute>}/>
-                <Route path="/subscription/purchase/:months">{({months}) => <ProtectedRoute><SubscriptionPurchase params={{months}}/></ProtectedRoute>}</Route>
+                <Route path="/subscription/purchase/:months">{() => <ProtectedRoute><SubscriptionPurchase/></ProtectedRoute>}</Route>
                 <Route path="/subscription/trial-used" component={() => <ProtectedRoute><SubscriptionTrialUsed/></ProtectedRoute>}/>
                 <Route path="/finder" component={() => <ProtectedRoute><Finder/></ProtectedRoute>}/>
                 <Route path="/finder/tasks" component={() => <ProtectedRoute><FinderTasks/></ProtectedRoute>}/>

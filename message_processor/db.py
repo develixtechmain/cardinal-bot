@@ -84,14 +84,14 @@ async def save_in_clickhouse(message):
     return chat_id, message_id
 
 
-async def save_recommendation(user, recommendation):
+async def save_recommendation(user, task_id, recommendation):
     async with pool.acquire() as conn:
         query = """
-            INSERT INTO user_recommendations (user_id, recommendation)
-            VALUES($1, $2)
+            INSERT INTO user_recommendations (user_id, task_id, recommendation)
+            VALUES($1, $2, $3)
             RETURNING id;
         """
-        return await conn.fetchval(query, user['id'], json.dumps(recommendation))
+        return await conn.fetchval(query, user['id'], task_id, json.dumps(recommendation))
 
 
 async def init_click():

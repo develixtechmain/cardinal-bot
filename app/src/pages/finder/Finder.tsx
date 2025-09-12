@@ -90,6 +90,7 @@ export default function Finder() {
 
             <CircleStatus activeCount={subscription?.isActive() ? Object.values(tasksStats!).reduce((sum, stats) => sum + stats.today, 0) : 0}/>
 
+            {/*TODO URL to channel*/}
             <WideButton color="#7211F833" text={
                 <div className={styles.moveButton}>
                     <MoveArrowIcon color="#7211F8"/>

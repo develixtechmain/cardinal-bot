@@ -38,7 +38,7 @@ export const answerQuestions = async (briefingId: string, answer: QuestionAnswer
     return res;
 };
 
-export const completeBriefing = async (briefingId: string, totalAnswers: QuestionAnswer[]): Promise<string[]> => {
+export const completeBriefing = async (briefingId: string, totalAnswers: QuestionAnswer[]): Promise<{ title: string, tags: string[] }> => {
     const response = await authFetch("ai_core", `/onboarding/${briefingId}/complete`, {
         method: 'POST',
         headers: {
@@ -55,13 +55,13 @@ export const completeBriefing = async (briefingId: string, totalAnswers: Questio
     return res;
 }
 
-export const createTask = async (cloud: string[]) => {
+export const createTask = async (cloudTask: { title: string, tags: string[] }) => {
     const response = await authFetch("backend", `/finder/tasks`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({cloud})
+        body: JSON.stringify({cloudTask})
     });
 
     const res = await response.json();

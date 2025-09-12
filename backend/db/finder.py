@@ -2,12 +2,10 @@ import json
 import uuid
 from typing import List
 
-from cachetools import TTLCache
 from fastapi import HTTPException
 
-from db import get_pool
-
-onboarding_cache = TTLCache(maxsize=100, ttl=1200)
+from db import get_pool, onboarding_cache
+from embedding import save_tags
 
 
 async def fetch_user_tasks_stats(user_id: uuid.UUID):
@@ -55,9 +53,15 @@ async def fetch_tasks_by_user_id(user_id: uuid.UUID):
 
 async def save_user_task(user_id: uuid.UUID, cloud: List[str]):
     async with get_pool().acquire() as conn:
-        result = await conn.fetchrow("INSERT INTO user_tasks (user_id, title, tags) VALUES ($1, $2, $3) RETURNING *", user_id, cloud[0], json.dumps(cloud))
-        if result:
-            return result
+        count = await conn.fetchval("SELECT COUNT(1) user_tasks WHERE user_id = $1", user_id)
+        if count >= 5:
+            raise HTTPException(status_code=409, detail="User reached tasks limit")
+
+        async with conn.transaction():
+            result = await conn.fetchrow("INSERT INTO user_tasks (user_id, title, tags) VALUES ($1, $2, $3) RETURNING *", user_id, cloud[0], json.dumps(cloud))
+            if result:
+                await save_tags(user_id, result['id'], cloud)
+                return result
         raise Exception("Failed to create user task")
 
 
@@ -88,9 +92,8 @@ async def fetch_user_channels_by_user_id(user_id: uuid.UUID):
 
 async def save_user_channel(user_id: uuid.UUID, chat_id: int):
     async with get_pool().acquire() as conn:
-        result = await conn.execute("INSERT INTO user_channels (user_id, chat_id) VALUES ($1, $2) ON CONFLICT (user_id, chat_id) DO NOTHING;", user_id, chat_id)
-        rows_affected = result.split()[-1]
-        return rows_affected == "1"
+        result = await conn.fetchrow("INSERT INTO user_channels (user_id, chat_id) VALUES ($1, $2) ON CONFLICT (user_id, chat_id) DO NOTHING RETURNING id", user_id, chat_id)
+        return result is not None
 
 
 async def delete_user_channel(user_id: uuid.UUID, user_channel_id: uuid.UUID):

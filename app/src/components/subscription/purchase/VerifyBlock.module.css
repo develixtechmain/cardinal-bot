@@ -1,0 +1,27 @@
+.container {
+    gap: 3px;
+    display: flex;
+    flex-direction: column;
+    padding: 8px 20px 14px 8px;
+    background-color: #272727;
+    border-radius: 11px;
+}
+
+.header {
+    gap: 6px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 16px;
+    letter-spacing: -0.03em;
+}
+
+.value {
+    padding-left: 22px;
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 14px;
+    letter-spacing: 0;
+}

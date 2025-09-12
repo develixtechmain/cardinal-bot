@@ -24,15 +24,14 @@ export default function BriefingVerify() {
             if (hasRun.current) return;
             hasRun.current = true;
 
-            // await new Promise((r) => setTimeout(r, 5500)); // TODO TEMP
             const additional = additionalQuestions ?? [];
             const total = totalAnswers(answers ?? [], additional);
 
             const newQuestions = await answerQuestions(briefingId!, total);
 
             if (newQuestions.length == 0) {
-                const cloud = await completeBriefing(briefingId!, total)
-                const task = await createTask(cloud)
+                const cloudTask = await completeBriefing(briefingId!, total)
+                const task = await createTask(cloudTask)
                 setTasks([...tasks, task])
                 setNavigateTo("/finder/briefing/completed")
             } else {

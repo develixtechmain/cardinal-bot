@@ -17,6 +17,7 @@ queue_name = "tg_queue"
 
 logger = logging.getLogger(__name__)
 
+
 async def process_message(_, message):
     global rabbitmq_channel
 
@@ -63,7 +64,7 @@ async def init_rabbitmq():
 
 async def main():
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
     )
 
@@ -89,6 +90,7 @@ async def main():
         name=session,
         api_id=api_id,
         api_hash=api_hash,
+        workdir="/app/pyrogram-sessions"
     )
 
     app.add_handler(MessageHandler(process_message, filters.text & ~filters.me))

@@ -6,25 +6,24 @@ import httpx
 from utils import validate_env
 
 client: httpx.AsyncClient
-embedder_save_tags_url: str
 
 timeout = httpx.Timeout(connect=10.0, read=10.0, write=10.0, pool=10)
 
 logger = logging.getLogger(__name__)
 
 
-async def save_tags(user_id, tags):
+async def save_tags(user_id, task_id, tags):
     try:
-        resp = await client.post(embedder_save_tags_url, json={
+        resp = await client.post("/vectors/tags", json={
             "tags": tags,
-            "taskId": str(user_id),
+            "taskId": str(task_id),
             "userId": str(user_id)
         })
         logger.debug(f"Response status: {resp.status_code}, Response: {resp.text}")
         if resp.status_code != 200:
             raise Exception(f"Save user tags failed with {resp.status_code}")
     except Exception as e:
-        raise Exception(f"Failed to save user tags: {e}")
+        raise Exception(f"Failed to save user tags") from e
 
 
 async def accept_recommendation(recommendation_id):
@@ -34,7 +33,7 @@ async def accept_recommendation(recommendation_id):
         if resp.status_code != 200:
             raise Exception(f"Accept user recommendation failed with {resp.status_code}")
     except Exception as e:
-        raise Exception(f"Failed to accept user recommendation: {e}")
+        raise Exception(f"Failed to accept user recommendation") from e
 
 
 async def decline_recommendation(recommendation_id):
@@ -44,22 +43,23 @@ async def decline_recommendation(recommendation_id):
         if resp.status_code != 200:
             raise Exception(f"Decline user recommendation failed with {resp.status_code}")
     except Exception as e:
-        raise Exception(f"Failed to decline user recommendation: {e}")
+        raise Exception(f"Failed to decline user recommendation") from e
 
 
 def init_embedding():
-    global embedder_save_tags_url, client
+    global client
 
-    validate_env("EMBEDDER_KEY")
-    validate_env("EMBEDDER_HOST")
-    embedder_host = os.environ.get("EMBEDDER_HOST")
-    embedder_save_tags_url = embedder_host + "/api/vectors/tags"
+    validate_env("EMBEDDINGS_PROCESSOR_KEY")
+    validate_env("EMBEDDINGS_PROCESSOR_HOST")
+    embedder_host = os.environ.get("EMBEDDINGS_PROCESSOR_HOST")
+    if embedder_host.endswith("/"):
+        embedder_host = embedder_host[:-1]
 
-    client = httpx.AsyncClient(headers={
+    client = httpx.AsyncClient(base_url=embedder_host + "/api", headers={
         "Accept": "application/json",
         "Content-Type": "application/json",
-        "X-API-KEY": os.environ["EMBEDDER_KEY"],
-    }, timeout=timeout, base_url=embedder_host)
+        "X-API-KEY": os.environ["EMBEDDINGS_PROCESSOR_KEY"],
+    }, timeout=timeout)
 
 
 async def stop_embedding():

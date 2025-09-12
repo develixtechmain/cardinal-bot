@@ -11,7 +11,6 @@ from starlette.middleware.cors import CORSMiddleware
 
 import ai
 import db
-import embedding
 import security
 
 logger = logging.getLogger(__name__)
@@ -28,11 +27,6 @@ async def lifespan(_):
             security.init_security()
         except Exception as e:
             raise RuntimeError(f"Failed to configure security: {e}")
-
-        try:
-            embedding.init_embedding()
-        except Exception as e:
-            raise RuntimeError(f"Failed to configure embedding: {e}")
 
         try:
             await ai.init_llm()
@@ -60,6 +54,7 @@ async def lifespan(_):
 app = FastAPI(lifespan=lifespan)
 
 app.middleware("http")(security.jwt_auth_middleware)
+app.middleware("http")(security.key_auth_middleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -72,6 +67,16 @@ app.add_middleware(
 class Question(BaseModel):
     question: str
     answer: str
+
+
+class CheckRulesRequest(BaseModel):
+    text: str
+    rules: list[str]
+
+
+class RuleExtractRequest(BaseModel):
+    text: str
+    userText: str
 
 
 @app.post("/api/onboarding/start", status_code=status.HTTP_201_CREATED)
@@ -96,9 +101,24 @@ async def complete_onboarding(request: Request, onboarding_id: UUID):
         raise HTTPException(status_code=400, detail="Недостаточно заполнена анкета")
 
     tags = await ai.get_cloud_of_meaning(onboarding['questions'])
+    title = await ai.get_task_title(tags)
 
     await db.delete_onboarding_by_id(request.state.user_id, onboarding_id)
-    return tags
+    return {
+        "title": title,
+        "tags": tags
+    }
+
+
+@app.post("/api/rules/check")
+async def check_rules(request: CheckRulesRequest):
+    if not await ai.check_rules(request.text, request.rules):
+        raise HTTPException(status_code=409, detail="Not matches rules")
+
+
+@app.post("/api/rules/extract")
+async def extract_rules(request: RuleExtractRequest):
+    return await ai.extract_rules(request.text, request.userText)
 
 
 def main():

@@ -1,6 +1,7 @@
 import {authFetch} from "../utils/api";
 import {Subscription, User} from "../types";
 import {SubscriptionImpl} from "../types/subscription";
+import {Bank} from "../utils/consts";
 
 export const fetchUser = async (): Promise<User> => {
     const response = await authFetch("backend", "/users/me");
@@ -35,13 +36,16 @@ export const fetchSubscription = async (): Promise<Subscription> => {
         throw new Error("Failed to fetch subscription");
     }
 
-    const data = await response.json();
+    const res = await response.json();
+    if (!response.ok) {
+        throw new Error(res.detail || "unknown error");
+    }
 
     return new SubscriptionImpl({
-        ...data,
-        trial_starts_at: parseDate(data.trial_starts_at),
-        trial_ends_at: parseDate(data.trial_ends_at),
-        subscription_ends_at: parseDate(data.subscription_ends_at),
+        ...res,
+        trial_starts_at: parseDate(res.trial_starts_at),
+        trial_ends_at: parseDate(res.trial_ends_at),
+        subscription_ends_at: parseDate(res.subscription_ends_at),
     });
 }
 
@@ -56,8 +60,57 @@ export const startSubscriptionTrial = async (subId: string): Promise<Subscriptio
         throw new Error(res.detail || "unknown error");
     }
 
-    return res;
+    return new SubscriptionImpl({
+        ...res,
+        trial_starts_at: parseDate(res.trial_starts_at),
+        trial_ends_at: parseDate(res.trial_ends_at),
+        subscription_ends_at: parseDate(res.subscription_ends_at),
+    });
 };
+
+
+export const fetchPurchaseLink = async (months: number, bank: Bank, email: string): Promise<string> => {
+    const response = await authFetch("backend", `/subscriptions/purchase`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            months: months,
+            email: email,
+            payment_system: bank === "ru" ? "lava" : "alpha",
+        })
+    });
+
+
+    const res = await response.json();
+    if (!response.ok) {
+        throw new Error(res.detail || "unknown error");
+    }
+
+    return res.url;
+}
+
+
+export const purchaseFromBalance = async (): Promise<Subscription> => {
+    const response = await authFetch("backend", `/subscriptions/purchase/balance`, {
+        method: 'POST'
+    });
+
+
+    const res = await response.json();
+    if (!response.ok) {
+        throw new Error(res.detail || "unknown error");
+    }
+
+    return new SubscriptionImpl({
+        ...res,
+        trial_starts_at: parseDate(res.trial_starts_at),
+        trial_ends_at: parseDate(res.trial_ends_at),
+        subscription_ends_at: parseDate(res.subscription_ends_at),
+    });
+}
+
 
 function parseDate(dateString: string | null): Date | undefined {
     if (dateString === null) return undefined;

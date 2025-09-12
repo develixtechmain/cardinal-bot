@@ -26,6 +26,7 @@ queue_name = "tg_queue"
 
 logger = logging.getLogger(__name__)
 
+
 async def process_message(body, message: aio_pika.abc.AbstractIncomingMessage):
     try:
         await _process_message(body)
@@ -64,7 +65,10 @@ async def _process_message(body: bytes):
     for candidate in search_response:
         if candidate["rating"] > rating:
             logger.info(f"User {candidate['userId']} selected for recommendation.")
-            tasks.append(save_recommendation(candidate, message))
+            if candidate["stats"]["recent_recommendations"] >= 33:
+                logger.info(f"User {candidate['userId']} skipped recommendation due to daily limit.")
+            else:
+                tasks.append(save_recommendation(candidate, message))
 
     await asyncio.gather(*tasks)
 
@@ -72,7 +76,7 @@ async def _process_message(body: bytes):
 async def save_recommendation(candidate, recommendation):
     try:
         user = await db.fetch_user_by_id(candidate["userId"])
-        recommendation_id = await db.save_recommendation(user, recommendation)
+        recommendation_id = await db.save_recommendation(user, candidate['taskId'], recommendation)
         await embedding.confirm_recommendation(recommendation_id, candidate)
         await core.send_recommendation_to_user(recommendation, candidate)
     except Exception as e:
@@ -100,6 +104,7 @@ async def select_candidate(candidates):
 async def calculate_rating(now, cutoff, candidate):
     try:
         stats = await db.get_user_stats(candidate["userId"], cutoff)
+        candidate["stats"] = stats
     except Exception as e:
         raise Exception(f"Failed to fetch user stats: {e}")
 

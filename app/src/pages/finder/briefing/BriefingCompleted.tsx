@@ -23,8 +23,7 @@ export default function BriefingCompleted() {
                     </div>
                 </div>
                 <div style={{flex: 1}}/>
-                {/*TODO leads*/}
-                <button className={styles.leadsButton} onClick={() => navigate("/finder")}>
+                <button className={styles.leadsButton} onClick={() => Telegram.WebApp.openTelegramLink("https://t.me/TesterinoTester_bot")}>
                     Перейти к лидам
                 </button>
                 <button className={styles.clientButton} onClick={() => navigate("/")}>

@@ -1,5 +1,6 @@
 {
   "name": "telegram-mini-app",
+  "type": "module",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -7,6 +8,7 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "wouter": "^3.7.1",
+    "serve": "^14.2.5",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
@@ -14,14 +16,15 @@
     "@types/react-dom": "^19.1.6",
     "@types/telegram-web-app": "^7.10.1",
     "@vitejs/plugin-react": "^4.6.0",
-    "fastify": "^5.4.0",
     "typescript": "^5.8.3",
     "vite": "^5.4.19",
     "vite-plugin-svgr": "^4.3.0"
   },
   "scripts": {
     "dev": "npm run client",
-    "client": "vite"
+    "client": "vite",
+    "build": "vite build",
+    "start": "npx serve -s dist -l 5173"
   },
   "browserslist": {
     "production": [

@@ -1,5 +1,7 @@
 FROM python:3.11-slim
 
+LABEL loki.include=true loki.service.name=message_processor
+
 WORKDIR /app
 
 COPY requirements.txt ./

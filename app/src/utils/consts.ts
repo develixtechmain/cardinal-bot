@@ -3,19 +3,29 @@ import {Benefit} from "../types";
 
 const rawBackendBaseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
 const rawAiCoreBaseUrl = import.meta.env.VITE_AI_CORE_BASE_URL;
-const rawProcessorBaseUrl = import.meta.env.VITE_PROCESSOR_BASE_URL;
 
 export type Service = "backend" | "ai_core" | "processor";
+export type Bank = "ru" | "external";
 
 export const BACKEND_BASE_URL = rawBackendBaseUrl.replace(/\/+$/, "");
 export const AI_CORE_BASE_URL = rawAiCoreBaseUrl.replace(/\/+$/, "");
-export const PROCESSOR_BASE_URL = rawProcessorBaseUrl.replace(/\/+$/, "");
 
 export const SERVICE_LOCATOR = {
     "backend": BACKEND_BASE_URL,
-    "ai_core": AI_CORE_BASE_URL,
-    "processor": PROCESSOR_BASE_URL,
+    "ai_core": AI_CORE_BASE_URL
 }
+
+export const TARIFF_PRICES = {
+    1: 4900,
+    3: 12500,
+    12: 42000
+}
+
+export const TARIFF_PRICES_NORMALIZED = Object.fromEntries(
+    Object.entries(TARIFF_PRICES).map(([k, v]) => [
+        k, v >= 10000 ? v.toLocaleString('ru-RU') : String(v)
+    ])
+);
 
 export const tools: { [key: string]: Tool } = {
     contactCatcher: {
@@ -24,8 +34,8 @@ export const tools: { [key: string]: Tool } = {
         subtitle: 'контактов',
         description: 'Получайте контакты лидов ваших конкурентов которые звонили им либо посещали их сайты',
         selectorParts: ['Перехват контактов'],
-        url: "https://google.com", // TODO
-        aboutUrl: "https://google.com", // TODO
+        url: "https://google.com", // TODO URL catcher
+        aboutUrl: "https://google.com", // TODO URL about catcher
         color: 'purple'
     },
     finder: {
@@ -35,7 +45,7 @@ export const tools: { [key: string]: Tool } = {
         description: 'Получайте самые релевантные заказы на ваши услуги',
         selectorParts: ['ИИ лид', 'файндер'],
         url: "/finder",
-        aboutUrl: "https://google.com", // TODO
+        aboutUrl: "https://google.com", // TODO URL about finder
         color: 'purple'
     }
 };
@@ -48,7 +58,7 @@ export const actionButtons: ActionButton[] = [
         colorOpacity: 0.2,
         expiredColor: "#F81B11",
         longColor: "#7211F8",
-        url: "/subscription" // TODO
+        url: "/subscription"
     },
     {
         id: 'ref',
@@ -57,7 +67,7 @@ export const actionButtons: ActionButton[] = [
         borderColor: "#BEF811",
         buttonColor: "#202020",
         contentColor: "#F2F2F2",
-        url: "/referral" // TODO
+        url: "/referral"
     }
 ];
 
@@ -163,6 +173,6 @@ export const subscriptionBenefits: Benefit[] = [
     }
 ]
 
-// TODO
+// TODO URL support docs
 export const SUPPORT_URL = "https://google.com"
 export const DOCS_URL = "https://google.com"

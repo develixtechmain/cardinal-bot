@@ -15,7 +15,21 @@ bot_token: str
 jwt_secret_key: str
 
 INVALID_INIT_DATA = "Invalid Telegram init data"
-EXCLUDED_PATHS = {"/docs", "/openapi.json"}
+KEY_PATHS = {"/api/rules/check", "/api/rules/extract"}
+EXCLUDED_PATHS = {"/docs", "/openapi.json", *KEY_PATHS}
+
+api_key: str
+
+
+async def key_auth_middleware(request: Request, call_next: Callable):
+    if not request.url.path in KEY_PATHS:
+        return await call_next(request)
+
+    key_header = request.headers.get("X-API-KEY")
+    if not key_header or not api_key == key_header:
+        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+
+    return await call_next(request)
 
 
 async def jwt_auth_middleware(request: Request, call_next: Callable):
@@ -48,8 +62,10 @@ def parse_user_id(token: str):
 
 
 def init_security():
-    global jwt_secret_key, bot_token
+    global jwt_secret_key, bot_token, api_key
     validate_env("SECURITY_KEY")
     jwt_secret_key = os.environ["SECURITY_KEY"]
     validate_env("BOT_TOKEN")
     bot_token = os.environ["BOT_TOKEN"]
+    validate_env("API_KEY")
+    api_key = os.environ["API_KEY"]

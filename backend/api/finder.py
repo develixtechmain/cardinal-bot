@@ -1,9 +1,9 @@
 import logging
 import uuid
-from typing import List, Any, Optional
+from typing import Optional
 
 from fastapi import Request, APIRouter
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, field_validator, conlist
 
 from bot.recommendations import send_recommendation_to_user
 from db import fetch_tasks_by_user_id, fetch_user_channels_by_user_id, delete_user_channel, delete_task_by_id, patch_task_by_id, save_user_task, fetch_user_tasks_stats
@@ -15,22 +15,21 @@ logger = logging.getLogger(__name__)
 class RecommendationSendRequest(BaseModel):
     id: uuid.UUID
     user_id: str
+    task_id: uuid.UUID
     text: str
     username: Optional[str] = None
 
 
 class CreateTaskRequest(BaseModel):
-    cloud: List[str]
+    title: str = Field(..., min_length=1, max_length=255)
+    cloud: conlist(str, min_length=1)
 
-    # noinspection PyMethodParameters
-    @model_validator(mode='before')
-    def check_cloud_is_not_empty(cls, data: Any) -> Any:
-        if isinstance(data, dict):
-            if not 'cloud' in data:
-                raise ValueError("'cloud' must be included")
-            if not data['cloud']:
-                raise ValueError("Cloud of meaning must contain at least one tag")
-        return data
+    @field_validator("title")
+    @classmethod
+    def title_must_not_be_whitespace(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("title must not be empty or whitespace")
+        return v
 
 
 class PatchTaskRequest(BaseModel):

@@ -125,6 +125,7 @@
 
 .priceBlock {
     padding: 26px 0;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -135,6 +136,25 @@
     font-weight: 700;
     line-height: 27px;
     letter-spacing: -1px;
+}
+
+.priceEconomy {
+    top: 72px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    padding: 4px 7px;
+    gap: 4px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-family: var(--font-primary);
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 11px;
+    letter-spacing: -0.03em;
 }
 
 .featuresBlock {
@@ -221,7 +241,6 @@
     align-items: center;
     justify-content: center;
     gap: 5px;
-    color: #7211F8;
     font-family: var(--font-ui);
     font-size: 15px;
     font-weight: 500;
@@ -234,7 +253,6 @@
     align-items: center;
     justify-content: center;
     gap: 5px;
-    color: white;
     font-family: var(--font-ui);
     font-size: 15px;
     font-weight: 500;

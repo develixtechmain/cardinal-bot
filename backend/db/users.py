@@ -1,11 +1,8 @@
 import uuid
 
-from cachetools import TTLCache
 from fastapi import HTTPException
 
-from db import get_pool
-
-users_cache = TTLCache(maxsize=100, ttl=300)
+from db import get_pool, users_cache
 
 
 async def create_user(tg_user, ref_id=None):
@@ -30,7 +27,7 @@ async def create_user(tg_user, ref_id=None):
                                      ref_id)
         if result:
             return result
-        raise Exception("Failed to create onboarding")
+        raise Exception("Failed to create user")
 
 
 async def fetch_user_by_id(user_id: uuid.UUID | int, from_tg: bool = False):
@@ -67,7 +64,7 @@ async def patch_user_by_id(user_id: uuid.UUID, data):
             update_values = list(user_updates.values())
 
             updates = [f"{field} = ${i + 2}" for i, field in enumerate(update_fields)]
-            update_query = f"UPDATE users SET {', '.join(updates)} WHERE id = $1 RETURNING *"
+            update_query = f"UPDATE users SET {', '.join(updates)}, updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *"
 
             values = [user_id] + update_values
             result = await conn.fetchrow(update_query, *values)

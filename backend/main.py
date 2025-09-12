@@ -9,6 +9,7 @@ from fastapi import FastAPI
 from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.middleware.cors import CORSMiddleware
 
+import ai
 import bot
 import embedding
 import lava
@@ -67,33 +68,38 @@ async def lifespan(_):
         try:
             security.init_security()
         except Exception as e:
-            raise RuntimeError(f"Failed to configure security: {e}")
+            raise RuntimeError(f"Failed to configure security") from e
+
+        try:
+            ai.init_ai()
+        except Exception as e:
+            raise RuntimeError(f"Failed to configure ai core") from e
 
         try:
             embedding.init_embedding()
         except Exception as e:
-            raise RuntimeError(f"Failed to configure embedding: {e}")
+            raise RuntimeError(f"Failed to configure embedding") from e
 
         try:
             lava.init_lava()
         except Exception as e:
-            raise RuntimeError(f"Failed to configure lava: {e}")
+            raise RuntimeError(f"Failed to configure lava") from e
 
         try:
             await bot.init_core_webhook()
         except Exception as e:
-            raise RuntimeError(f"Failed to configure core bot: {e}")
+            raise RuntimeError(f"Failed to configure core bot") from e
 
         try:
             await bot.init_recommendations_webhook()
         except Exception as e:
-            raise RuntimeError(f"Failed to configure recommendations bot: {e}")
+            raise RuntimeError(f"Failed to configure recommendations bot") from e
 
         try:
             await init_postgresql()
             logger.info(f"Connected to PostgreSQL.")
         except Exception as e:
-            raise RuntimeError(f"Failed to connect to PostgreSQL: {e}")
+            raise RuntimeError(f"Failed to connect to PostgreSQL") from e
 
         instrumentator.expose(app, endpoint="/metrics", include_in_schema=False)
         logger.info(f"Metrics enabled {os.environ.get('ENABLE_METRICS', False)}.")
@@ -118,6 +124,7 @@ async def lifespan(_):
         await disconnect()
 
         await embedding.stop_embedding()
+        await ai.stop_ai()
         await lava.stop_lava()
 
         logger.info(f"Backend Core stopped.")
