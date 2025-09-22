@@ -15,5 +15,5 @@ export const useErrorStore = create<ErrorState>((set) => ({
     message: undefined,
     location: undefined,
     setError: (type, message, location) => set({type, message, location}),
-    clearError: () => set({type: null, message: undefined, location: undefined}),
+    clearError: () => set({type: null, message: undefined, location: undefined})
 }));

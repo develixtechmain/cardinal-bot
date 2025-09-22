@@ -1,6 +1,6 @@
 import uuid
 
-from db import get_pool
+from service import get_pool
 
 
 async def fetch_user_refs(user_id: uuid.UUID):

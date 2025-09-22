@@ -1,4 +1,5 @@
-import {create} from 'zustand';
+import {create} from "zustand";
+
 import {Subscription, User} from "../types";
 
 type Store = {
@@ -14,5 +15,5 @@ export const useStore = create<Store>((set) => ({
     setUser: (user) => set({user}),
 
     subscription: undefined,
-    setSubscription: (subscription: Subscription) => set({subscription}),
+    setSubscription: (subscription: Subscription) => set({subscription})
 }));

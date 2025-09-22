@@ -1,5 +1,5 @@
-import {authFetch} from "../utils/api";
 import {FinderTask, FinderTaskStatistics} from "../types/finder";
+import {authFetch} from "../utils/api";
 
 export const fetchUserTasks = async (): Promise<FinderTask[]> => {
     const response = await authFetch("backend", "/finder/tasks/me");
@@ -9,9 +9,9 @@ export const fetchUserTasks = async (): Promise<FinderTask[]> => {
     }
 
     return await response.json();
-}
+};
 
-export const fetchUserTasksStats = async (): Promise<{ [key: string]: FinderTaskStatistics }> => {
+export const fetchUserTasksStats = async (): Promise<{[key: string]: FinderTaskStatistics}> => {
     const response = await authFetch("backend", "/finder/tasks/stats");
 
     if (!response.ok) {
@@ -19,15 +19,12 @@ export const fetchUserTasksStats = async (): Promise<{ [key: string]: FinderTask
     }
 
     return await response.json();
-}
-
+};
 
 export const patchUserTask = async (task: FinderTask) => {
     const response = await authFetch("backend", `/finder/tasks/${task.id}`, {
-        method: 'PATCH',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        method: "PATCH",
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(task)
     });
 
@@ -36,14 +33,12 @@ export const patchUserTask = async (task: FinderTask) => {
     }
 
     return await response.json();
-}
+};
 
 export const deleteUserTask = async (taskId: string) => {
-    const response = await authFetch("backend", `/finder/tasks/${taskId}`, {
-        method: 'DELETE'
-    });
+    const response = await authFetch("backend", `/finder/tasks/${taskId}`, {method: "DELETE"});
 
     if (!response.ok) {
         throw new Error("Failed to delete user task");
     }
-}
+};

@@ -6,7 +6,7 @@ from fastapi import Request, APIRouter
 from pydantic import BaseModel, Field, field_validator, conlist
 
 from bot.recommendations import send_recommendation_to_user
-from db import fetch_tasks_by_user_id, fetch_user_channels_by_user_id, delete_user_channel, delete_task_by_id, patch_task_by_id, save_user_task, fetch_user_tasks_stats
+from service import fetch_tasks_by_user_id, fetch_user_channels_by_user_id, delete_user_channel, delete_task_by_id, patch_task_by_id, save_user_task, fetch_user_tasks_stats
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

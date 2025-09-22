@@ -5,6 +5,7 @@
 }
 
 .title {
+    text-wrap: nowrap;
     gap: 7px;
     display: flex;
     flex-direction: row;
@@ -16,6 +17,12 @@
     font-size: 15px;
     line-height: 24px;
     letter-spacing: -0.03em;
+}
+
+.title > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: calc(100% - 15px);
 }
 
 .statsBlock {

@@ -5,18 +5,19 @@ from contextlib import asynccontextmanager
 
 import dotenv
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
 from prometheus_fastapi_instrumentator import Instrumentator
 from starlette.middleware.cors import CORSMiddleware
 
 import ai
+import alpha
 import bot
 import embedding
 import lava
 from api import *
 from api import security
 from bot import *
-from db import init_postgresql, disconnect, check_transactions
+from service import init_postgresql, disconnect, check_transactions
 
 LOGGING_CONFIG = {
     "version": 1,
@@ -86,6 +87,11 @@ async def lifespan(_):
             raise RuntimeError(f"Failed to configure lava") from e
 
         try:
+            alpha.init_alpha()
+        except Exception as e:
+            raise RuntimeError(f"Failed to configure alpha") from e
+
+        try:
             await bot.init_core_webhook()
         except Exception as e:
             raise RuntimeError(f"Failed to configure core bot") from e
@@ -126,6 +132,7 @@ async def lifespan(_):
         await embedding.stop_embedding()
         await ai.stop_ai()
         await lava.stop_lava()
+        await alpha.stop_alpha()
 
         logger.info(f"Backend Core stopped.")
 
@@ -142,6 +149,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+async def exception_handler(_: Request, e: Exception):
+    logger.warning(f"Error response: {e}")
+    raise HTTPException(status_code=500, detail=str(e))
+
+
+app.add_exception_handler(Exception, exception_handler)
 
 app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
 app.include_router(users_router, prefix="/api/users", tags=["users"])

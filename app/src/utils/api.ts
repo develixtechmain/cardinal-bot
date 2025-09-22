@@ -1,5 +1,5 @@
 import {useAuthStore} from "../store/auth";
-import {Service, SERVICE_LOCATOR} from "./consts";
+import {SERVICE_LOCATOR, Service} from "./consts";
 
 export async function authFetch(service: Service, input: RequestInfo, init?: RequestInit): Promise<Response> {
     const {accessToken, refreshAccessToken, clearTokens} = useAuthStore.getState();
@@ -7,16 +7,10 @@ export async function authFetch(service: Service, input: RequestInfo, init?: Req
     const authHeaders: Record<string, string> = {};
 
     if (accessToken) {
-        authHeaders['Authorization'] = `Bearer ${accessToken}`;
+        authHeaders["Authorization"] = `Bearer ${accessToken}`;
     }
 
-    const fetchInit: RequestInit = {
-        ...init,
-        headers: {
-            ...(init?.headers || {}),
-            ...authHeaders,
-        },
-    };
+    const fetchInit: RequestInit = {...init, headers: {...(init?.headers || {}), ...authHeaders}};
 
     let url: RequestInfo = input;
 
@@ -30,10 +24,7 @@ export async function authFetch(service: Service, input: RequestInfo, init?: Req
         const refreshed = await refreshAccessToken();
 
         if (refreshed !== "") {
-            const retryHeaders = {
-                ...(init?.headers || {}),
-                Authorization: `Bearer ${refreshed}`,
-            };
+            const retryHeaders = {...(init?.headers || {}), Authorization: `Bearer ${refreshed}`};
 
             response = await fetch(url, {...init, headers: retryHeaders});
         } else {

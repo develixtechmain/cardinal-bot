@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import Request, APIRouter
 from pydantic import BaseModel
 
-from db import fetch_user_by_id, patch_user_by_id
+from service import fetch_user_by_id, patch_user_by_id
 
 router = APIRouter()
 

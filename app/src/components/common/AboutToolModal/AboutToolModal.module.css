@@ -1,0 +1,13 @@
+.overlay {
+    padding: 16px 17px 17px 16px;
+    overflow-y: hidden;
+}
+
+.container {
+    padding: 15px 15px 26px 16px;
+    border: 1px solid #FFFFFF12;
+    background: linear-gradient(to bottom, #202020, #0D0D0D);
+    border-radius: 23px;
+    height: auto;
+    overflow-y: auto;
+}

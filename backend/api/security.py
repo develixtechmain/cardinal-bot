@@ -19,7 +19,7 @@ REFRESH_TOKEN_EXPIRE_DAYS = 7
 INVALID_INIT_DATA = "Invalid Telegram init data"
 SUBSCRIPTION_LAVA_KEY_PATHS = {"/api/subscription/webhook/lava"}
 KEY_PATHS = {"/api/finder/recommendations/send"}
-OPEN_PATHS = {"/r/*"}
+OPEN_PATHS = {"/r/*", "/api/subscriptions/purchase/complete"}
 WEBHOOK_PATHS = {"/api/webhook", "/api/finder/recommendations/webhook"}
 EXCLUDED_PATHS = {"/api/auth", "/api/auth/refresh", "/docs", "/openapi.json", "/metrics", *KEY_PATHS, *SUBSCRIPTION_LAVA_KEY_PATHS, *WEBHOOK_PATHS}
 

@@ -7,23 +7,31 @@
     "@fastify/formbody": "^8.0.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "wouter": "^3.7.1",
     "serve": "^14.2.5",
+    "wouter": "^3.7.1",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@types/telegram-web-app": "^7.10.1",
     "@vitejs/plugin-react": "^4.6.0",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.6.2",
+    "typed-css-modules": "^0.9.1",
     "typescript": "^5.8.3",
     "vite": "^5.4.19",
     "vite-plugin-svgr": "^4.3.0"
   },
   "scripts": {
-    "dev": "npm run client",
+    "dev": "npm-run-all --parallel client css:watch:pages css:watch:components",
     "client": "vite",
-    "build": "vite build",
+    "css:gen": "tcm src --include '**/*.module.css'",
+    "css:watch:pages": "tcm src/pages --include '**/*.module.css' --watch",
+    "css:watch:components": "tcm src/components --include '**/*.module.css' --watch",
+    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\"",
+    "build": "npm run css:gen && vite build",
     "start": "npx serve -s dist -l 5173"
   },
   "browserslist": {

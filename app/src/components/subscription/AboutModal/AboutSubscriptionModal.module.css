@@ -1,0 +1,142 @@
+.purple {
+    color: #7211F8;
+}
+
+.dot {
+    flex-shrink: 0;
+    height: 8px;
+    width: 8px;
+    border-radius: 50%;
+    background-color: #7211F8;
+}
+
+.overlay {
+    padding: 18px;
+    overflow-y: hidden;
+}
+
+.container {
+    position: relative;
+    padding: 15px 17px 23px 17px;
+    border: 1px solid #FFFFFF12;
+    background: linear-gradient(to bottom, #202020, #0D0D0D);
+    border-radius: 23px;
+    height: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.background {
+    position: absolute;
+    width: auto;
+    top: 58px;
+    right: -130px;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.background > img {
+    width: 100%;
+    min-height: 537px;
+    object-fit: cover;
+    display: block;
+}
+
+.header {
+    margin-left: 9px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: start;
+    font-family: var(--font-ui);
+    font-size: 25px;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: -1px;
+}
+
+.headerDescription {
+    position: relative;
+    margin: 23px 44px 0 14px;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 18px;
+    letter-spacing: -1px;
+}
+
+.title {
+    margin-left: 9px;
+    margin-bottom: 19px;
+    font-family: var(--font-ui);
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: -1px;
+    position: relative;
+    z-index: 1;
+}
+
+.tariffDetail {
+    margin: 0 9px 4px 9px;
+    padding: 18px 14px;
+    gap: 23px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    background-color: #202020;
+    border-radius: 11px;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 12px;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 1;
+}
+
+.tariffDetailExample {
+    color: #FFFFFF80;
+    font-size: 10px;
+}
+
+.legalBlock {
+    display: flex;
+    flex-direction: column;
+    margin-left: 9px;
+    margin-right: 9px;
+    padding: 11px 53px 11px 21px;
+    gap: 15px;
+    background-color: #7211F81A;
+    border-left: 2px solid #7211F8;
+    border-radius: 7px;
+    position: relative;
+    z-index: 1;
+}
+
+.legalHeader {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 20px;
+    letter-spacing: -0.04em;
+}
+
+.legalDescription {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 15px;
+    letter-spacing: -0.04em;
+}
+
+.purchaseButton {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 24px;
+    letter-spacing: -0.03em;
+}

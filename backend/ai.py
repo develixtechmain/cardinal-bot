@@ -44,7 +44,7 @@ def init_ai():
 
     validate_env("AI_CORE_KEY")
     validate_env("AI_CORE_HOST")
-    ai_core_host = os.environ.get("AI_CORE_HOST")
+    ai_core_host = os.environ["AI_CORE_HOST"]
     if ai_core_host.endswith("/"):
         ai_core_host = ai_core_host[:-1]
 

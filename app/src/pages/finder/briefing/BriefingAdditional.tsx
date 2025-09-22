@@ -1,24 +1,26 @@
-import React, {useEffect, useState} from "react";
 import styles from "./BriefingAdditional.module.css";
+import {useEffect, useState} from "react";
+
 import {useLocation} from "wouter";
+
 import {useBriefingStore} from "../../../store/finder";
 
 export default function BriefingAdditional() {
     const [, navigate] = useLocation();
-    const briefingId = useBriefingStore(s => s.id);
+    const briefingId = useBriefingStore((s) => s.id);
 
     if (!briefingId) {
         navigate("/finder/briefing/alert");
     }
 
-    const additionalQuestions = useBriefingStore(s => s.additionalQuestions);
-    const setAdditionalQuestions = useBriefingStore(s => s.setAdditionalQuestions);
+    const additionalQuestions = useBriefingStore((s) => s.additionalQuestions);
+    const setAdditionalQuestions = useBriefingStore((s) => s.setAdditionalQuestions);
 
     const [answerText, setAnswerText] = useState("");
     const [answerError, setAnswerError] = useState("");
 
     let questions = additionalQuestions ?? [];
-    let questionIndex = questions.findIndex(q => q.answer.trim() === "")
+    let questionIndex = questions.findIndex((q) => q.answer.trim() === "");
     let question = questions[questionIndex];
 
     useEffect(() => {
@@ -29,10 +31,10 @@ export default function BriefingAdditional() {
 
     useEffect(() => {
         questions = additionalQuestions ?? [];
-        questionIndex = questions.findIndex(q => q.answer.trim() === "")
+        questionIndex = questions.findIndex((q) => q.answer.trim() === "");
         question = questions[questionIndex];
-        setAnswerText(question?.answer || "")
-        setAnswerError("")
+        setAnswerText(question?.answer || "");
+        setAnswerError("");
     }, [additionalQuestions]);
 
     const handleAnswerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,31 +42,31 @@ export default function BriefingAdditional() {
         if (answer.trim() === "") {
             setAnswerError("Введите ответ на вопрос");
         } else {
-            setAnswerError("")
+            setAnswerError("");
         }
         setAnswerText(answer);
-    }
+    };
 
     const handleQuestionChange = () => {
         if (answerError.length !== 0 || answerText === "") {
-            setAnswerError("Введите ответ на вопрос")
-            return
+            setAnswerError("Введите ответ на вопрос");
+            return;
         }
 
-        let currentQuestions = [...questions]
-        currentQuestions[questionIndex] = {question: question.question, answer: answerText}
-        setAdditionalQuestions(currentQuestions)
-    }
+        let currentQuestions = [...questions];
+        currentQuestions[questionIndex] = {question: question.question, answer: answerText};
+        setAdditionalQuestions(currentQuestions);
+    };
 
     return (
         <div className={styles.container}>
             <div className={styles.headerContainer}>
                 <div className={styles.headerBlock}>
-                    <img height="12px" width="12px" src="/assets/finder/briefing/additional-mark.svg" alt=" "/>
+                    <img height="12px" width="12px" src="/assets/finder/briefing/additional-mark.svg" alt=" " />
                     <span>Дополнительный вопрос от ИИ</span>
                 </div>
                 <span className={styles.headerText}>ИИ задал этот вопрос, чтобы точнее подобрать для тебя заказы</span>
-                <div style={{flex: 1}}/>
+                <div style={{flex: 1}} />
             </div>
             <div className={styles.question}>{question?.question || ""}</div>
 
@@ -78,9 +80,7 @@ export default function BriefingAdditional() {
                 className={`${styles.answerInput} ${answerError ? styles.inputError : ""}`}
             />
 
-            <div className={styles.tip}>
-                Пишите, как говорите — это помогает нам точнее понимать и подбирать ответы.
-            </div>
+            <div className={styles.tip}>Пишите, как говорите — это помогает нам точнее понимать и подбирать ответы.</div>
 
             <div style={{flex: 1}}></div>
 

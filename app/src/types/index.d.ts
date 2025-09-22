@@ -10,10 +10,10 @@ export type User = {
     created_at: string;
 
     tg: WebAppUser;
-}
+};
 
 export type Subscription = {
-    id: string,
+    id: string;
 
     trial_starts_at: Date | undefined;
     trial_ends_at: Date | undefined;
@@ -27,23 +27,13 @@ export type Subscription = {
 };
 
 export type Benefit = {
-    title: {
-        icon: {
-            height: number;
-            width: number;
-        }
-        text: PartialText;
-    };
+    title: {icon: {height: number; width: number}; text: PartialText};
     text: PartialText[];
-    button: {
-        height: number;
-        width: number;
-        label: string;
-    };
-}
+    button: {height: number; width: number; label: string};
+};
 
 export interface PartialText {
-    id: string,
+    id: string;
     textParts: TextPart[];
     extraPadding?: number;
 }

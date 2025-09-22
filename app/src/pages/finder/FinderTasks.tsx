@@ -1,24 +1,27 @@
-import React, {useEffect, useRef, useState} from "react";
-import styles from "./FinderTasks.module.css"
+import styles from "./FinderTasks.module.css";
+import {useEffect, useRef, useState} from "react";
+
 import {useLocation} from "wouter";
-import WideButton from "../../components/common/Buttons/WideButton";
-import MoveArrowIcon from "../../assets/icons/move-arrow.svg";
-import TaskBlock from "../../components/finder/TasksList/TaskBlock";
-import {Loading} from "../../components/common/Loading/Loading";
+
 import {fetchUserTasks, fetchUserTasksStats} from "../../api/finder";
-import {useFinder} from "../../store/finder";
+import WideButton from "../../components/common/Buttons/WideButton";
 import Header from "../../components/common/Header/Header";
+import {Loading} from "../../components/common/Loading/Loading";
+import TaskBlock from "../../components/finder/TasksList/TaskBlock";
+import {useFinder} from "../../store/finder";
+
+import MoveArrowIcon from "../../assets/icons/move-arrow.svg";
 
 export default function Finder() {
     const [, navigate] = useLocation();
 
     const isTasksLoading = useRef(false);
-    const tasks = useFinder(s => s.tasks)
-    const setTasks = useFinder(s => s.setTasks);
+    const tasks = useFinder((s) => s.tasks);
+    const setTasks = useFinder((s) => s.setTasks);
 
     const isTasksStatisticsLoading = useRef(false);
-    const tasksStats = useFinder(s => s.tasksStats)
-    const setTasksStats = useFinder(s => s.setTasksStats);
+    const tasksStats = useFinder((s) => s.tasksStats);
+    const setTasksStats = useFinder((s) => s.setTasksStats);
 
     const [loading, setLoading] = useState(true);
 
@@ -36,10 +39,10 @@ export default function Finder() {
             } catch (e: unknown) {
                 const error = e as Error;
                 console.error(`Failed to fetch user tasks stats: ${error.message}. Retrying...`);
-                await new Promise(resolve => setTimeout(resolve, 3000));
+                await new Promise((resolve) => setTimeout(resolve, 3000));
                 await tryFetchTasks();
             }
-        }
+        };
 
         const run = async () => {
             if (isTasksLoading.current) return;
@@ -53,8 +56,8 @@ export default function Finder() {
             } finally {
                 isTasksLoading.current = false;
             }
-        }
-        void run()
+        };
+        void run();
     }, [tasks]);
 
     useEffect(() => {
@@ -65,10 +68,10 @@ export default function Finder() {
             } catch (e: unknown) {
                 const error = e as Error;
                 console.error(`Failed to fetch user tasks stats: ${error.message}. Retrying...`);
-                await new Promise(resolve => setTimeout(resolve, 3000));
+                await new Promise((resolve) => setTimeout(resolve, 3000));
                 await tryFetchTasksStats();
             }
-        }
+        };
 
         const run = async () => {
             if (isTasksStatisticsLoading.current) return;
@@ -82,44 +85,46 @@ export default function Finder() {
             } finally {
                 isTasksStatisticsLoading.current = false;
             }
-        }
-        void run()
+        };
+        void run();
     }, [tasksStats]);
 
     if (loading) {
-        return <Loading/>;
+        return <Loading />;
     }
 
     return (
         <div className={styles.container}>
-            <Header backTo="/finder"/>
+            <Header backTo="/finder" />
             <div className={styles.block}>
-
                 <div className={styles.header}>
                     <div className={styles.headerText}>
-                        <span>Список заданий  </span>
+                        <span>Список заданий </span>
                         <span className={styles.purple}>{">"}</span>
                     </div>
-                    <img height="22px" width="24px" src="/assets/finder/exit-marked.svg" alt=" "/>
+                    <img height="22px" width="24px" src="/assets/finder/exit-marked.svg" alt=" " />
                 </div>
                 <div className={styles.tasksList}>
                     <div style={{display: "flex", flexDirection: "column", gap: 10}}>
                         {tasks.map((task, index) => {
-                            let stats = tasksStats![task.id]
+                            let stats = tasksStats![task.id];
                             if (!stats) stats = {avg: 0, total: 0, today: 0};
-                            return (
-                                <TaskBlock key={index} task={task} stats={stats}/>
-                            );
+                            return <TaskBlock key={index} task={task} stats={stats} />;
                         })}
                     </div>
                 </div>
 
-                <WideButton color="#2E2E2E" text={
-                    <div className={styles.moveButton}>
-                        <MoveArrowIcon color="white"/>
-                        <span style={{color: "white"}}>Добавить новое задание</span>
-                    </div>
-                } buttonStyle={{borderRadius: 19, height: 50}} onClick={() => navigate("/finder/briefing/alert")}/>
+                <WideButton
+                    color="#2E2E2E"
+                    text={
+                        <div className={styles.moveButton}>
+                            <MoveArrowIcon color="white" />
+                            <span style={{color: "white"}}>Добавить новое задание</span>
+                        </div>
+                    }
+                    buttonStyle={{borderRadius: 19, height: 50}}
+                    onClick={tasks.length >= 5 ? undefined : () => navigate("/finder/briefing/alert")}
+                />
             </div>
         </div>
     );

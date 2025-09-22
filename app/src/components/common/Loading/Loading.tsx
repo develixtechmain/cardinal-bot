@@ -1,5 +1,5 @@
-import styles from "./Loading.module.css"
-import React, {useEffect, useRef, useState} from "react";
+import styles from "./Loading.module.css";
+import {useEffect, useRef, useState} from "react";
 
 export const Loading = () => {
     const [percentage, setPercentage] = useState(0);
@@ -25,13 +25,11 @@ export const Loading = () => {
 
     return (
         <div className={styles.logo}>
-            <img height="111px" width="187px" src="/assets/logo.svg" alt="Loading" color={"white"}/>
+            <img height="111px" width="187px" src="/assets/logo.svg" alt="Loading" color={"white"} />
             <div className={styles.percentageContainer}>
-                <div style={{flex: 1}}/>
-                <div className={styles.percentage}>
-                    {percentage}%
-                </div>
+                <div style={{flex: 1}} />
+                <div className={styles.percentage}>{percentage}%</div>
             </div>
         </div>
-    )
-}
+    );
+};

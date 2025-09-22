@@ -4,8 +4,8 @@ from typing import List
 
 from fastapi import HTTPException
 
-from db import get_pool, onboarding_cache
 from embedding import save_tags
+from service import get_pool, onboarding_cache
 
 
 async def fetch_user_tasks_stats(user_id: uuid.UUID):

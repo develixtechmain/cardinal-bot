@@ -2,7 +2,7 @@ import asyncio
 import logging
 import uuid
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 from typing import Optional
 
@@ -11,27 +11,16 @@ from asyncpg import Record
 from fastapi import HTTPException
 from pydantic import BaseModel
 
+import alpha
 import lava
-from db import get_pool, users_cache
+from consts import TransactionPayment, get_price_by_months, TransactionStatus, get_months_by_price
+from service import get_pool, users_cache
 
 logger = logging.getLogger(__name__)
 
 
 class IgnoreWebhookException(Exception):
     pass
-
-
-class TransactionStatus(str, Enum):
-    PENDING = "pending"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    TIMEOUT = "timeout"
-
-
-class TransactionPayment(str, Enum):
-    LAVA = "lava"
-    ALPHA = "alpha"
-    BALANCE = 'balance'
 
 
 class WebhookStatus(str, Enum):
@@ -82,36 +71,98 @@ async def fetch_subscription_by_user_id(user_id: uuid.UUID):
 
 async def start_subscription_trial(user_id, subscription_id):
     async with get_pool().acquire() as conn:
-        subscription = await conn.fetchrow("SELECT * FROM user_subscriptions WHERE user_id = $1 AND id = $2", user_id, subscription_id)
+        subscription = await conn.fetchrow("SELECT * FROM user_subscriptions WHERE user_id = $1", user_id)
         if not subscription:
             raise HTTPException(status_code=400, detail=f"Invalid subscription id {subscription_id} for user {user_id}")
 
-        if subscription['trial_starts_at'] or subscription['trial_ends_at']:
-            raise HTTPException(status_code=400, detail=f"Trial already used for subscription {subscription_id}")
+        if subscription['trial_starts_at'] or subscription['trial_ends_at'] or subscription['subscription_ends_at']:
+            raise HTTPException(status_code=400, detail=f"Trial is not available for subscription {subscription_id}")
 
         return await conn.fetchrow("UPDATE user_subscriptions SET trial_starts_at = CURRENT_TIMESTAMP, trial_ends_at = CURRENT_TIMESTAMP + INTERVAL '3 days' WHERE id = $1 RETURNING *", subscription_id)
 
 
 async def init_purchase_for_user(user_id, purchase_request):
+    months = purchase_request.months
+    payment = purchase_request.payment_system
+    price = get_price_by_months(months)
+
     async with get_pool().acquire() as conn:
         subscription = await conn.fetchrow("SELECT * FROM user_subscriptions WHERE user_id = $1", user_id)
         if not subscription:
             raise HTTPException(status_code=404, detail="Failed to find subscription for init purchase")
 
-        months = purchase_request.months
-        payment = purchase_request.payment_system
         if payment == TransactionPayment.LAVA:
-            purchase = await lava.init_purchase(purchase_request.email, months)
+            purchase = await lava.init_purchase(purchase_request.email, price)
+            trx = await conn.fetchrow("INSERT INTO transactions (external_id, user_id, subscription_id, amount, payment, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *", purchase['id'], user_id,
+                                      subscription['id'], price, TransactionPayment.LAVA, TransactionStatus.PENDING)
         elif payment == TransactionPayment.ALPHA:
-            purchase = None
+            trx = await conn.fetchrow("INSERT INTO transactions (external_id, user_id, subscription_id, amount, payment, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *", uuid.UUID(int=0), user_id,
+                                      subscription['id'], price, TransactionPayment.ALPHA, TransactionStatus.TEMPLATE)
+            purchase = await alpha.init_purchase(trx['id'], months, purchase_request.email, price)
+            trx = await conn.fetchrow("UPDATE transactions SET external_id = $2, status = 'pending', updated_at = CURRENT_TIMESTAMP WHERE id = $1 AND status = 'template' RETURNING *", trx['id'], purchase['id'])
+            if not trx:
+                raise Exception("Failed to set alpha transaction to pending status")
         else:
             raise HTTPException(status_code=400, detail="Unexpected payment_system for init purchase")
 
-        result = await conn.fetchrow("INSERT INTO transactions (external_id, user_id, subscription_id, amount, payment) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-                                     purchase['id'], user_id, subscription['id'], purchase['price'], TransactionPayment.BALANCE)
-        if result:
+        if trx:
+            purchase['id'] = trx['id']
             return purchase
         raise Exception("Failed to create subscription")
+
+
+async def complete_purchase_for_user(external_id):
+    async with get_pool().acquire() as conn:
+        trx = await conn.fetchrow("SELECT * FROM transactions WHERE external_id = $1", external_id)
+        if not trx or trx['payment'] != TransactionPayment.ALPHA:
+            raise HTTPException(status_code=404, detail=f"Order {external_id} not found")
+
+        trx_id = trx['id']
+        status = trx['status']
+        if status == TransactionStatus.COMPLETED:
+            result = await conn.fetchrow("SELECT * FROM user_subscriptions WHERE id = $1", trx['subscription_id'])
+            if result:
+                return result
+            else:
+                raise Exception(f"Failed to fetch subscription {trx['subscription_id']}")
+        elif status != TransactionStatus.PENDING:
+            raise HTTPException(status_code=409, detail=f"Transaction {trx_id} is not pending")
+
+        new_status = await alpha.fetch_order_status(external_id)
+        if status == new_status:
+            raise HTTPException(status_code=409, detail=f"Transaction {trx_id} is not updated")
+        else:
+            async with conn.transaction():
+                trx = await conn.fetchrow("UPDATE transactions SET status = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $1 AND status = $2 RETURNING *", trx_id, status, new_status)
+                if trx:
+                    logger.debug(f"Transaction {trx_id} updated to status: {new_status}")
+                else:
+                    raise Exception(f"Transaction {trx_id} already has a new status")
+
+                if new_status == TransactionStatus.COMPLETED:
+                    result = await _prolong_subscription(conn, trx['subscription_id'], trx['amount'])
+                else:
+                    result = await conn.fetchrow("SELECT * FROM user_subscriptions WHERE id = $1", trx['subscription_id'])
+
+                if result:
+                    return result
+
+        raise Exception("Failed to complete purchase")
+
+
+async def check_purchase_for_user(user_id, trx_id):
+    async with get_pool().acquire() as conn:
+        trx = await conn.fetchrow("SELECT * FROM transactions WHERE id = $1", trx_id)
+        if not trx or str(trx['user_id']) != user_id:
+            raise HTTPException(status_code=404, detail=f"Transaction {trx_id} not found")
+
+        if trx['status'] == TransactionStatus.COMPLETED:
+            subscription = await conn.fetchrow("SELECT * FROM user_subscriptions WHERE user_id = $1", user_id)
+            if subscription:
+                return subscription
+            raise HTTPException(status_code=404, detail=f"Failed to find subscription for user {user_id}")
+        else:
+            return trx
 
 
 async def purchase_from_user_balance(user_id):
@@ -132,8 +183,7 @@ async def purchase_from_user_balance(user_id):
                              THEN subscription_ends_at + INTERVAL '1 month'
                         ELSE CURRENT_TIMESTAMP + INTERVAL '1 month'
                     END WHERE id = $1 RETURNING *
-                    """,
-                    subscription['id']
+                    """, subscription['id']
                 )
         if result:
             users_cache.pop(user_id, None)
@@ -165,6 +215,7 @@ async def disable_recurrency_for_user(user_id):
 
 
 async def check_transactions():
+    await asyncio.sleep(600)
     while True:
         try:
             await _check_transactions()
@@ -174,26 +225,42 @@ async def check_transactions():
 
 
 async def _check_transactions():
+    processed = []
     while True:
         trx_id = None
         async with get_pool().acquire() as conn:
             try:
                 async with conn.transaction():
-                    trx = await conn.fetchrow(
-                        "SELECT id, external_id, status FROM transactions WHERE status = 'pending' AND created_at < CURRENT_TIMESTAMP - INTERVAL '10 minutes' FOR UPDATE SKIP LOCKED LIMIT 1")
+                    trx = await conn.fetchrow("""
+                        SELECT id, external_id, status, payment FROM transactions 
+                        WHERE status = 'pending' AND created_at < CURRENT_TIMESTAMP - INTERVAL '1 hour' AND NOT (id = ANY($1::uuid[])) 
+                        FOR UPDATE SKIP LOCKED LIMIT 1
+                        """, processed)
                     if not trx:
                         return
 
                 trx_id = trx['id']
+                processed.append(trx_id)
 
-                new_status = await lava.fetch_transaction_status(trx['external_id'])
+                if trx['payment'] == TransactionPayment.LAVA:
+                    new_status = await lava.fetch_transaction_status(trx['external_id'])
+                elif trx['payment'] == TransactionPayment.ALPHA:
+                    new_status = await alpha.fetch_order_status(trx['external_id'])
+
+                if new_status == TransactionStatus.PENDING:
+                    now = datetime.now(trx['updated_at'].tzinfo)
+                    if trx['updated_at'] < (now - timedelta(hours=1)):
+                        new_status = TransactionStatus.TIMEOUT
+
                 if trx['status'] != new_status:
+                    if new_status == TransactionStatus.COMPLETED:
+                        logger.error(f"Check is moving transaction {trx_id} to {new_status} status")
                     async with conn.transaction():
                         result = await conn.fetchrow("UPDATE transactions SET status = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $1 AND status = $2 RETURNING id", trx_id, trx['status'], new_status)
                         if result:
                             logger.debug(f"Transaction {trx_id} updated to status: {new_status}")
                         else:
-                            logger.warning(f"Transaction {trx_id} already had a new status {new_status}")
+                            logger.warning(f"Transaction {trx_id} already has a new status")
             except Exception as e:
                 if trx_id:
                     logger.error(f"Failed to process pending transaction {trx_id}: {e}")
@@ -224,12 +291,12 @@ async def handle_webhook(webhook: SubscriptionWebhook) -> None:
                         raise IgnoreWebhookException(f"No transactions found for cancelled subscription {webhook.id} ")
                 elif webhook.status == WebhookStatus.COMPLETED:
                     trx = await _update_transaction_status(conn, webhook)
-                    await _update_user_balance(conn, trx['user_id'], webhook.amount)
+                    await _prolong_subscription_or_balance(conn, trx['subscription_id'], webhook.amount, trx['user_id'])
                 elif webhook.status == WebhookStatus.COMPLETED_NEW:
                     trx = await _insert_recurring_transaction(conn, webhook, TransactionStatus.COMPLETED)
-                    await _update_user_balance(conn, trx['user_id'], webhook.amount)
+                    await _prolong_subscription_or_balance(conn, trx['subscription_id'], webhook.amount, trx['user_id'])
                 else:
-                    raise Exception(f"Unexpected webhook status {webhook.status}")
+                    raise ValueError(f"Unexpected webhook status {webhook.status}")
     except IgnoreWebhookException as e:
         logger.warning(f"Suppressed {webhook.payment} webhook: {e}")
     except Exception as e:
@@ -276,6 +343,30 @@ async def _update_transaction_status(conn: asyncpg.Connection, webhook: Subscrip
     except asyncpg.exceptions.UniqueViolationError:
         logger.info(f"Ignoring duplicate {webhook.payment} webhook {webhook.id} {webhook.timestamp}")
         raise IgnoreWebhookException("Webhook already processed")
+
+
+async def _prolong_subscription_or_balance(conn: asyncpg.Connection, subscription_id: uuid.UUID, price: int, user_id):
+    try:
+        await _prolong_subscription(conn, subscription_id, price)
+    except ValueError as e:
+        logger.warning(f"Failed to prolong subscription, updating balance: {e}")
+        await _update_user_balance(conn, user_id, price)
+
+
+async def _prolong_subscription(conn: asyncpg.Connection, subscription_id: uuid.UUID, price: int):
+    months = get_months_by_price(price)
+    result = await conn.fetchrow(
+        f"""
+                            UPDATE user_subscriptions SET subscription_ends_at = CASE
+                                WHEN subscription_ends_at > CURRENT_TIMESTAMP
+                                     THEN subscription_ends_at + INTERVAL '{months} month'
+                                ELSE CURRENT_TIMESTAMP + INTERVAL '{months} month'
+                            END WHERE id = $1 RETURNING *
+                            """, subscription_id
+    )
+    if result:
+        return result
+    raise Exception(f"Failed to prolong subscription {subscription_id} for {months} months")
 
 
 async def _update_user_balance(conn: asyncpg.Connection, user_id: uuid.UUID, amount: int) -> None:

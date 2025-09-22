@@ -4,10 +4,12 @@ from datetime import datetime
 from typing import Optional
 
 from fastapi import Request, APIRouter
+from fastapi.params import Query
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field, EmailStr, model_validator
 
-from db import fetch_subscription_by_user_id, start_subscription_trial, init_purchase_for_user, handle_webhook, SubscriptionWebhook, WebhookStatus, TransactionPayment, disable_recurrency_for_user, \
-    purchase_from_user_balance
+from service import fetch_subscription_by_user_id, start_subscription_trial, init_purchase_for_user, handle_webhook, SubscriptionWebhook, WebhookStatus, TransactionPayment, disable_recurrency_for_user, \
+    purchase_from_user_balance, complete_purchase_for_user, check_purchase_for_user
 
 router = APIRouter()
 
@@ -21,8 +23,8 @@ class PurchaseRequest(BaseModel):
 
     @model_validator(mode='after')
     def check_email_required_for_lava(self):
-        if self.payment_system == TransactionPayment.LAVA and not self.email:
-            raise ValueError("Email must be included for lava payment_system")
+        if self.payment_system in (TransactionPayment.LAVA, TransactionPayment.ALPHA) and not self.email:
+            raise ValueError("Email must be included for lava|alpha payment_system")
         return self
 
 
@@ -50,8 +52,42 @@ async def init_purchase(request: Request, purchase_request: PurchaseRequest):
     return await init_purchase_for_user(request.state.user_id, purchase_request)
 
 
+@router.get("/purchase/complete")
+async def complete_purchase(external_id: uuid.UUID = Query(..., alias="orderId")):
+    try:
+        await complete_purchase_for_user(external_id)
+        return HTMLResponse("""
+                <html>
+                    <body>
+                        <p>Успешный платёж</p>
+                        <script>
+                            setTimeout(() => window.close(), 1500);
+                        </script>
+                    </body>
+                </html>
+            """)
+
+    except Exception as e:
+        logger.warning(f"Failed to complete purchase: {e}")
+        return HTMLResponse("""
+                <html>
+                    <body>
+                        <p>Ошибка во время обработки платежа</p>
+                        <script>
+                            setTimeout(() => window.close(), 1500);
+                        </script>
+                    </body>
+                </html>
+            """)
+
+
+@router.get("/purchase/{trx_id}")
+async def check_purchase(request: Request, trx_id: uuid.UUID):
+    return await check_purchase_for_user(request.state.user_id, trx_id)
+
+
 @router.post("/purchase/balance")
-async def init_purchase(request: Request):
+async def init_balance_purchase(request: Request):
     return await purchase_from_user_balance(request.state.user_id)
 
 

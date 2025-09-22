@@ -3,6 +3,8 @@
 }
 
 .container {
+    width: 100%;
+    max-width: calc(100dvw - 32px);
     margin: 0 16px 0 16px;
     display: flex;
     flex-direction: column;
@@ -10,6 +12,7 @@
     padding: 10px 10px 18px 20px;
     background-color: #141414;
     border-radius: 19px;
+    box-sizing: border-box;
 }
 
 .header {
@@ -47,6 +50,7 @@
 }
 
 .taskBlock > span {
+    flex: 1;
     overflow: hidden;
     display: inline-block;
     white-space: nowrap;

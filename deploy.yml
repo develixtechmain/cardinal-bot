@@ -1,16 +1,13 @@
 services:
 
   app:
-    image: registry.develixtech.com/cardinal/app:0.0.1-SNAPSHOT
+    image: 162.120.16.215:54710/cardinal/app:0.0.3-SNAPSHOT
     restart: unless-stopped
     ports:
       - "3000:3000"
-    environment:
-      VITE_BACKEND_BASE_URL: https://127.0.0.1:8443/api
-      VITE_AI_CORE_BASE_URL: https://127.0.0.1:8001/api
 
   telegram-parser:
-    image: registry.develixtech.com/cardinal/telegram-parser:0.0.1-SNAPSHOT
+    image: 162.120.16.215:54710/cardinal/telegram-parser:0.0.3-SNAPSHOT
     restart: unless-stopped
     environment:
       RABBITMQ_HOST: ${RABBITMQ_HOST}
@@ -32,10 +29,18 @@ services:
           memory: 256M
 
   message-processor:
-    image: registry.develixtech.com/cardinal/message-processor:0.0.1-SNAPSHOT
+    image: 162.120.16.215:54710/cardinal/message-processor:0.0.3-SNAPSHOT
     restart: unless-stopped
     environment:
-      EMBEDDINGS_PROCESSOR_HOST: http://embeddings-processor:8080
+      ENABLE_METRICS: ${ENABLE_METRICS}
+      LANGSMITH_TRACING: true
+      LANGSMITH_PROJECT: cardinal
+      LANGSMITH_ENDPOINT: https://api.smith.langchain.com
+      BACKEND_CORE_HOST: http://cardinal-backend-core-1:8000
+      EMBEDDINGS_PROCESSOR_HOST: http://cardinal-embeddings-processor-1:8080
+      LANGSMITH_API_KEY: ${LANGSMITH_API_KEY}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
       DB_HOST: ${POSTGRESQL_HOST}
       DB_NAME: ${POSTGRESQL_DB}
       DB_USER: ${POSTGRESQL_USER}
@@ -45,12 +50,11 @@ services:
       RABBITMQ_USER: ${RABBITMQ_USER}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
-      CLICKHOUSE_HOST: ${CLICKHOUSE_HOST}
-      CLICKHOUSE_PASS: ${CLICKHOUSE_PASS}
-      CLICKHOUSE_DATABASE: ${CLICKHOUSE_DATABASE}
-      CLICKHOUSE_USER: ${CLICKHOUSE_USER}
+      BACKEND_CORE_KEY: ${BACKEND_CORE_KEY}
       EMBEDDINGS_PROCESSOR_KEY: ${EMBEDDINGS_PROCESSOR_KEY}
     depends_on:
+      - redis
+      - rabbitmq
       - postgresql
     deploy:
       resources:
@@ -60,13 +64,13 @@ services:
           memory: 256M
 
   embeddings-processor:
-    image: registry.develixtech.com/cardinal/embeddings-processor:0.0.1-SNAPSHOT
+    image: 162.120.16.215:54710/cardinal/embeddings-processor:0.0.3-SNAPSHOT
     restart: unless-stopped
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       Qdrant__CollectionName: leads
-      Qdrant__Host: http://qdrant:6333
-      EmbeddingsApi__Host: http://embeddings:80
+      Qdrant__Host: http://cardinal-qdrant-1:6333
+      EmbeddingsApi__Host: http://cardinal-embeddings-1:80
       Qdrant__ApiKey: ${QDRANT_KEY}
       ApiKey: ${EMBEDDINGS_PROCESSOR_KEY}
       ConnectionStrings__Postgres: ${EMBEDDINGS_PROCESSOR_DB_CONNECTION_STRING}
@@ -80,16 +84,15 @@ services:
           memory: 512M
         reservations:
           memory: 256M
-    ports:
-      - "18080:8080"
 
   backend-core:
-    image: registry.develixtech.com/cardinal/backend-core:0.0.1-SNAPSHOT
+    image: 162.120.16.215:54710/cardinal/backend-core:0.0.3-SNAPSHOT
     restart: unless-stopped
     environment:
-      WEBHOOK_URL: https://6d0e6a411eaa.ngrok-free.app
-      AI_CORE_HOST: http://ai-core:8000
-      EMBEDDINGS_PROCESSOR_HOST: http://embeddings-processor:8080
+      ENABLE_METRICS: ${ENABLE_METRICS}
+      WEBHOOK_URL: https://cardinal-x.online
+      AI_CORE_HOST: http://cardinal-ai-core-1:8000
+      EMBEDDINGS_PROCESSOR_HOST: http://cardinal-embeddings-processor-1:8080
       BOT_TOKEN: ${BOT_TOKEN}
       RECOMMENDATION_BOT_TOKEN: ${RECOMMENDATION_BOT_TOKEN}
       WEBHOOK_KEY: ${TG_WEBHOOK_KEY}
@@ -97,6 +100,7 @@ services:
       DB_NAME: ${POSTGRESQL_DB}
       DB_USER: ${POSTGRESQL_USER}
       DB_PASS: ${POSTGRESQL_PASS}
+      ALPHA_KEY: ${ALPHA_KEY}
       LAVA_KEY: ${LAVA_KEY}
       LAVA_X_KEY: ${LAVA_WEBHOOK_KEY}
       SECURITY_KEY: ${SECURITY_KEY}
@@ -113,9 +117,11 @@ services:
           memory: 512M
         reservations:
           memory: 256M
+    ports:
+      - "8000:8000"
 
   ai-core:
-    image: registry.develixtech.com/cardinal/ai-core:0.0.1-SNAPSHOT
+    image: 162.120.16.215:54710/cardinal/ai-core:0.0.3-SNAPSHOT
     restart: unless-stopped
     environment:
       AI_MODE: prod
@@ -131,10 +137,6 @@ services:
       DB_PASS: ${POSTGRESQL_PASS}
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       LANGSMITH_API_KEY: ${LANGSMITH_API_KEY}
-    depends_on:
-      - rabbitmq
-      - clickhouse
-      - embeddings-processor
     deploy:
       resources:
         limits:
@@ -142,7 +144,7 @@ services:
         reservations:
           memory: 256M
     ports:
-      - "8080:8000"
+      - "8088:8000"
 
   qdrant:
     image: qdrant/qdrant:v1.15.4
@@ -157,8 +159,6 @@ services:
           memory: 512M
         reservations:
           memory: 256M
-    ports:
-      - "10633:6333"
 
   rabbitmq:
     image: rabbitmq:3
@@ -176,6 +176,21 @@ services:
         reservations:
           memory: 256M
 
+  redis:
+    image: redis:8.4.0-alpine3.22
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command: >
+      sh -c "redis-server
+      --save 60 3000
+      --loglevel warning
+      --requirepass $REDIS_PASSWORD"
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
+
   embeddings:
     image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.8
     restart: unless-stopped
@@ -188,25 +203,9 @@ services:
     deploy:
       resources:
         limits:
-          memory: 3GB
+          memory: 6GB
         reservations:
-          memory: 1GB
-
-  clickhouse:
-    image: clickhouse/clickhouse-server:25.6-alpine
-    restart: unless-stopped
-    environment:
-      CLICKHOUSE_DB: cardinal
-      CLICKHOUSE_USER: cardinal
-      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASS}
-    volumes:
-      - clickhouse-data:/var/lib/clickhouse
-    deploy:
-      resources:
-        limits:
-          memory: 512M
-        reservations:
-          memory: 256M
+          memory: 4GB
 
   postgresql:
     image: postgres:17.6-alpine3.22
@@ -243,10 +242,10 @@ services:
           memory: 256M
 
 volumes:
+  redis-data:
   qdrant-data:
   rabbitmq-data:
   embeddings-data:
-  clickhouse-data:
   postgresql-data:
   embeddings-postgresql-data:
   pyrogram-sessions:

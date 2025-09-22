@@ -6,7 +6,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.types import Update, Message
 from fastapi import APIRouter, Request, HTTPException
 
-from db import fetch_user_by_id, create_user
+from service import fetch_user_by_id, create_user
 from utils import validate_env
 
 logger = logging.getLogger(__name__)
@@ -59,8 +59,8 @@ async def init_webhook():
     dp = Dispatcher()
     dp.include_router(tg_router)
 
-    webhook_url = os.environ.get("WEBHOOK_URL")
+    webhook_url = os.environ["WEBHOOK_URL"]
     if webhook_url.endswith("/"):
         webhook_url = webhook_url[:-1]
-    await bot.set_webhook(f"{webhook_url}/api/webhook", secret_token=os.environ.get("WEBHOOK_KEY"))
+    await bot.set_webhook(f"{webhook_url}/api/webhook", secret_token=os.environ["WEBHOOK_KEY"])
     logger.info(f"Telegram webhook set to {webhook_url}/api/webhook")

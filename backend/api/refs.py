@@ -1,7 +1,7 @@
 from fastapi import Request, APIRouter
 from fastapi.responses import RedirectResponse
 
-from db.refs import fetch_user_refs
+from service.refs import fetch_user_refs
 
 router = APIRouter()
 

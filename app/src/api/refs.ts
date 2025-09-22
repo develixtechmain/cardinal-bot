@@ -9,4 +9,4 @@ export const fetchRefs = async (): Promise<RefUser[]> => {
     }
 
     return await response.json();
-}
+};

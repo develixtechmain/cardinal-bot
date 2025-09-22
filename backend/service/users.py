@@ -2,7 +2,7 @@ import uuid
 
 from fastapi import HTTPException
 
-from db import get_pool, users_cache
+from service import get_pool, users_cache
 
 
 async def create_user(tg_user, ref_id=None):

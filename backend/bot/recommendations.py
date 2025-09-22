@@ -12,9 +12,9 @@ from fastapi import APIRouter, Request
 import ai
 import embedding
 from ai import check_rules
-from db import fetch_user_channels_by_user_id, fetch_user_by_id, save_user_channel
-from db.recommendations import delete_user_recommendation, fetch_recommendation_by_id
-from db.task_rules import fetch_user_rules, save_user_rules
+from service import fetch_user_channels_by_user_id, fetch_user_by_id, save_user_channel
+from service.recommendations import delete_user_recommendation, fetch_recommendation_by_id
+from service.task_rules import fetch_user_rules, save_user_rules
 from utils import validate_env
 
 logger = logging.getLogger(__name__)
@@ -172,8 +172,8 @@ async def init_webhook():
     dp = Dispatcher()
     dp.include_router(tg_router)
 
-    webhook_url = os.environ.get("WEBHOOK_URL")
+    webhook_url = os.environ["WEBHOOK_URL"]
     if webhook_url.endswith("/"):
         webhook_url = webhook_url[:-1]
-    await bot.set_webhook(f"{webhook_url}/api/finder/recommendations/webhook", secret_token=os.environ.get("WEBHOOK_KEY"))
+    await bot.set_webhook(f"{webhook_url}/api/finder/recommendations/webhook", secret_token=os.environ["WEBHOOK_KEY"])
     logger.info(f"Telegram recommendations webhook set to {webhook_url}/api/finder/recommendations/webhook")

@@ -1,0 +1,74 @@
+.purple {
+    color: #7211F8;
+}
+
+.header {
+    padding: 7px 6px 7px 14px;
+    gap: 21px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    color: black;
+    background-color: #7211F8;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 18px;
+    letter-spacing: -0.05em;
+}
+
+.header > span {
+    flex: 1;
+}
+
+.header > img {
+    flex-shrink: 0;
+}
+
+.title {
+    margin: 16px 0;
+    padding-left: 14px;
+    font-family: var(--font-ui);
+    font-size: 25px;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: -1px;
+}
+
+.description {
+    padding-left: 15px;
+    padding-right: 18px;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 18px;
+    letter-spacing: -1px;
+}
+
+.infoBlock {
+    gap: 15px;
+    display: flex;
+    flex-direction: column;
+    margin-left: 9px;
+    margin-right: 9px;
+    padding: 11px 53px 16px 21px;
+    background-color: #7211F81A;
+    border-left: 2px solid #7211F8;
+    border-radius: 7px;
+}
+
+.infoTitle {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 15px;
+    letter-spacing: -0.04em;
+}
+
+.infoDescription {
+    gap: 15px;
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 15px;
+    letter-spacing: -0.04em;
+}

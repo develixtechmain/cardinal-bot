@@ -1,6 +1,7 @@
 import {Answer, Question, QuestionAnswer} from "../types/finder";
 import specialists from "./specialists";
 
+// prettier-ignore
 export const baseQuestions: Question[] = [
     {
         question: "Чем вы занимаетесь?",
@@ -46,7 +47,7 @@ export const baseQuestions: Question[] = [
     {
         question: "Какие основные услуги ты предлагаешь?",
         description: "Укажи те услуги, за которые чаще всего берёшься.",
-        examples: (selected) => selected.flatMap(key => {
+        examples: (selected) => selected.flatMap((key) => {
             const specialist = specialists.get(key);
             return specialist?.services ?? [];
         }),
@@ -87,7 +88,7 @@ export const baseQuestions: Question[] = [
         question: "С какими программами, платформами или сервисами ты обычно работаешь?",
         description: "Укажи инструменты, которые ты используешь в работе.",
         selection: true,
-        examples: (selected) => selected.flatMap(key => {
+        examples: (selected) => selected.flatMap((key) => {
             const specialist = specialists.get(key);
             return specialist?.applications ?? [];
         }),
@@ -119,7 +120,7 @@ export const baseQuestions: Question[] = [
     {
         question: "Какие доп. услуги, связанные с твоим направлением, ты готов выполнить?",
         description: "Напиши, что можешь делать дополнительно: аудит, сопровождение, правки, консультации и т.д.",
-        examples: (selected) => selected.flatMap(key => {
+        examples: (selected) => selected.flatMap((key) => {
             const specialist = specialists.get(key);
             return specialist?.additionalServices ?? [];
         }),
@@ -151,7 +152,7 @@ export const baseQuestions: Question[] = [
     {
         question: "Какие типы проектов или задач тебе наиболее интересны и ближе всего по профилю?",
         description: "",
-        examples: (selected) => selected.flatMap(key => {
+        examples: (selected) => selected.flatMap((key) => {
             const specialist = specialists.get(key);
             return specialist?.projectTypes ?? [];
         }),
@@ -183,7 +184,7 @@ export const baseQuestions: Question[] = [
     {
         question: "Какие термины клиенты часто путают или пишут неправильно, но они всё равно относятся к вашей работе?",
         description: "Укажи слова и фразы, которые клиенты часто используют неправильно, но по смыслу они подходят к твоей работе. Так мы не пропустим подходящие заявки.",
-        examples: (selected) => selected.flatMap(key => {
+        examples: (selected) => selected.flatMap((key) => {
             const specialist = specialists.get(key);
             return specialist?.wrongTerms ?? [];
         }),
@@ -208,7 +209,7 @@ export const baseQuestions: Question[] = [
             example: "Посадочная = лендинг, фирм. стиль = брендинг, UX-копирайтинг = микрокопи, мобильный дизайн = экранчики."
         }
     }
-]
+];
 
 export function totalAnswers(answers: Answer[], additionalQuestions: QuestionAnswer[]) {
     const totalAnswers = [];
@@ -216,6 +217,6 @@ export function totalAnswers(answers: Answer[], additionalQuestions: QuestionAns
         totalAnswers.push({question: baseQuestions[i].question, answer: answers[i].text});
     }
 
-    additionalQuestions.forEach(answer => totalAnswers.push(answer));
+    additionalQuestions.forEach((answer) => totalAnswers.push(answer));
     return totalAnswers;
 }

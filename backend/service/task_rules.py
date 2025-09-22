@@ -1,7 +1,7 @@
 import itertools
 import uuid
 
-from db import get_pool, rules_cache
+from service import get_pool, rules_cache
 
 
 async def save_user_rules(user_id: uuid.UUID, task_id: uuid.UUID, rules: list[str]):

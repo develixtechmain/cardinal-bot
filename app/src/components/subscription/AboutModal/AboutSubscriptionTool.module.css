@@ -1,0 +1,124 @@
+.purple {
+    color: #7211F8;
+}
+
+.green {
+    color: #BEF811;
+}
+
+.container {
+    padding-bottom: 12px;
+    background-color: #202020;
+    border-radius: 25px 25px 11px 11px;
+    position: relative;
+    z-index: 1;
+}
+
+.header {
+    padding: 3px;
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    /*background: linear-gradient(to right, #7211F8, #2E1B49); TODO VERIFY*/
+    background: linear-gradient(to right, #7211F8, #3A1A5A);
+    border-radius: 25px;
+    position: relative;
+}
+
+.header::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    bottom: 0;
+    left: 0;
+    right: -1px;
+    border-radius: 25px;
+    background: linear-gradient(to right, #FFFFFF00, #FFFFFF50);
+    z-index: 2;
+    padding: 1px;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+.headerTitle {
+    flex: 1;
+    text-align: center;
+    font-family: var(--font-ui);
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 85%;
+    letter-spacing: -0.04em;
+}
+
+.description {
+    padding: 13px 25px 25px 25px;
+    color: #FFFFFFB2;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 15px;
+    letter-spacing: -1px;
+}
+
+.aboutSection {
+    gap: 13px;
+    display: flex;
+    flex-direction: column;
+}
+
+.markBlock {
+    margin: 0 24px 0 10px;
+    padding-left: 11px;
+    gap: 11px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    color: #FFFFFF80;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 16px;
+    letter-spacing: -0.03em;
+}
+
+.title {
+    padding-left: 25px;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 15px;
+    letter-spacing: -1px;
+}
+
+.aboutButton {
+    gap: 6px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 32px;
+    letter-spacing: -0.02em;
+}
+
+.summarySection {
+    margin-top: 19px;
+    gap: 14px;
+    display: flex;
+    flex-direction: column;
+}
+
+.subscriptionButton {
+    gap: 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 24px;
+    letter-spacing: -0.03em;
+}

@@ -1,34 +1,34 @@
-import React from "react";
 import styles from "./ToolSelector.module.css";
-import {Tool} from "../../../types/home";
-import {useStore} from "../../../store/store";
+import {FC, Fragment} from "react";
 
-import FinderSelector from "../../../assets/finder/selector.svg";
+import {useStore} from "../../../store/store";
+import {Tool} from "../../../types/home";
+
 import CatcherSelector from "../../../assets/contact-catcher/selector.svg";
+import FinderSelector from "../../../assets/finder/selector.svg";
 
 interface ToolSelectorProps {
-    tool: Tool
-    onClick: () => void
+    tool: Tool;
+    onClick: () => void;
 }
 
-const ToolSelectionModal: React.FC<ToolSelectorProps> = ({tool, onClick}) => {
-    const subscription = useStore(s => s.subscription);
-    const selectorStyle = {
-        "--content-color": subscription!.isSubscriptionExpired() ? "#3C3C3C" : "#7211F8"
-    } as React.CSSProperties;
+const ToolSelectionModal: FC<ToolSelectorProps> = ({tool, onClick}) => {
+    const subscription = useStore((s) => s.subscription);
+    const selectorStyle = {"--content-color": subscription!.isSubscriptionExpired() ? "#3C3C3C" : "#7211F8"} as React.CSSProperties;
 
     return (
         <div className={styles.container} onClick={onClick}>
-            {tool.id == 'finder' ?
-                <FinderSelector height="37px" width="58px" style={selectorStyle}/> :
-                <CatcherSelector height="37px" width="58px" style={selectorStyle}/>
-            }
+            {tool.id == "finder" ? (
+                <FinderSelector height="37px" width="58px" style={selectorStyle} />
+            ) : (
+                <CatcherSelector height="37px" width="58px" style={selectorStyle} />
+            )}
             <span className={styles.title}>
                 {tool.selectorParts.map((part, index) => (
-                    <React.Fragment key={index}>
+                    <Fragment key={index}>
                         <span>{part}</span>
                         {index < tool.selectorParts.length - 1 && <span className={styles.purple}> // </span>}
-                    </React.Fragment>
+                    </Fragment>
                 ))}
             </span>
         </div>

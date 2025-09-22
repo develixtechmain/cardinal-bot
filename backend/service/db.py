@@ -86,7 +86,7 @@ async def _0_0_1(conn):
                     END IF;
                     
                     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'transaction_status') THEN
-                        CREATE TYPE transaction_status AS ENUM ('pending', 'completed', 'failed', 'timeout');
+                        CREATE TYPE transaction_status AS ENUM ('template', 'pending', 'completed', 'failed', 'timeout');
                     END IF;
                     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'transaction_payment') THEN
                         CREATE TYPE transaction_payment AS ENUM ('lava', 'alpha', 'balance');
@@ -177,16 +177,15 @@ async def _0_0_1(conn):
                 CREATE INDEX IF NOT EXISTS idx_user_id ON users(id);
                 CREATE INDEX IF NOT EXISTS idx_user_tg_id ON users(user_id);
                 CREATE INDEX IF NOT EXISTS idx_user_referrer_id ON users(referrer_id);
-                CREATE INDEX IF NOT EXISTS idx_channels_user_id ON user_channels(user_id);
-                CREATE INDEX IF NOT EXISTS idx_onboardings_user_id ON user_onboardings(user_id);
-                CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON user_subscriptions(user_id);
+                CREATE INDEX IF NOT EXISTS idx_user_channels_user_id ON user_channels(user_id);
+                CREATE INDEX IF NOT EXISTS idx_user_onboardings_user_id ON user_onboardings(user_id);
+                CREATE INDEX IF NOT EXISTS idx_user_subscriptions_user_id ON user_subscriptions(user_id);
                 CREATE INDEX IF NOT EXISTS idx_user_tasks_user_id ON user_tasks(user_id);
                 CREATE INDEX IF NOT EXISTS idx_task_statistics_task_id ON task_statistics(task_id);
                 CREATE INDEX IF NOT EXISTS idx_task_statistics_date ON task_statistics(date);
                 CREATE INDEX IF NOT EXISTS idx_task_statistics_task_id_date ON task_statistics(task_id, date);
                 CREATE INDEX IF NOT EXISTS idx_transactions_external_id ON transactions(external_id);
                 CREATE INDEX IF NOT EXISTS idx_transactions_pending_latest ON transactions (external_id, amount, created_at DESC) WHERE status = 'pending';
-                CREATE INDEX IF NOT EXISTS idx_transactions_pending_created_at ON transactions (created_at) WHERE status = 'pending';
                 CREATE INDEX IF NOT EXISTS idx_transactions_pending_created_at ON transactions (created_at) WHERE status = 'pending';
                 CREATE UNIQUE INDEX IF NOT EXISTS ux_transactions_external_id_payment_timestamp ON transactions(external_id, payment_timestamp) WHERE payment_timestamp IS NOT NULL;
                 CREATE INDEX IF NOT EXISTS idx_user_task_rules_user_id_task_id ON user_task_rules(user_id, task_id);

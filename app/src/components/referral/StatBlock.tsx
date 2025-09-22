@@ -1,5 +1,5 @@
-import React from 'react';
-import styles from './StatBlock.module.css';
+import styles from "./StatBlock.module.css";
+import {CSSProperties, FC} from "react";
 
 interface StatBlockProps {
     title: string;
@@ -10,12 +10,9 @@ interface StatBlockProps {
     borderColor: string;
 }
 
-export const StatBlock: React.FC<StatBlockProps> = ({title, count, titleColor, countColor, backgroundColor, borderColor}) => {
+export const StatBlock: FC<StatBlockProps> = ({title, count, titleColor, countColor, backgroundColor, borderColor}) => {
     return (
-        <div className={styles.container} style={{
-            "--background-color": backgroundColor,
-            "--border-color": borderColor,
-        } as React.CSSProperties}>
+        <div className={styles.container} style={{"--background-color": backgroundColor, "--border-color": borderColor} as CSSProperties}>
             <div className={styles.title} style={{color: titleColor}}>
                 {title}
             </div>

@@ -1,25 +1,29 @@
-import React, {useEffect, useRef, useState} from "react";
 import styles from "./Finder.module.css";
+import {useEffect, useRef, useState} from "react";
+
 import {useLocation} from "wouter";
-import {useFinder} from "../../store/finder";
+
 import {fetchUserTasks, fetchUserTasksStats} from "../../api/finder";
-import {Loading} from "../../components/common/Loading/Loading";
-import {useStore} from "../../store/store";
-import Header from "../../components/common/Header/Header";
-import {actionButtons, tools} from "../../utils/consts";
-import ToolSelector from "../../components/common/ToolSelection/ToolSelector";
-import ToolSelectionModal from "../../components/common/ToolSelection/ToolSelectionModal";
-import CircleStatus from "../../components/finder/CircleStatus/CircleStatus";
-import WideButton from "../../components/common/Buttons/WideButton";
-import MoveArrowIcon from "../../assets/icons/move-arrow.svg";
-import ClubSection from "../../components/ClubSection/ClubSection";
-import Delimiter from "../../components/common/Delimiter/Delimiter";
-import BottomSection from "../../components/common/BottomSection/BottomSection";
-import ToolsSection from "../../components/ToolsSection/ToolsSection";
-import {TasksStatisticsSection} from "../../components/finder/TasksStatisticsSection/TasksStatisticsSection";
 import ActionButtons from "../../components/ActionButtons/ActionButtons";
-import {TasksLearningSection} from "../../components/finder/TasksLearningSection/TasksLearningSection";
+import ClubSection from "../../components/ClubSection/ClubSection";
+import ToolsSection from "../../components/ToolsSection/ToolsSection";
+import BottomSection from "../../components/common/BottomSection/BottomSection";
+import WideButton from "../../components/common/Buttons/WideButton";
+import Delimiter from "../../components/common/Delimiter/Delimiter";
+import Header from "../../components/common/Header/Header";
+import {Loading} from "../../components/common/Loading/Loading";
+import ToolSelectionModal from "../../components/common/ToolSelection/ToolSelectionModal";
+import ToolSelector from "../../components/common/ToolSelection/ToolSelector";
+import AboutContactCatcherModal from "../../components/contact-catcher/AboutModal/AboutContactCatcherModal";
+import CircleStatus from "../../components/finder/CircleStatus/CircleStatus";
 import TasksLearningModal from "../../components/finder/TasksLearningModal/TasksLearningModal";
+import {TasksLearningSection} from "../../components/finder/TasksLearningSection/TasksLearningSection";
+import {TasksStatisticsSection} from "../../components/finder/TasksStatisticsSection/TasksStatisticsSection";
+import {useFinder} from "../../store/finder";
+import {useStore} from "../../store/store";
+import {actionButtons, tools} from "../../utils/consts";
+
+import MoveArrowIcon from "../../assets/icons/move-arrow.svg";
 
 export default function Finder() {
     const [location, navigate] = useLocation();
@@ -27,16 +31,17 @@ export default function Finder() {
     const isTasksLoading = useRef(false);
     const isTasksStatisticsLoading = useRef(false);
 
-    const user = useStore(s => s.user);
-    const subscription = useStore(s => s.subscription);
+    const user = useStore((s) => s.user);
+    const subscription = useStore((s) => s.subscription);
 
-    const tasks = useFinder(s => s.tasks)
-    const setTasks = useFinder(s => s.setTasks);
+    const tasks = useFinder((s) => s.tasks);
+    const setTasks = useFinder((s) => s.setTasks);
 
-    const tasksStats = useFinder(s => s.tasksStats)
-    const setTasksStats = useFinder(s => s.setTasksStats);
+    const tasksStats = useFinder((s) => s.tasksStats);
+    const setTasksStats = useFinder((s) => s.setTasksStats);
 
     const [isToolSelectionOpen, setIsToolSelectionOpen] = useState(false);
+    const [isAboutCatcherOpen, setIsAboutContactCatcherOpen] = useState(false);
     const [isTasksLearningModalOpen, setIsTasksLearningModalOpen] = useState(false);
 
     useEffect(() => {
@@ -57,8 +62,8 @@ export default function Finder() {
             } else {
                 setTasks(tasks);
             }
-        }
-        void run()
+        };
+        void run();
     }, [tasks]);
 
     useEffect(() => {
@@ -68,19 +73,20 @@ export default function Finder() {
 
             const tasksStats = await fetchUserTasksStats();
             setTasksStats(tasksStats);
-        }
-        void run()
+        };
+        void run();
     }, [tasksStats]);
 
     if (loading) {
-        return <Loading/>;
+        return <Loading />;
     }
 
     return (
         <div className={styles.container}>
-            <Header/>
-            <ToolSelector tool={tools.finder} onClick={() => setIsToolSelectionOpen(true)}/>
-            <ToolSelectionModal toolId={tools.finder.id} isOpen={isToolSelectionOpen} onClose={() => setIsToolSelectionOpen(false)}/>
+            <AboutContactCatcherModal isOpen={isAboutCatcherOpen} onClose={() => setIsAboutContactCatcherOpen(false)} />
+            <Header />
+            <ToolSelector tool={tools.finder} onClick={() => setIsToolSelectionOpen(true)} />
+            <ToolSelectionModal toolId={tools.finder.id} isOpen={isToolSelectionOpen} onClose={() => setIsToolSelectionOpen(false)} />
 
             <div className={styles.leadsTitle}>
                 <span>Получено </span>
@@ -88,29 +94,45 @@ export default function Finder() {
                 <span> сегодня</span>
             </div>
 
-            <CircleStatus activeCount={subscription?.isActive() ? Object.values(tasksStats!).reduce((sum, stats) => sum + stats.today, 0) : 0}/>
+            <CircleStatus activeCount={subscription?.isActive() ? Object.values(tasksStats!).reduce((sum, stats) => sum + stats.today, 0) : 0} />
 
             {/*TODO URL to channel*/}
-            <WideButton color="#7211F833" text={
-                <div className={styles.moveButton}>
-                    <MoveArrowIcon color="#7211F8"/>
-                    <span style={{color: "#7211F8"}}>Перейти в канал</span>
-                </div>
-            } buttonStyle={{borderRadius: 12, height: 54, maxWidth: "70%", margin: "0 auto"}} onClick={() => navigate("https://google.com")}/>
+            <WideButton
+                color="#7211F833"
+                text={
+                    <div className={styles.moveButton}>
+                        <MoveArrowIcon color="#7211F8" />
+                        <span style={{color: "#7211F8"}}>Перейти в канал</span>
+                    </div>
+                }
+                buttonStyle={{borderRadius: 12, height: 54, maxWidth: "70%", margin: "0 auto"}}
+                onClick={() => navigate("https://google.com")}
+            />
 
-            <TasksStatisticsSection user={user!} tasks={tasks} tasksStats={tasksStats!} subscription={subscription!}/>
+            <TasksStatisticsSection user={user!} tasks={tasks} tasksStats={tasksStats!} subscription={subscription!} />
 
-            <ActionButtons buttons={actionButtons} isSubscriptionExpired={subscription!.isSubscriptionExpired()}
-                           isMoreThan3days={subscription!.daysLeft() > 3}/>
-            <TasksLearningSection openLearning={() => setIsTasksLearningModalOpen(true)} isActive={subscription!.isActive()}/>
-            <TasksLearningModal tasks={tasks} isOpen={isTasksLearningModalOpen} onClose={() => setIsTasksLearningModalOpen(false)}/>
+            <ActionButtons
+                buttons={actionButtons}
+                isSubscriptionExpired={subscription!.isSubscriptionExpired()}
+                isMoreThan3days={subscription!.daysLeft() > 3}
+            />
+            <TasksLearningSection
+                openLearning={() => setIsTasksLearningModalOpen(true)}
+                isActive={subscription!.isActive()}
+                newTaskAvailable={tasks.length < 5}
+            />
+            <TasksLearningModal tasks={tasks} isOpen={isTasksLearningModalOpen} onClose={() => setIsTasksLearningModalOpen(false)} />
 
-            <Delimiter/>
-            <ToolsSection tools={Object.values(tools).filter(it => it.id !== 'finder')} showTitle={false}/>
+            <Delimiter />
+            <ToolsSection
+                tools={Object.values(tools).filter((it) => it.id !== "finder")}
+                showTitle={false}
+                showModal={{"contact-catcher": () => setIsAboutContactCatcherOpen(true)}}
+            />
 
-            <ClubSection/>
-            <Delimiter/>
-            <BottomSection/>
+            <ClubSection />
+            <Delimiter />
+            <BottomSection />
         </div>
     );
 }

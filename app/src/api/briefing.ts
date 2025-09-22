@@ -1,13 +1,11 @@
-import {authFetch} from "../utils/api";
 import {QuestionAnswer} from "../types/finder";
 import {Briefing} from "../types/finder/briefing";
+import {authFetch} from "../utils/api";
 
 export const fetchBriefing = async (userId: string): Promise<Briefing> => {
     const response = await authFetch("ai_core", "/onboarding/start", {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify({user_id: userId})
     });
 
@@ -19,16 +17,12 @@ export const fetchBriefing = async (userId: string): Promise<Briefing> => {
     return res;
 };
 
-
 export const answerQuestions = async (briefingId: string, answer: QuestionAnswer[]): Promise<string[]> => {
     const response = await authFetch("ai_core", `/onboarding/${briefingId}/answer`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(answer),
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(answer)
     });
-
 
     const res = await response.json();
     if (!response.ok) {
@@ -38,12 +32,10 @@ export const answerQuestions = async (briefingId: string, answer: QuestionAnswer
     return res;
 };
 
-export const completeBriefing = async (briefingId: string, totalAnswers: QuestionAnswer[]): Promise<{ title: string, tags: string[] }> => {
+export const completeBriefing = async (briefingId: string, totalAnswers: QuestionAnswer[]): Promise<{title: string; tags: string[]}> => {
     const response = await authFetch("ai_core", `/onboarding/${briefingId}/complete`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(totalAnswers)
     });
 
@@ -53,14 +45,12 @@ export const completeBriefing = async (briefingId: string, totalAnswers: Questio
     }
 
     return res;
-}
+};
 
-export const createTask = async (cloudTask: { title: string, tags: string[] }) => {
+export const createTask = async (cloudTask: {title: string; tags: string[]}) => {
     const response = await authFetch("backend", `/finder/tasks`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify({cloudTask})
     });
 
@@ -70,4 +60,4 @@ export const createTask = async (cloudTask: { title: string, tags: string[] }) =
     }
 
     return res;
-}
+};

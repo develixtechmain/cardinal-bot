@@ -1,8 +1,9 @@
 import {useEffect} from "react";
+
 import {useLocation} from "wouter";
 
 export default function ScrollToTop() {
-    const [location,] = useLocation();
+    const [location] = useLocation();
 
     useEffect(() => {
         requestAnimationFrame(() => {
@@ -24,7 +25,7 @@ export default function ScrollToTop() {
                 return;
             }
             const telegramHeight = tg.viewportStableHeight || tg?.viewportHeight || window.innerHeight;
-            document.documentElement.style.setProperty('--tg-vh', `${telegramHeight}px`);
+            document.documentElement.style.setProperty("--tg-vh", `${telegramHeight}px`);
         }, 1000);
 
         return () => clearInterval(intervalId);

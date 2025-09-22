@@ -1,11 +1,13 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App';
-import './global-styles.css'
-import './errorHandlers'
+import {StrictMode} from "react";
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
-    <React.StrictMode>
-        <App/>
-    </React.StrictMode>,
+import "./global-styles.css";
+import {createRoot} from "react-dom/client";
+
+import App from "./App";
+import "./errorHandlers";
+
+createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+        <App />
+    </StrictMode>
 );

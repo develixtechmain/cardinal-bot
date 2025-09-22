@@ -1,7 +1,9 @@
-import React, {useEffect, useState} from "react";
+import {useEffect, useState} from "react";
+
+import {useLocation} from "wouter";
+
 import {useErrorStore} from "../../../store/error";
 import ExceptionModal from "./ExceptionModal";
-import {useLocation} from "wouter";
 import SubscriptionModal from "./SubscriptionModal";
 
 export default function GlobalModals() {
@@ -19,11 +21,11 @@ export default function GlobalModals() {
     if (currentLocation !== location) return null;
 
     if (type === "exception") {
-        return <ExceptionModal isOpen={true} onClose={clearError}/>;
+        return <ExceptionModal isOpen={true} onClose={clearError} />;
     }
 
     if (type === "subscription") {
-        return <SubscriptionModal isOpen={true} onClose={clearError}/>;
+        return <SubscriptionModal isOpen={true} onClose={clearError} />;
     }
 
     return null;

@@ -1,5 +1,5 @@
-import React, {ReactElement} from 'react';
-import styles from './VerifyBlock.module.css';
+import styles from "./VerifyBlock.module.css";
+import {FC, ReactElement} from "react";
 
 interface VerifyBlockProps {
     icon: ReactElement;
@@ -7,7 +7,7 @@ interface VerifyBlockProps {
     value: string;
 }
 
-export const VerifyBlock: React.FC<VerifyBlockProps> = ({icon, title, value}) => {
+export const VerifyBlock: FC<VerifyBlockProps> = ({icon, title, value}) => {
     return (
         <div className={styles.container}>
             <div className={styles.header}>

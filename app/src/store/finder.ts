@@ -1,14 +1,15 @@
 import {create} from "zustand/index";
+
 import {Answer, FinderTask, FinderTaskStatistics, QuestionAnswer} from "../types/finder";
 
 type FinderStore = {
     tasks: FinderTask[];
     setTasks: (tasks: FinderTask[]) => void;
-    tasksStats: { [key: string]: FinderTaskStatistics } | undefined;
-    setTasksStats: (tasks: { [key: string]: FinderTaskStatistics }) => void;
+    tasksStats: {[key: string]: FinderTaskStatistics} | undefined;
+    setTasksStats: (tasks: {[key: string]: FinderTaskStatistics}) => void;
     updateTask: (task: FinderTask) => void;
     removeTask: (taskId: string) => void;
-}
+};
 
 type BriefingStore = {
     id: string | undefined;
@@ -18,13 +19,13 @@ type BriefingStore = {
     additionalQuestions: QuestionAnswer[] | undefined;
     setAdditionalQuestions: (additionalQuestions: QuestionAnswer[]) => void;
     reset: () => void;
-}
+};
 
 export const useFinder = create<FinderStore>((set) => ({
     tasks: [],
     setTasks: (tasks: FinderTask[]) => set({tasks}),
     tasksStats: undefined,
-    setTasksStats: (tasksStats: { [key: string]: FinderTaskStatistics }) => set({tasksStats}),
+    setTasksStats: (tasksStats: {[key: string]: FinderTaskStatistics}) => set({tasksStats}),
     updateTask: (task: FinderTask) => {
         set((state) => {
             let updatedTasks = [...state.tasks];
@@ -42,13 +43,10 @@ export const useFinder = create<FinderStore>((set) => ({
             let updatedTasks = state.tasks.filter((t) => t.id !== taskId);
             let updatedTasksStats = {...state.tasksStats};
             delete updatedTasksStats[taskId];
-            return {
-                tasks: updatedTasks,
-                tasksStats: updatedTasksStats
-            };
+            return {tasks: updatedTasks, tasksStats: updatedTasksStats};
         });
     }
-}))
+}));
 
 export const useBriefingStore = create<BriefingStore>((set) => ({
     id: undefined,
@@ -57,9 +55,5 @@ export const useBriefingStore = create<BriefingStore>((set) => ({
     setAnswers: (answers) => set({answers}),
     additionalQuestions: undefined,
     setAdditionalQuestions: (additionalQuestions) => set({additionalQuestions}),
-    reset: () => set({
-        id: undefined,
-        answers: undefined,
-        additionalQuestions: undefined,
-    }),
-}))
+    reset: () => set({id: undefined, answers: undefined, additionalQuestions: undefined})
+}));

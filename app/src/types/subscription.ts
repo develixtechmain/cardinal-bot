@@ -34,7 +34,7 @@ export class SubscriptionImpl implements Subscription {
     }
 
     isSubscriptionExpired(): boolean {
-        return !this.isActive()
+        return !this.isActive();
     }
 
     isActive(): boolean {
