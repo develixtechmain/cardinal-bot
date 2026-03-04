@@ -21,12 +21,12 @@ async def _get_token() -> str:
     return data["response"]["token"]
 
 
-async def add_target(tg_user_id: int):
+async def add_target(username: str):
     try:
         token = await _get_token()
         res = await client.post("/wf/add_target", json={
             "task": os.environ["SELARTI_TASK"],
-            "target": str(tg_user_id)
+            "target": f"@{username}"
         }, headers={
             "Authorization": f"Bearer {token}"
         })
@@ -34,7 +34,7 @@ async def add_target(tg_user_id: int):
         res.raise_for_status()
         return res.json()
     except Exception as e:
-        logger.warning(f"Failed to add target in Selarti for user {tg_user_id}: {e}")
+        logger.warning(f"Failed to add target in Selarti for @{username}: {e}")
 
 
 def init_selarti():

@@ -35,7 +35,8 @@ async def start(message: Message):
                 except Exception as ex:
                     logger.error(f"Failed to find referrer {ref_tg_id}: {ex}")
             db_user = await create_user(message.from_user.model_dump(), ref_id)
-            await selarti.add_target(message.from_user.id)
+            if message.from_user.username:
+                await selarti.add_target(message.from_user.username)
         else:
             raise
     if db_user:
