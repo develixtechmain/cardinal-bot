@@ -6,6 +6,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.types import Update, Message
 from fastapi import APIRouter, Request, HTTPException
 
+import selarti
 from service import fetch_user_by_id, create_user
 from utils import validate_env
 
@@ -34,6 +35,7 @@ async def start(message: Message):
                 except Exception as ex:
                     logger.error(f"Failed to find referrer {ref_tg_id}: {ex}")
             db_user = await create_user(message.from_user.model_dump(), ref_id)
+            await selarti.add_target(message.from_user.id)
         else:
             raise
     if db_user:

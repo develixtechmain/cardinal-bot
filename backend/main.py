@@ -14,6 +14,7 @@ import alpha
 import bot
 import embedding
 import lava
+import selarti
 from api import *
 from api import security
 from bot import *
@@ -92,6 +93,11 @@ async def lifespan(_):
             raise RuntimeError(f"Failed to configure alpha") from e
 
         try:
+            selarti.init_selarti()
+        except Exception as e:
+            raise RuntimeError(f"Failed to configure selarti") from e
+
+        try:
             await bot.init_core_webhook()
         except Exception as e:
             raise RuntimeError(f"Failed to configure core bot") from e
@@ -133,6 +139,7 @@ async def lifespan(_):
         await ai.stop_ai()
         await lava.stop_lava()
         await alpha.stop_alpha()
+        await selarti.stop_selarti()
 
         logger.info(f"Backend Core stopped.")
 
