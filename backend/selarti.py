@@ -39,11 +39,16 @@ async def add_target(username: str):
 
 def init_selarti():
     global client
+    validate_env("SELARTI_HOST")
     validate_env("SELARTI_KEY")
     validate_env("SELARTI_TASK")
 
+    selarti_host = os.environ["SELARTI_HOST"]
+    if selarti_host.endswith("/"):
+        selarti_host = selarti_host[:-1]
+
     client = httpx.AsyncClient(
-        base_url="https://selarti.com/api/1.1",
+        base_url=selarti_host,
         headers={
             "Accept": "*/*",
             "Content-Type": "application/json",
