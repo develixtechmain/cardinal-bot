@@ -7,13 +7,14 @@ from utils import validate_env
 
 logger = logging.getLogger(__name__)
 
-client: httpx.AsyncClient
+auth_client: httpx.AsyncClient
+target_client: httpx.AsyncClient
 
 timeout = httpx.Timeout(connect=10.0, read=10.0, write=10.0, pool=10)
 
 
 async def _get_token() -> str:
-    res = await client.post("/wf/auth", json={
+    res = await auth_client.post("/wf/auth", json={
         "key": os.environ["SELARTI_KEY"]
     })
     res.raise_for_status()
@@ -24,7 +25,7 @@ async def _get_token() -> str:
 async def add_target(username: str):
     try:
         token = await _get_token()
-        res = await client.post("/wf/add_target", json={
+        res = await target_client.post("/wf/add_target", json={
             "task": os.environ["SELARTI_TASK"],
             "target": f"@{username}"
         }, headers={
@@ -38,24 +39,38 @@ async def add_target(username: str):
 
 
 def init_selarti():
-    global client
-    validate_env("SELARTI_HOST")
+    global auth_client, target_client
+    validate_env("SELARTI_AUTH_HOST")
+    validate_env("SELARTI_TARGET_HOST")
     validate_env("SELARTI_KEY")
     validate_env("SELARTI_TASK")
 
-    selarti_host = os.environ["SELARTI_HOST"]
-    if selarti_host.endswith("/"):
-        selarti_host = selarti_host[:-1]
+    headers = {
+        "Accept": "*/*",
+        "Content-Type": "application/json",
+    }
 
-    client = httpx.AsyncClient(
-        base_url=selarti_host,
-        headers={
-            "Accept": "*/*",
-            "Content-Type": "application/json",
-        },
+    auth_host = os.environ["SELARTI_AUTH_HOST"]
+    if auth_host.endswith("/"):
+        auth_host = auth_host[:-1]
+
+    target_host = os.environ["SELARTI_TARGET_HOST"]
+    if target_host.endswith("/"):
+        target_host = target_host[:-1]
+
+    auth_client = httpx.AsyncClient(
+        base_url=auth_host,
+        headers=headers,
+        timeout=timeout
+    )
+
+    target_client = httpx.AsyncClient(
+        base_url=target_host,
+        headers=headers,
         timeout=timeout
     )
 
 
 async def stop_selarti():
-    await client.aclose()
+    await auth_client.aclose()
+    await target_client.aclose()
