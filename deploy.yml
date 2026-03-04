@@ -86,7 +86,7 @@ services:
           memory: 256M
 
   backend-core:
-    image: 162.120.16.215:54710/cardinal/backend-core:0.0.3-SNAPSHOT
+    image: 162.120.16.215:54710/cardinal/backend-core:0.0.4-SNAPSHOT
     restart: unless-stopped
     environment:
       ENABLE_METRICS: ${ENABLE_METRICS}
@@ -107,6 +107,8 @@ services:
       AI_CORE_KEY: ${AI_CORE_KEY}
       API_KEY: ${BACKEND_CORE_KEY}
       EMBEDDINGS_PROCESSOR_KEY: ${EMBEDDINGS_PROCESSOR_KEY}
+      SELARTI_KEY: ${SELARTI_KEY}
+      SELARTI_TASK: ${SELARTI_TASK}
     depends_on:
       - postgresql
       - ai-core
