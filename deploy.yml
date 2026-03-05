@@ -86,7 +86,7 @@ services:
           memory: 256M
 
   backend-core:
-    image: 162.120.16.215:54710/cardinal/backend-core:0.0.4-SNAPSHOT
+    image: 162.120.16.215:54710/cardinal/backend-core:0.0.3-SNAPSHOT
     restart: unless-stopped
     environment:
       ENABLE_METRICS: ${ENABLE_METRICS}
