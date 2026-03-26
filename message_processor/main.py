@@ -7,13 +7,13 @@ from datetime import datetime, timedelta
 import aio_pika
 from aio_pika.abc import AbstractRobustChannel, AbstractRobustQueue
 from dotenv import load_dotenv
-from langchain.chains import LLMChain
-
 import ai
 import core
 import db
+import deepseek
 import embedding
 from ai import check_lead
+from deepseek import check_relevance, is_relevant
 from embedding import search_candidates
 from utils import validate_env
 
@@ -67,8 +67,30 @@ async def _process_message(body: bytes):
             logger.info(f"User {candidate['userId']} selected for recommendation.")
             if candidate["stats"]["recent_recommendations"] >= 33:
                 logger.info(f"User {candidate['userId']} skipped recommendation due to daily limit.")
-            else:
-                tasks.append(save_recommendation(candidate, message))
+                continue
+
+            user_task = await db.fetch_user_task(candidate["taskId"])
+            if not user_task:
+                logger.warning(f"Task {candidate['taskId']} not found, skipping relevance check.")
+                continue
+
+            tags = user_task["tags"] if isinstance(user_task["tags"], list) else json.loads(user_task["tags"])
+            relevance = await check_relevance(message["text"], user_task["title"], tags)
+
+            if not is_relevant(relevance):
+                logger.info(
+                    f"User {candidate['userId']} skipped: low relevance "
+                    f"(confidence={relevance['confidence']}, reason={relevance['reasoning']})"
+                )
+                continue
+
+            if relevance:
+                logger.info(
+                    f"User {candidate['userId']} passed relevance check "
+                    f"(confidence={relevance['confidence']})"
+                )
+
+            tasks.append(save_recommendation(candidate, message))
 
     await asyncio.gather(*tasks)
 
@@ -181,6 +203,13 @@ async def main():
         embedding.init_embedding()
     except Exception as e:
         logger.error(f"Failed to configure: {e}")
+        return
+
+    try:
+        deepseek.init_deepseek()
+        logger.info("DeepSeek initiated.")
+    except Exception as e:
+        logger.error(f"Failed to init DeepSeek: {e}")
         return
 
     logger.info(f"Listener started.")

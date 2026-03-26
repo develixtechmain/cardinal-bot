@@ -2,6 +2,7 @@ aio-pika
 langchain
 langchain_core
 langchain_openai
+langchain_deepseek
 langchain_community
 clickhouse-driver
 python-dateutil

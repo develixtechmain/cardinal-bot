@@ -57,6 +57,16 @@ async def get_user_stats(user_id, cutoff):
         }
 
 
+async def fetch_user_task(task_id):
+    async with pool.acquire() as conn:
+        result = await conn.fetchrow(
+            "SELECT title, tags FROM user_tasks WHERE id = $1", task_id
+        )
+        if result:
+            return result
+        return None
+
+
 async def save_in_clickhouse(message):
     chat_id = str(message['chat_id'])
     user_id = str(message['user_id'])
