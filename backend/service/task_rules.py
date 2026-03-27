@@ -1,12 +1,12 @@
 import itertools
 import uuid
 
-from service import get_pool, rules_cache
+from service.db import get_pool, rules_cache
 
 
 async def save_user_rules(user_id: uuid.UUID, task_id: uuid.UUID, rules: list[str]):
     async with get_pool().acquire() as conn:
-        result = await conn.fetchrow("INSERT INTO user_task_rules (user_id, task_id, rules) VALUES ($1, $2, $3) RETURNING id", user_id, task_id, rules)
+        result = await conn.fetchrow("INSERT INTO user_task_rules (user_id, task_id, rules) VALUES ($1, $2, $3) RETURNING id;", user_id, task_id, rules)
         if result:
             rules_cache.pop(f"{user_id}_{task_id}", None)
         else:
@@ -25,8 +25,8 @@ async def fetch_user_rules(user_id: uuid.UUID, task_id: uuid.UUID):
 
 async def fetch_user_rules_from_db(user_id: uuid.UUID, task_id: uuid.UUID):
     async with get_pool().acquire() as conn:
-        result = await conn.fetch("SELECT rules FROM user_task_rules WHERE user_id = $1 AND task_id = $2", user_id, task_id)
+        result = await conn.fetch("SELECT rules FROM user_task_rules WHERE user_id = $1 AND task_id = $2;", user_id, task_id)
         if result:
-            return list(itertools.chain.from_iterable(row['rules'] for row in result))
+            return list(itertools.chain.from_iterable(row["rules"] for row in result))
         else:
             return None

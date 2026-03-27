@@ -2,29 +2,39 @@ import asyncio
 import json
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import aio_pika
+import redis.asyncio as redis
+import xxhash
 from aio_pika.abc import AbstractRobustChannel, AbstractRobustQueue
 from dotenv import load_dotenv
-from langchain.chains import LLMChain
 
 import ai
 import core
 import db
 import embedding
+import handlers
 from ai import check_lead
 from embedding import search_candidates
+from handlers import HANDLERS, ID_HANDLERS
 from utils import validate_env
 
 load_dotenv()
 
+redis_ttl = 86400
+redis_client: redis.Redis
+
 rabbitmq_connection: aio_pika.RobustConnection
-rabbitmq_channel: AbstractRobustChannel
+rabbitmq_consume_channel: AbstractRobustChannel
 rabbitmq_queue: AbstractRobustQueue
 queue_name = "tg_queue"
 
+queue_tasks: asyncio.Semaphore
+
 logger = logging.getLogger(__name__)
+
+spam_abuse_suffixes = ("Интересно? Пиши", "Заинтересовало? Пиши", "Пиши")
 
 
 async def process_message(body, message: aio_pika.abc.AbstractIncomingMessage):
@@ -36,28 +46,113 @@ async def process_message(body, message: aio_pika.abc.AbstractIncomingMessage):
         await message.reject(requeue=False)
 
 
+total_messages = 0
+total_skipped = 0
+total_grouped = 0
+total_from_group = 0
+total_found = 0
+total_not_found = 0
+total_standardized = 0
+total_new = 0
+total_refresh = 0
+total_scam = 0
+total_processed = 0
+
+
+def log_process():
+    logger.info(
+        f"\nTotal: {total_messages} | {total_messages - total_skipped - total_refresh} | {total_found - total_scam}\n"
+        f"Processed: {total_processed}, {total_from_group} from {total_grouped} grouped\n"
+        f"Skipped: {total_skipped} + refresh: {total_refresh} = {total_skipped + total_refresh} with {total_standardized} standardized\n"
+        f"New: {total_new}: found: {total_found}, not found: {total_not_found}, scam: {total_scam}"
+    )
+
+
 async def _process_message(body: bytes):
+    global total_messages, total_skipped, total_grouped, total_from_group, total_found, total_not_found, total_standardized, total_new, total_refresh, total_scam, total_processed
+
     try:
         message = json.loads(body)
     except Exception as e:
-        raise Exception(f"Failed to read message: {e}")
+        raise Exception(f"Failed to read message") from e
 
-    logger.debug(f"Received message: {message['text']}")
+    message_text = message["text"]
 
-    search_response = await search_candidates(message['text'])
-    if not search_response:
+    total_messages += 1
+    if message.get("chat_handler_processed"):
+        logger.info(f"Received part message:\n{message_text}")
+        total_from_group += 1
+
+    if (
+        message_text.startswith("Message from user")
+        or message_text.endswith("been kicked from the chat because this user is in spam list")
+        or message_text.endswith("has been removed because it matches a filter mention (???)")
+    ):
+        total_skipped += 1
+        log_process()
         return
 
+    last_line_starts_at = message_text.rfind("\n")
+    if last_line_starts_at == -1:
+        last_line_starts_at = 0
+    else:
+        last_line_starts_at += 1
+
+    last_line = message_text[last_line_starts_at:]
+    for prefix in spam_abuse_suffixes:
+        if last_line.startswith(prefix):
+            mentions = 0
+            for word in last_line.split():
+                if word.startswith("@"):
+                    mentions += 1
+                    if mentions > 1:
+                        break
+            if mentions > 1:
+                message_text = message_text[:last_line_starts_at]
+                total_standardized += 1
+
+    try:
+        message_key = xxhash.xxh3_64_intdigest(message_text).to_bytes(8)
+        if await redis_client.exists(message_key):
+            log_process()
+            await redis_client.expire(message_key, redis_ttl)
+            total_refresh += 1
+            return
+        else:
+            total_new += 1
+            logger.debug(f"Key {message_key} set from {message_text}")
+            await redis_client.set(message_key, b"", ex=redis_ttl)
+    except Exception as e:
+        logger.warning(f"Failed to check for duplicate: ", exc_info=e)
+
+    if not message.get("chat_handler_processed"):
+        for key_handlers, key in [(HANDLERS, message["chat_username"]), (ID_HANDLERS, message["chat_id"])]:
+            handler = key_handlers.get(key)
+            if handler and await handler(message):
+                total_grouped += 1
+                return
+
+    logger.log(0, f"Received message:\n{message_text}")
+
+    search_response = await search_candidates(message_text)
+    if not search_response:
+        total_not_found += 1
+        log_process()
+        return
+
+    total_found += 1
     is_lead = await check_lead(message)
     if not is_lead:
+        total_scam += 1
+        log_process()
         return
 
-    await db.save_in_clickhouse(message)
+    await db.save_message(message)
 
     try:
         selected_candidate = await select_candidate(search_response)
     except Exception as e:
-        raise Exception(f"Failed to find candidate for {message['message_id']} from {message['chat_id']}: {e}")
+        raise Exception(f"Failed to find candidate for {message['message_id']} from {message['chat_id']}") from e
 
     rating = selected_candidate["rating"] * 0.9
 
@@ -71,20 +166,22 @@ async def _process_message(body: bytes):
                 tasks.append(save_recommendation(candidate, message))
 
     await asyncio.gather(*tasks)
+    total_processed += 1
+    log_process()
 
 
-async def save_recommendation(candidate, recommendation):
+async def save_recommendation(candidate, message):
     try:
         user = await db.fetch_user_by_id(candidate["userId"])
-        recommendation_id = await db.save_recommendation(user, candidate['taskId'], recommendation)
+        recommendation_id = await db.save_recommendation(user, candidate["taskId"], message)
         await embedding.confirm_recommendation(recommendation_id, candidate)
-        await core.send_recommendation_to_user(recommendation, candidate)
+        await core.send_recommendation_to_user(message, candidate, recommendation_id)
     except Exception as e:
-        raise Exception(f"Failed to recommend {recommendation['message_id']} from {recommendation['chat_id']} to user {candidate['userId']}: {e}")
+        raise Exception(f"Failed to recommend {message['message_id']} from {message['chat_id']} to user {candidate['userId']}") from e
 
 
 async def select_candidate(candidates):
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     cutoff = now - timedelta(hours=24)
     selected_candidate = None
 
@@ -106,7 +203,7 @@ async def calculate_rating(now, cutoff, candidate):
         stats = await db.get_user_stats(candidate["userId"], cutoff)
         candidate["stats"] = stats
     except Exception as e:
-        raise Exception(f"Failed to fetch user stats: {e}")
+        raise Exception(f"Failed to fetch user stats") from e
 
     if stats["last_recommendation_at"]:
         time_since_last = now - stats["last_recommendation_at"]
@@ -115,16 +212,31 @@ async def calculate_rating(now, cutoff, candidate):
         time_factor = 0
 
     loyalty_bonus = min(0.1, stats["total_recommendations"] / 10000)
-    candidate["rating"] = (
-            0.3 * (1 / (stats["recent_recommendations"] + 1)) +
-            0.3 * candidate["score"] +
-            0.25 * (1 - time_factor) +
-            0.15 * loyalty_bonus
+
+    recent_rating = 0.3 * (1 / (stats["recent_recommendations"] + 1))
+    score_rating = 0.3 * candidate["score"]
+    time_rating = 0.25 * (1 - time_factor)
+    loyalty_rating = 0.15 * loyalty_bonus
+    candidate["rating"] = recent_rating + score_rating + time_rating + loyalty_rating
+
+
+async def init_redis():
+    global redis_client
+
+    validate_env("REDIS_PASSWORD")
+
+    # fmt: off
+    redis_client = redis.Redis(
+        host=os.environ.get("REDIS_HOST", "redis"),
+        port=int(os.environ.get("REDIS_PORT", 6379)),
+        password=os.environ["REDIS_PASSWORD"],
+        db=0, max_connections=20, decode_responses=False
     )
+    # fmt: on
 
 
 async def init_rabbitmq():
-    global rabbitmq_channel, rabbitmq_connection, rabbitmq_queue
+    global rabbitmq_consume_channel, rabbitmq_connection, rabbitmq_queue, queue_tasks
 
     validate_env("RABBITMQ_PASS")
 
@@ -134,33 +246,40 @@ async def init_rabbitmq():
     user = os.environ.get("RABBITMQ_USER", "cardinal")
     password = os.environ["RABBITMQ_PASS"]
 
+    tasks = int(os.environ.get("QUEUE_TASKS", 50))
+    queue_tasks = asyncio.Semaphore(tasks)
+
     rabbitmq_connection = await aio_pika.connect_robust(f"amqp://{user}:{password}@{host}:{port}{vhost}")
-    rabbitmq_channel = await rabbitmq_connection.channel()
-    rabbitmq_queue = await rabbitmq_channel.declare_queue(queue_name, durable=True)
+    rabbitmq_consume_channel = await rabbitmq_connection.channel(publisher_confirms=False)
+    await rabbitmq_consume_channel.set_qos(prefetch_count=tasks)
+    rabbitmq_queue = await rabbitmq_consume_channel.declare_queue(queue_name, durable=True)
+
+    rabbitmq_publish_channel = await rabbitmq_connection.channel(publisher_confirms=True)
+    handlers.init_handlers(rabbitmq_publish_channel, queue_name)
 
 
 async def main():
     global rabbitmq_queue
 
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-    )
+    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+
+    for package in ("httpx", "httpcore", "aiormq.connection", "openai._base_client", "langsmith.client"):
+        logging.getLogger(package).setLevel(logging.INFO)
 
     logger.info("Listener startup initiated.")
+
+    try:
+        await init_redis()
+        logger.info(f"Connected to Redis.")
+    except Exception as e:
+        logger.error(f"Failed to connect to Redis: {e}")
+        return
 
     try:
         await init_rabbitmq()
         logger.info(f"Connected to RabbitMQ.")
     except Exception as e:
         logger.error(f"Failed to connect to RabbitMQ: {e}")
-        return
-
-    try:
-        await db.init_click()
-        logger.info(f"Connected to ClickHouse.")
-    except Exception as e:
-        logger.error(f"Failed to connect to ClickHouse: {e}")
         return
 
     try:
@@ -180,7 +299,13 @@ async def main():
     try:
         embedding.init_embedding()
     except Exception as e:
-        logger.error(f"Failed to configure: {e}")
+        logger.error(f"Failed to configure embeddings: {e}")
+        return
+
+    try:
+        core.init_core()
+    except Exception as e:
+        logger.error(f"Failed to configure backend: {e}")
         return
 
     logger.info(f"Listener started.")
@@ -188,7 +313,8 @@ async def main():
     try:
         async with rabbitmq_queue.iterator() as queue_iter:
             async for message in queue_iter:
-                asyncio.create_task(process_message(message.body, message))
+                async with queue_tasks:
+                    asyncio.create_task(process_message(message.body, message))
     finally:
         await db.disconnect()
         await rabbitmq_connection.close()

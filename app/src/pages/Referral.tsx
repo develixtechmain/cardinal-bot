@@ -15,8 +15,9 @@ import {RefsList} from "../components/referral/RefsList";
 import {StatBlock} from "../components/referral/StatBlock";
 import {useReferral} from "../store/referral";
 import {useStore} from "../store/store";
-import {BACKEND_BASE_URL, TARIFF_PRICES} from "../utils/consts";
+import {BACKEND_BASE_URL, SUPPORT_URL, TARIFF_PRICES} from "../utils/consts";
 
+import Mark from "../assets/icons/mark.svg";
 import MoveArrow from "../assets/icons/move-arrow.svg";
 
 const Referral: FC = () => {
@@ -29,6 +30,8 @@ const Referral: FC = () => {
     const refs = useReferral((s) => s.refs);
     const setRefs = useReferral((s) => s.setRefs);
     const setSubscription = useStore((s) => s.setSubscription);
+
+    const copyRef = useRef<HTMLDivElement>(null);
 
     const [loading, setLoading] = useState(true);
 
@@ -57,6 +60,20 @@ const Referral: FC = () => {
         } else {
             fallbackCopy(text);
         }
+        if (!copyRef.current) return;
+        const div = copyRef.current;
+
+        div.style.transition = "none";
+        div.style.opacity = "1";
+        div.classList.add("visible");
+
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                div.style.transition = "opacity 2s";
+                div.style.opacity = "0";
+                div.classList.remove("visible");
+            }, 1000);
+        });
     };
 
     const fallbackCopy = (text: string) => {
@@ -87,11 +104,12 @@ const Referral: FC = () => {
         }
     };
 
-    const refLink = `${BACKEND_BASE_URL}/r/${user!.user_id}`;
+    const refBase = BACKEND_BASE_URL.replace("/api", "");
+    const refLink = `${refBase}/r/${user!.user_id}`;
 
     return (
         <div className={styles.container}>
-            <Header height={64} backTo="" icon={<img height="82px" width="76px" src="/assets/referral/header.svg" alt="CARDINAL REFERRALS" />} />
+            <Header height={82} top={0} backTo="" icon={<img height="82px" width="76px" src="/assets/referral/header.svg" alt="CARDINAL REFERRALS" />} />
 
             <div className={styles.title}>
                 <span>Заработай </span>
@@ -102,7 +120,7 @@ const Referral: FC = () => {
             <div className={styles.subtitle}>
                 <span>
                     <span>Приводи в сервис новых пользователей — и получай до </span>
-                    <span style={{fontWeight: 500, color: "white"}}>50% на баланс за каждого активного.</span>
+                    <span style={{fontWeight: 500, color: "#FFFFFF"}}>50% на баланс за каждого активного.</span>
                 </span>
             </div>
 
@@ -126,16 +144,26 @@ const Referral: FC = () => {
             </div>
 
             <div className={styles.partnerBlock}>
-                <div className={styles.partnerTitle}>Твоя ссылка:</div>
+                <div className={styles.partnerTitle} style={{marginBottom: 6}}>
+                    Твоя ссылка:
+                </div>
 
-                <div className={styles.linkBlock} onClick={() => copyToClipboard(refLink)}>
-                    <span style={{flex: 1}}>{refLink}</span>
-                    <div className={styles.copyBlock}>
-                        <img height="17px" width="16px" src="/assets/icons/copy.svg" alt="COPY" />
+                <div style={{position: "relative"}}>
+                    <div className={styles.linkBlock} onClick={() => copyToClipboard(refLink)}>
+                        <span style={{flex: 1, zIndex: 1}}>{refLink}</span>
+                        <div className={styles.copyBlock}>
+                            <img height="17px" width="16px" src="/assets/icons/copy.svg" alt="COPY" />
+                        </div>
+                    </div>
+                    <div ref={copyRef} className={styles.linkCopied}>
+                        <Mark height="14px" width="14px" color="#7211F8" />
+                        <span>Успешно скопировано</span>
                     </div>
                 </div>
 
-                <div className={styles.partnerTitle}>Инструкция:</div>
+                <div className={styles.partnerTitle} style={{marginTop: 12, marginLeft: 4, marginBottom: 3}}>
+                    Инструкция:
+                </div>
 
                 <div className={styles.partnerInstruction}>
                     <div className={styles.dot} />
@@ -159,8 +187,8 @@ const Referral: FC = () => {
                             Правила партнерской програмы
                         </div>
                     }
-                    buttonStyle={{minHeight: 39, maxHeight: 39, color: "#FFFFFF66"}}
-                    style={{marginTop: 5, borderRadius: 19, border: "1px solid #FFFFFF66"}}
+                    buttonStyle={{minHeight: 38, maxHeight: 38, color: "#FFFFFF66"}}
+                    style={{marginTop: 5, borderRadius: 11, border: "1px solid #FFFFFF66"}}
                     onClick={() => navigate("https://google.com")}
                 />
             </div>
@@ -179,7 +207,6 @@ const Referral: FC = () => {
                 onClick={handlePurchaseByBalance}
             />
 
-            {/*TODO URL withdraw balance*/}
             <WideButton
                 color={"transparent"}
                 text={
@@ -190,7 +217,7 @@ const Referral: FC = () => {
                 }
                 buttonStyle={{minHeight: 48, maxHeight: 48}}
                 style={{marginTop: 3, marginBottom: 17, borderRadius: 19, border: "1px solid #FFFFFF"}}
-                onClick={() => navigate("https://google.com")}
+                onClick={() => Telegram.WebApp.openLink(SUPPORT_URL, {try_instant_view: true})}
             />
 
             <RefsList refs={refs!} />
@@ -218,7 +245,7 @@ const Referral: FC = () => {
                                 <span>Эксклюзивный ранний доступ</span>
                             </span>
                         </div>
-                        <div className={styles.bonusDescription} style={{paddingRight: 160}}>
+                        <div className={styles.bonusDescription} style={{paddingRight: 150}}>
                             Получай новые инструменты и фишки первым, до официального релиза.
                         </div>
                     </div>
@@ -233,7 +260,7 @@ const Referral: FC = () => {
                                 <span>Личный менеджер и поддержка</span>
                             </span>
                         </div>
-                        <div className={styles.bonusDescription} style={{paddingRight: 160}}>
+                        <div className={styles.bonusDescription} style={{paddingRight: 140}}>
                             Быстрые ответы на любые вопросы, помощь с продвижением и интеграцией.
                         </div>
                     </div>

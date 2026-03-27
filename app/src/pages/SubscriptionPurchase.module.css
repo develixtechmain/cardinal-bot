@@ -29,7 +29,7 @@
     color: #202020;
     font-weight: 700;
     line-height: 27px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }
 
 .step {
@@ -49,7 +49,7 @@
 
 .purchaseBlock {
     margin-top: 8px;
-    min-height: calc(100% - 56px);
+    min-height: calc(100% - 110px);
     display: flex;
     flex-direction: column;
     position: relative;
@@ -106,10 +106,11 @@
     font-size: 15px;
     font-weight: 500;
     line-height: 22px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }
 
 .purchaseItem {
+    max-height: 13px;
     gap: 7px;
     width: fit-content;
     padding: 8px 8px 8px 11px;
@@ -117,7 +118,7 @@
     flex-direction: row;
     align-items: center;
     justify-items: center;
-    border: 1px solid #FFFFFF1A;
+    border: 2px solid #FFFFFF1A;
     border-radius: 9px;
     font-size: 20px;
     font-weight: 400;
@@ -153,21 +154,21 @@
     font-size: 15px;
     font-weight: 500;
     line-height: 22px;
-    letter-spacing: -1px;
+    letter-spacing: -0.05em;;
 }
 
 .bankSelected {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 50px;
+    height: 22px;
     padding: 14px 0;
     color: #7211F8;
     border: 1px solid #7211F8;
     background-color: #7211F833;
     border-radius: 9px;
     font-family: var(--font-ui);
-    font-size: 15px;
+    font-size: 20px;
     font-weight: 500;
     line-height: 24px;
     letter-spacing: -0.03em;
@@ -177,12 +178,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 52px;
+    height: 24px;
     padding: 14px 0;
     background-color: #36363673;
     border-radius: 9px;
     font-family: var(--font-ui);
-    font-size: 15px;
+    font-size: 20px;
     font-weight: 500;
     line-height: 24px;
     letter-spacing: -0.03em;
@@ -222,9 +223,10 @@
 .emailInput {
     padding-left: 0;
     border: none;
-    color: white;
-    caret-color: white;
+    color: #FFFFFF;
+    caret-color: #FFFFFF;
     background-color: transparent;
+    font-family: var(--font-primary);
     font-size: 20px;
     font-weight: 400;
     line-height: 14px;
@@ -240,6 +242,23 @@
 
 .emailInput:focus {
     outline: none;
+}
+
+.emailInput:-webkit-autofill {
+    background-color: transparent !important;
+    color: #FFFFFF !important;
+    caret-color: #FFFFFF !important;
+    box-shadow: 0 0 0 9999px transparent inset !important;
+    transition: background-color 9999s ease-in-out 0s !important;
+    -webkit-text-fill-color: #FFFFFF !important;
+    font-family: var(--font-primary) !important;
+    font-size: 20px !important;
+    font-style: normal !important;
+    font-weight: 400 !important;
+    line-height: 14px !important;
+    letter-spacing: 0 !important;
+    text-decoration: none !important;
+    -webkit-box-shadow: none !important;
 }
 
 .inputError {
@@ -264,7 +283,7 @@
     font-size: 15px;
     font-weight: 500;
     line-height: 22px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }
 
 .priceValue {
@@ -279,7 +298,7 @@
     align-items: center;
     justify-content: center;
     gap: 5px;
-    color: white;
+    color: #FFFFFF;
     font-family: var(--font-ui);
     font-size: 15px;
     font-weight: 500;
@@ -308,7 +327,7 @@
     font-size: 20px;
     font-weight: 500;
     line-height: 22px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }
 
 .verifyBlocks {
@@ -369,7 +388,7 @@
     font-size: 20px;
     font-weight: 400;
     line-height: 22px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }
 
 .checkLinkButton {

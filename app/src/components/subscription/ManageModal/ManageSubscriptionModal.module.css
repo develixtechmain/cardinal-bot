@@ -1,0 +1,121 @@
+.dot {
+    background-color: #7211F8;;
+    flex-shrink: 0;
+    height: 4px;
+    width: 4px;
+    border-radius: 50%;
+}
+
+.purple {
+    color: #7211F8;
+}
+
+.overlay {
+    margin: 0 16px;
+}
+
+.bold {
+    font-weight: 700;
+}
+
+.container {
+    gap: 10px;
+    padding: 15px 21px 26px 20px;
+    display: flex;
+    flex-direction: column;
+    background-color: #141414;
+    border-radius: 19px;
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.title {
+    font-family: var(--font-ui);
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 24px;
+    letter-spacing: -0.03em;
+}
+
+.subscription {
+    gap: 6px;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 11px;
+    background-color: #1E1E1E;
+    border-radius: 11px;
+    align-items: center;
+}
+
+.subscriptionHeader {
+    height: 38px;
+    width: calc(100% - 18px);
+    padding: 0 9px 0 11px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #2E2E2E;
+    border-radius: 11px;
+}
+
+.subscriptionTitle {
+    gap: 7px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 20px;
+    letter-spacing: 0;
+}
+
+.subscriptionEnds {
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 18px;
+    letter-spacing: 0;
+}
+
+.recurrencyBlock{
+    gap: 2px;
+    padding: 6px 8px 6px 5px;
+    display: flex;
+    flex-direction: row;
+    background-color: #202020;
+    border-radius: 11px;
+}
+
+.recurrencyStatus{
+    flex: 1;
+    text-align: center;
+    align-content: center;
+    background-color: #383838;
+    border-radius: 6px;
+    font-size: 8px;
+    font-weight: 400;
+    line-height: 2px;
+    letter-spacing: 0;
+}
+
+.recurrencyButton{
+    height: 26px;
+    width: 37px;
+    text-align: center;
+    align-content: center;
+    background-color: #363636;
+    border-radius: 6px;
+    font-size: 8px;
+    font-weight: 700;
+    line-height: 2px;
+    letter-spacing: 0;
+}
+
+.active {
+    background-color: #7211F8;
+}

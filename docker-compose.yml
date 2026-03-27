@@ -1,8 +1,8 @@
 version: '3.8'
 
 services:
-  parser:
-    image: doker.develixtech.com/cardinal/parser:0.0.1-SNAPSHOT
+  telegram-parser:
+    image: registry.develixtech.com/cardinal/telegram-parser:0.0.3-SNAPSHOT
     environment:
       TELEGRAM_API_ID:
       TELEGRAM_API_HASH:
@@ -11,55 +11,61 @@ services:
       - rabbitmq
 
 
-  processor:
-    image: doker.develixtech.com/cardinal/processor:0.0.1-SNAPSHOT
+  message-processor:
+    image: registry.develixtech.com/cardinal/message-processor:0.0.3-SNAPSHOT
     environment:
+      DB_PASS:
       RABBITMQ_PASS:
-      CLICKHOUSE_PASS:
+      REDIS_PASSWORD:
       OPENAI_API_KEY:
-      EMBEDDER_URL: http://embedder:7200/api/similarity/search
-      EMBEDDER_KEY:
+      BACKEND_CORE_KEY:
+      BACKEND_CORE_HOST:
+      EMBEDDINGS_PROCESSOR_KEY:
+      EMBEDDINGS_PROCESSOR_HOST:
     depends_on:
+      - redis
       - rabbitmq
-      - clickhouse
+      - postgresql
 
   rabbitmq:
-    image: "rabbitmq:3"
+    image: rabbitmq:3
     environment:
       RABBITMQ_DEFAULT_USER: cardinal
       RABBITMQ_DEFAULT_PASS: 
       RABBITMQ_DEFAULT_VHOST: /
     ports:
-      - "5672:5672"
+      - 5672:5672
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
 
-  clickhouse:
-      image: clickhouse/clickhouse-server:25.4-alpine
-      environment:
-        CLICKHOUSE_DB: cardinal
-        CLICKHOUSE_USER: cardinal
-        CLICKHOUSE_PASSWORD: 
-        RABBITMQ_VM_MEMORY_HIGH_WATERMARK: 0.6
-      ports:
-        - "8123:8123"
-        - "9000:9000"
-      volumes:
-        - clickhouse-data:/var/lib/clickhouse
+  redis:
+    image: redis:8.4.0-alpine3.22
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    command: >
+      sh -c "redis-server
+      --save 60 3000
+      --loglevel warning
+      --requirepass $REDIS_PASSWORD"
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
 
   postgresql:
-    image: "postgres:17.4-alpine3.21"
-    restart: "unless-stopped"
+    image: postgres:17.6-alpine3.22
+    restart: unless-stopped
     environment:
       POSTGRES_DB: cardinal
       POSTGRES_USER: cardinal
       POSTGRES_PASSWORD:
     ports:
-      - "5432:5432"
+      - 5432:5432
     volumes:
       - postgresql-data:/var/lib/postgresql/data
 
 volumes:
+  redis-data:
   rabbitmq-data:
-  clickhouse-data:
   postgresql-data:

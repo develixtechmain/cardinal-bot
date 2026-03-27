@@ -3,6 +3,5 @@
     <rect opacity="0.25" x="9" y="11.5" width="132" height="7" rx="3.5" fill="#7211F8"/>
     <rect opacity="0.5" x="9" y="11.5" width="132" height="7" rx="3.5" fill="#7211F8"/>
     <circle cx="136" cy="15" r="4.125" stroke="#7211F8" stroke-width="2.75"/>
-    <text x="130" y="17" font-size="14">
-    </text>
+    <text x="129" y="18" font-size="14">🎉</text>
 </svg>

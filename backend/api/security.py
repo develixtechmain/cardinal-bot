@@ -3,12 +3,13 @@ import hmac
 import json
 import os
 import urllib.parse
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Callable
 from uuid import UUID
 
 import jwt
-from fastapi import Request, HTTPException
+from fastapi import HTTPException, Request
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
 from utils import validate_env
@@ -19,7 +20,7 @@ REFRESH_TOKEN_EXPIRE_DAYS = 7
 INVALID_INIT_DATA = "Invalid Telegram init data"
 SUBSCRIPTION_LAVA_KEY_PATHS = {"/api/subscription/webhook/lava"}
 KEY_PATHS = {"/api/finder/recommendations/send"}
-OPEN_PATHS = {"/r/*", "/api/subscriptions/purchase/complete"}
+OPEN_PATHS = {"/r/*", "/api/subscriptions/purchase/robokassa/complete", "/api/subscriptions/purchase/robokassa/complete/result", "/api/subscriptions/purchase/alpha/complete"}
 WEBHOOK_PATHS = {"/api/webhook", "/api/finder/recommendations/webhook"}
 EXCLUDED_PATHS = {"/api/auth", "/api/auth/refresh", "/docs", "/openapi.json", "/metrics", *KEY_PATHS, *SUBSCRIPTION_LAVA_KEY_PATHS, *WEBHOOK_PATHS}
 
@@ -28,6 +29,30 @@ webhook_key: str
 api_key: str
 bot_token: str
 jwt_secret_key: str
+
+
+class KeyAuthMiddleware(BaseHTTPMiddleware):
+
+    async def dispatch(self, request, call_next):
+        return await key_auth_middleware(request, call_next)
+
+
+class LavaAuthMiddleware(BaseHTTPMiddleware):
+
+    async def dispatch(self, request, call_next):
+        return await lava_auth_middleware(request, call_next)
+
+
+class WebhookAuthMiddleware(BaseHTTPMiddleware):
+
+    async def dispatch(self, request, call_next):
+        return await webhook_auth_middleware(request, call_next)
+
+
+class JWTAuthMiddleware(BaseHTTPMiddleware):
+
+    async def dispatch(self, request, call_next):
+        return await jwt_auth_middleware(request, call_next)
 
 
 async def webhook_auth_middleware(request: Request, call_next: Callable):
@@ -111,14 +136,11 @@ def authenticate_user(init_data: str):
     if not hmac.compare_digest(hmac_hash, received_hash):
         raise HTTPException(status_code=401, detail=INVALID_INIT_DATA)
 
-    return json.loads(data['user']), data.get('start_param', None)
+    return json.loads(data["user"]), data.get("start_param", None)
 
 
 def create_token(user):
-    return {
-        "access_token": generate_access_token(user['id']),
-        "refresh_token": generate_refresh_token(user['id'])
-    }
+    return {"access_token": generate_access_token(user["id"]), "refresh_token": generate_refresh_token(user["id"])}
 
 
 def generate_access_token(user_id: str):

@@ -11,7 +11,7 @@ interface BriefingQuestionExampleProps {
 
 const BriefingQuestionExample: FC<BriefingQuestionExampleProps> = ({question}) => {
     return (
-        <div className={styles.container}>
+        <div>
             <span className={styles.blockHeader}>Правильный алгоритм ответа на вопрос:</span>
             <div className={styles.question}>
                 <img height="11px" width="10px" src="/assets/finder/briefing/example-question.svg" alt=" " />
@@ -25,10 +25,13 @@ const BriefingQuestionExample: FC<BriefingQuestionExampleProps> = ({question}) =
                 Чего избегать
             </div>
             <BriefingExamplesSection good={false} examples={question.hint.bad} />
-
-            <Delimiter style={{backgroundColor: "#FFFFFF14", maxWidth: "80%"}} />
-            <span className={styles.blockHeader}>Пример правильного ответа:</span>
-            <div className={styles.example}>{question.hint.example}</div>
+            {question.hint.example && (
+                <>
+                    <Delimiter style={{backgroundColor: "#FFFFFF14", maxWidth: "80%"}} />
+                    <span className={styles.blockHeader}>Пример правильного ответа:</span>
+                    <div className={styles.example}>{question.hint.example}</div>
+                </>
+            )}
         </div>
     );
 };

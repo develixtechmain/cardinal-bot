@@ -64,10 +64,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({buttons, isSubscriptionExpired, 
                         className={styles.actionBtn}
                         onClick={() => navigate(button.url)}
                         style={
-                            {
-                                "--color": button.borderColor || getButtonColor(button),
-                                "--background-color": getButtonColor(button, true, true)
-                            } as React.CSSProperties
+                            {"--color": button.borderColor || getButtonColor(button), "--background-color": getButtonColor(button, true, true)} as CSSProperties
                         }
                     >
                         {Logo ? (
@@ -75,7 +72,7 @@ const ActionButtons: FC<ActionButtonsProps> = ({buttons, isSubscriptionExpired, 
                                 height="29px"
                                 width="116px"
                                 color={getButtonColor(button)}
-                                style={{alignSelf: "flex-start", "--content-color": getContentColor(button)} as React.CSSProperties}
+                                style={{alignSelf: "flex-start", "--content-color": getContentColor(button)} as CSSProperties}
                             />
                         ) : (
                             <img height="29px" width="116px" style={{alignSelf: "flex-start"}} src={"/assets/crd-" + button.id + ".svg"} alt=" " />

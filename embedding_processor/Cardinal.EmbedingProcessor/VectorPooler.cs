@@ -13,10 +13,10 @@ public class VectorPooler(IConfiguration configuration)
         {
             case "mean":
                 return VectorPooling.MeanPooling(vectors);
-            
+
             case "max":
                 return VectorPooling.MaxPooling(vectors);
-            
+
             default:
                 throw new Exception("Unknown pooling type");
         }

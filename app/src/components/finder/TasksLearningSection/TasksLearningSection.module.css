@@ -3,10 +3,11 @@
 }
 
 .container {
+    width: 100%;
     margin-top: 23px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 13px;
 }
 
 .title {
@@ -24,47 +25,10 @@
     height: 79px;
 }
 
-.learningButton {
-    flex: 1;
-    padding: 10px;
-    background-color: #141414;
-    border-radius: 24px;
-    display: flex;
-    align-items: center;
-    flex-direction: row;
-    justify-items: start;
-    gap: 20px;
-}
-
-.learningLabel {
-    display: flex;
-    flex-direction: row;
-    gap: 13px;
-    align-items: center;
-    justify-content: center;
-}
-
-.learning {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    font-size: 11px;
-    line-height: 14px;
-    letter-spacing: -0.03em;
-    text-align: start;
-}
-
-.learningDescription {
-    color: #FFFFFF60;
-    font-size: 7px;
-    line-height: 7px;
-    letter-spacing: -0.03em;
-}
-
 .briefingButton {
     flex: 1;
     gap: 13px;
-    padding: 27px 19px 27px 19px;
+    padding: 27px 15px 27px 19px;
     background-color: #141414;
     border-radius: 24px;
     display: flex;
@@ -74,12 +38,26 @@
 }
 
 .briefing {
-    font-size: 11px;
-    line-height: 14px;
-    letter-spacing: -0.03em;
-    text-align: start;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
-.markedText {
-    font-weight: 700;
+.briefingTitle {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 14px;
+    letter-spacing: -0.03em;
+}
+
+.briefingDescription {
+    flex-shrink: 0;
+    color: #FFFFFF80;
+    font-family: var(--font-primary);
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 11px;
+    letter-spacing: -0.03em;
+    text-align: end;
 }

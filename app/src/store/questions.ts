@@ -113,8 +113,7 @@ export const baseQuestions: Question[] = [
                     title: "Устаревшие или нерелевантные инструменты:",
                     description: "Которые не показывают ценности для офферов."
                 }
-            ],
-            example: "Работаю в Figma (основной инструмент), владею Photoshop и Illustrator для графики. Использую Tilda и Webflow для сборки сайтов. Для командной работы применяю Miro и Jira. Это помогает запускать проекты от прототипа до готового продукта."
+            ]
         }
     },
     {
@@ -180,43 +179,17 @@ export const baseQuestions: Question[] = [
             ],
             example: "Интересны проекты по созданию лендингов и промо-сайтов, редизайн мобильных приложений и дашбордов для B2B. Ближе всего финтех и e-commerce."
         }
-    },
-    {
-        question: "Какие термины клиенты часто путают или пишут неправильно, но они всё равно относятся к вашей работе?",
-        description: "Укажи слова и фразы, которые клиенты часто используют неправильно, но по смыслу они подходят к твоей работе. Так мы не пропустим подходящие заявки.",
-        examples: (selected) => selected.flatMap((key) => {
-            const specialist = specialists.get(key);
-            return specialist?.wrongTerms ?? [];
-        }),
-        hint: {
-            description: "Укажи синонимы и частые ошибки в формулировках. Это поможет системе подхватывать офферы даже если клиент пишет «по-своему».",
-            good: [
-                {
-                    title: "Синонимы",
-                    description: "Посадочная = лендинг, фирм. стиль = брендинг, UX-копирайтинг = микрокопи."
-                },
-                {
-                    title: "Ошибочные термины",
-                    description: "Клиенты пишут «логотип» → на самом деле нужен «айдентика»"
-                }
-            ],
-            bad: [
-                {
-                    title: "Игнорировать вопрос",
-                    description: "(система теряет часть заказов)."
-                }
-            ],
-            example: "Посадочная = лендинг, фирм. стиль = брендинг, UX-копирайтинг = микрокопи, мобильный дизайн = экранчики."
-        }
     }
 ];
 
 export function totalAnswers(answers: Answer[], additionalQuestions: QuestionAnswer[]) {
-    const totalAnswers = [];
+    const totalAnswers: QuestionAnswer[] = [];
     for (let i = 0; i < baseQuestions.length; i++) {
-        totalAnswers.push({question: baseQuestions[i].question, answer: answers[i].text});
+        if (answers[i]) totalAnswers.push({question: baseQuestions[i].question, answer: answers[i].text, selections: answers[i].selections});
     }
 
-    additionalQuestions.forEach((answer) => totalAnswers.push(answer));
+    additionalQuestions.forEach((answer) => {
+        if (answer) totalAnswers.push(answer);
+    });
     return totalAnswers;
 }

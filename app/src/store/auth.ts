@@ -1,4 +1,4 @@
-import {create} from "zustand/index";
+import {create} from "zustand";
 
 import {BACKEND_BASE_URL} from "../utils/consts";
 
@@ -22,7 +22,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
             let res = await fetch(BACKEND_BASE_URL + "/auth/refresh", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({refreshToken})
+                body: JSON.stringify({refresh_token: refreshToken})
             });
 
             const data = await res.json().catch(() => undefined);

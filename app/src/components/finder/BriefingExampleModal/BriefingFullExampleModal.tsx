@@ -25,7 +25,7 @@ const BriefingFullExampleModal: FC<BriefingFullExampleProps> = ({isOpen, onClose
             <div className={styles.overlay} onClick={onClose}>
                 <div className={styles.container} onClick={(e) => e.stopPropagation()}>
                     <div className={styles.header}>
-                        <span style={{marginRight: 54}}>
+                        <span style={{marginRight: 54, marginTop: 5}}>
                             <span>Точность</span>
                             <span className={styles.purple}> в брифе</span>
                             {window.innerWidth <= 390 && <br />}

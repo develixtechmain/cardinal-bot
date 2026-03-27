@@ -2,6 +2,8 @@ import styles from "./RefList.module.css";
 import {FC, useEffect, useMemo, useRef, useState} from "react";
 
 import {RefUser} from "../../types/referral";
+import {openLink} from "../../utils/common";
+import Avatar from "../common/Avatar/Avatar";
 
 interface RefsListPropsProps {
     refs: RefUser[];
@@ -68,15 +70,20 @@ export const RefsList: FC<RefsListPropsProps> = ({refs}) => {
                                 key={index}
                                 className={styles.ref}
                                 onClick={() =>
-                                    ref.username
-                                        ? Telegram.WebApp.openTelegramLink(`https://t.me/${ref.username}`)
-                                        : console.log(`User ${ref.id} doesn't have a public username`)
+                                    ref.username ? openLink(`https://t.me/${ref.username}`) : console.log(`User ${ref.id} doesn't have a public username`)
                                 }
                             >
-                                <img height="40px" width="40px" src={ref.avatar_url} alt="" className={styles.refAvatar} />
+                                <Avatar
+                                    height="40px"
+                                    width="40px"
+                                    src={
+                                        ref.avatar_url ? ref.avatar_url : ref.billed ? "/assets/referral/active-user.svg" : "/assets/referral/inactive-user.svg"
+                                    }
+                                    className={styles.refAvatar}
+                                />
                                 <div
                                     className={styles.refStatus}
-                                    style={{color: ref.billed ? "#BEF811" : "white", backgroundColor: ref.billed ? "#BEF8114D" : "#FFFFFF4D"}}
+                                    style={{color: ref.billed ? "#BEF811" : "#FFFFFF", backgroundColor: ref.billed ? "#BEF8114D" : "#FFFFFF4D"}}
                                 >
                                     {ref.billed ? "Оплатил" : "Ждет"}
                                 </div>

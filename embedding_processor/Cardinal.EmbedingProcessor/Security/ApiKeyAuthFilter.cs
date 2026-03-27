@@ -31,4 +31,4 @@ namespace Cardinal.EmbedingProcessor.Security
             await Task.CompletedTask;
         }
     }
-} 
+}

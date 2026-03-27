@@ -19,7 +19,7 @@
     font-size: 30px;
     font-weight: 500;
     line-height: 27px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }
 
 .headerSubtitle {
@@ -28,7 +28,7 @@
     font-size: 18px;
     font-weight: 300;
     line-height: 21px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }
 
 .monthsSelector {
@@ -40,7 +40,7 @@
     height: 30px;
     align-items: center;
     justify-content: center;
-    gap: 9px;
+    gap: 18px;
     border: 1px solid transparent;
     background: linear-gradient(#141414, #1616167D) padding-box, linear-gradient(90deg, var(--border-from), var(--border-to)) border-box;
     border-radius: 15px;
@@ -62,24 +62,22 @@
     letter-spacing: -0.03em;
 }
 
-.monthSelected {
-    padding: 3px 8px;
-    background-color: transparent;
-    border-radius: 11px;
-}
-
-.monthSelected:before {
+.monthSelected::before {
     content: "";
     position: absolute;
-    inset: 0;
+    top: -3px;
+    left: var(--selected-left);
+    right: var(--selected-right);
+    bottom: -3px;
     padding: 1px;
-    border-radius: inherit;
+    border-radius: 11px;
     background: linear-gradient(90deg, var(--month-from), var(--month-to));
-
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor;
-
-    mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-image: linear-gradient(black, black), linear-gradient(black, black);
+    -webkit-mask-origin: content-box, border-box;
+    -webkit-mask-clip: content-box, border-box;
+    -webkit-mask-composite: destination-out;
+    -webkit-mask-repeat: no-repeat;
+    mask: linear-gradient(black, black) content-box, linear-gradient(black, black);
     mask-composite: exclude;
     pointer-events: none;
 }
@@ -135,7 +133,7 @@
     font-size: 30px;
     font-weight: 700;
     line-height: 27px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }
 
 .priceEconomy {
@@ -230,7 +228,7 @@
 }
 
 .featureTitle {
-    color: white;
+    color: #FFFFFF;
     font-size: 12px;
     font-weight: 500;
 }
@@ -303,7 +301,7 @@
     padding: 10px 29px 10px 19px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 16px;
     align-items: flex-start;
 }
 
@@ -337,4 +335,19 @@
     font-size: 14px;
     line-height: 15px;
     letter-spacing: -0.04em;
+}
+
+.manageSubscription{
+    width: 100%;
+    gap: 14px;
+    padding: 14px 15px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    color: #FFFFFF4D;
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 14px;
+    letter-spacing: -0.03em;
 }

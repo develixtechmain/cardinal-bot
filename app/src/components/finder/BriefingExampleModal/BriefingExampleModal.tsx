@@ -20,7 +20,7 @@ const BriefingExampleModal: FC<BriefingExampleProps> = ({question, isOpen, onClo
             <div className={styles.overlay} onClick={onClose}>
                 <div className={styles.container} onClick={(e) => e.stopPropagation()}>
                     <div className={styles.header}>
-                        <span style={{marginRight: 40}}>
+                        <span style={{marginRight: 40, marginTop: 11}}>
                             <span>Точность</span>
                             <span className={styles.purple}> в брифе</span>
                             {window.innerWidth <= 390 && <br />}
@@ -40,18 +40,20 @@ const BriefingExampleModal: FC<BriefingExampleProps> = ({question, isOpen, onClo
 
                     <BriefingQuestionExample question={question} />
 
-                    <WideButton
-                        color="#7211F833"
-                        onClick={useHint}
-                        text={
-                            <div className={styles.useHintButton}>
-                                <img height="17px" width="16px" src="/assets/icons/copy.svg" alt=" " />
-                                <span>Вставить шаблон ответа</span>
-                            </div>
-                        }
-                        buttonStyle={{borderRadius: 12, height: 52, border: "1px solid #7211F8"}}
-                        style={{marginTop: 9}}
-                    />
+                    {question.hint.example && (
+                        <WideButton
+                            color="#7211F833"
+                            onClick={useHint}
+                            text={
+                                <div className={styles.useHintButton}>
+                                    <img height="17px" width="16px" src="/assets/icons/copy.svg" alt=" " />
+                                    <span>Вставить шаблон ответа</span>
+                                </div>
+                            }
+                            buttonStyle={{borderRadius: 12, height: 52, border: "1px solid #7211F8"}}
+                            style={{marginTop: 9}}
+                        />
+                    )}
                 </div>
             </div>
         </OverlayModal>

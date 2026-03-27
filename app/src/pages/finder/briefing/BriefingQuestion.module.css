@@ -1,6 +1,6 @@
 .container {
     height: 100%;
-    padding: 24px 16px 0 16px;
+    padding: 0 16px;
     display: flex;
     flex-direction: column;
     align-items: start;
@@ -9,16 +9,14 @@
 
 .question {
     padding-left: 8px;
-    padding-top: 25px;
     font-size: 25px;
     font-weight: 500;
     line-height: 24px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }
 
 .description {
-    padding-left: 8px;
-    padding-top: 15px;
+    margin: 8px 0 10px 8px;
     font-size: 14px;
     font-weight: 300;
     line-height: 19px;
@@ -26,14 +24,15 @@
 }
 
 .answerInput {
-    align-self: stretch;
-    padding: 11px 0 11px 19px;
-    margin-top: 15px;
+    width: 100%;
+    padding: 11px 16px 11px 16px;
     border: none;
-    color: white;
+    color: #FFFFFF;
     caret-color: #7211F8;
     background-color: #7474801F;
     border-radius: 12px;
+    resize: none;
+    box-sizing: border-box;
 
 
     font-family: var(--font-ui);
@@ -41,6 +40,8 @@
     font-weight: 500;
     line-height: 22px;
     letter-spacing: 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 .answerInput::placeholder {
@@ -68,7 +69,7 @@
 }
 
 .tip {
-    margin: 12px 0 22px;
+    margin: 11px 0 22px;
     color: #FFFFFF99;
     padding-left: 8px;
     font-size: 14px;
@@ -99,17 +100,9 @@
     border-radius: 12px;
 }
 
-.selectionBlock > span {
-    display: inline-block;
-    max-width: 100%;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-}
-
 .selectedButton {
     cursor: pointer;
-    color: white;
+    color: #FFFFFF;
     border: none;
     border-radius: 7px;
     font-family: var(--font-primary);
@@ -119,11 +112,11 @@
     background-color: #7211F833;
     display: flex;
     align-items: center;
+    text-align: start;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
     gap: 9px;
-    padding: 5px 8px;
+    padding: 4px 8px;
 }
 
 .extraSelectionButton {
@@ -135,24 +128,17 @@
     min-width: 50px;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.selectedButton > span {
-    display: inline-block;
-    max-width: 100%;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    white-space: wrap;
 }
 
 .selectionSearchInput {
+    height: 30px;
     min-width: 100px;
     flex: 1;
     border: none;
     background-color: transparent;
     border-radius: 12px;
-    color: white;
+    color: #FFFFFF;
     caret-color: #7211F8;
     outline: none;
 
@@ -178,9 +164,7 @@
 }
 
 .selectionTip {
-    padding-left: 8px;
-    margin-top: 20px;
-    margin-bottom: 15px;
+    margin: 18px 0 15px 8px;
     color: #FFFFFF99;
     font-size: 14px;
     font-weight: 300;
@@ -196,9 +180,10 @@
 
 .selectionButton {
     cursor: pointer;
-    color: white;
+    color: #FFFFFF;
     border: none;
     border-radius: 17px;
+    text-align: start;
     font-family: var(--font-primary);
     font-size: 13px;
     line-height: 22px;
@@ -226,7 +211,7 @@
     line-height: 22px;
     letter-spacing: 0;
     border: none;
-    color: white;
+    color: #FFFFFF;
     background-color: #7211F866;
     border-radius: 7px;
 }
@@ -254,7 +239,7 @@
     flex: 1;
     padding: 16px;
     border: none;
-    color: white;
+    color: #FFFFFF;
     background-color: #7211F8;
 }
 

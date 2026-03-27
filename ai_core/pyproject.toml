@@ -1,0 +1,9 @@
+[tool.black]
+line-length = 210
+target-version = ["py311"]
+skip-magic-trailing-comma = true
+
+
+[tool.isort]
+profile = "black"
+line_length = 210

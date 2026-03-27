@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 LABEL loki.include=true loki.service.name=message_processor
 

@@ -17,14 +17,12 @@ interface ToolCardProps {
 export const ToolCard: FC<ToolCardProps> = ({tool, currentToolId, onClose}) => {
     const [, navigate] = useLocation();
 
-    // prettier-ignore
-    const logo = tool.id == 'finder' ?
-        <FinderSelector height="37px" width="58px" style={{
-            "--content-color": "#7211F8"
-        } as CSSProperties}/> :
-        <CatcherSelector height="37px" width="58px" style={{
-            "--content-color": "#898989"
-        } as CSSProperties}/>;
+    const logo =
+        tool.id == "finder" ? (
+            <FinderSelector height="37px" width="58px" style={{"--content-color": "#7211F8"} as CSSProperties} />
+        ) : (
+            <CatcherSelector height="37px" width="58px" style={{"--content-color": "#898989"} as CSSProperties} />
+        );
 
     return (
         <div

@@ -1,19 +1,21 @@
 import styles from "./ProfileSection.module.css";
-import {FC, useRef} from "react";
+import {CSSProperties, FC, useRef} from "react";
 
 import {useLocation} from "wouter";
 
 import {startSubscriptionTrial} from "../../api/base";
 import {useStore} from "../../store/store";
-import {Subscription, User} from "../../types";
+import {SubscriptionImpl} from "../../types/subscription";
+import {UserImpl} from "../../types/user";
 import {getDaysLeftEnding} from "../../utils/text";
+import Avatar from "../common/Avatar/Avatar";
 
 import Eagle from "../../assets/icons/eagle.svg";
 import MoveArrowIcon from "../../assets/icons/move-arrow.svg";
 
 interface ProfileSectionProps {
-    user: User;
-    subscription: Subscription;
+    user: UserImpl;
+    subscription: SubscriptionImpl;
 }
 
 export const ProfileSection: FC<ProfileSectionProps> = ({user, subscription}) => {
@@ -24,7 +26,7 @@ export const ProfileSection: FC<ProfileSectionProps> = ({user, subscription}) =>
     const setSubscription = useStore((s) => s.setSubscription);
 
     const trialRequested = useRef(false);
-    const textColor = isSubscriptionExpired || isMoreThan3days ? "white" : "black";
+    const textColor = isSubscriptionExpired || isMoreThan3days ? "#FFFFFF" : "#000000";
     const contentColor = isSubscriptionExpired ? "#F81B11" : isMoreThan3days ? "#7211F8" : "#F8E811";
     const backgroundColor = isSubscriptionExpired ? "#F81B114D" : isMoreThan3days ? "#7211F84D" : "#F8E8114D";
 
@@ -32,18 +34,18 @@ export const ProfileSection: FC<ProfileSectionProps> = ({user, subscription}) =>
         if (trialRequested.current) return;
         trialRequested.current = true;
 
-        const sub = await startSubscriptionTrial(subscription?.id!);
+        const sub = await startSubscriptionTrial(subscription!.id);
         setSubscription(sub);
         navigate("/subscription/trial-used");
     }
 
     return (
         <>
-            <div className={styles.container} style={{"--bottom-padding": `${isSubscriptionExpired ? 40 : 12}px`} as React.CSSProperties}>
+            <div className={styles.container} style={{"--bottom-padding": `${isSubscriptionExpired ? 40 : 12}px`} as CSSProperties}>
                 <div className={styles.header}>
-                    <img height="30px" width="30px" src={user.avatar_url} alt=" " />
+                    <Avatar height="30px" width="30px" src={user!.avatar_url} />
                     <div className={styles.usernameContainer}>
-                        <span className={styles.username}>{`@${user.username}`}</span>
+                        <span className={styles.username}>{`@${user.getUsername()}`}</span>
                     </div>
                     <div style={{flex: 1}} />
                     <div className={styles.eagleContainer}>
@@ -51,19 +53,19 @@ export const ProfileSection: FC<ProfileSectionProps> = ({user, subscription}) =>
                     </div>
                 </div>
                 {isSubscriptionExpired && subscription.isTrialUsed() ? (
-                    <div className={styles.expiredSubscription} style={{"--background-color": backgroundColor} as React.CSSProperties}>
+                    <div className={styles.expiredSubscription} style={{"--background-color": backgroundColor} as CSSProperties}>
                         <div className={styles.daysLeftHeader}>
                             <span className={styles.daysLeftHeaderText}>//Тариф истекает</span>
                             <Eagle height="16px" width="16px" color={contentColor} />
                         </div>
-                        <div className={styles.daysLeftText} style={{"--color": contentColor} as React.CSSProperties}>
+                        <div className={styles.daysLeftText} style={{"--color": contentColor} as CSSProperties}>
                             <span>{daysLeft}</span>
                             <div className={styles.daysLeftSubtext}>/дней</div>
                         </div>
                         <div
                             className={styles.subscriptionButton}
                             onClick={() => navigate("/subscription")}
-                            style={{"--background-color": contentColor, "--color": textColor} as React.CSSProperties}
+                            style={{"--background-color": contentColor, "--color": textColor} as CSSProperties}
                         >
                             <span>Тариф и оплата</span>
                         </div>
@@ -72,27 +74,27 @@ export const ProfileSection: FC<ProfileSectionProps> = ({user, subscription}) =>
                     <div className={styles.goodSubscription}>
                         <div
                             className={styles.goodTariffSection}
-                            style={{"--border-color": contentColor, "--background-color": backgroundColor} as React.CSSProperties}
+                            style={{"--border-color": contentColor, "--background-color": backgroundColor} as CSSProperties}
                         >
                             <div className={styles.daysLeftHeader}>
                                 <span className={styles.daysLeftHeaderText}>//Тариф истекает</span>
                                 <Eagle height="16px" width="16px" color={contentColor} />
                             </div>
-                            <div className={styles.daysLeftText} style={{"--color": contentColor} as React.CSSProperties}>
+                            <div className={styles.daysLeftText} style={{"--color": contentColor} as CSSProperties}>
                                 <span>{daysLeft}</span>
                                 <div className={styles.daysLeftSubtext}>/{getDaysLeftEnding(daysLeft)}</div>
                             </div>
                             <div
                                 className={styles.subscriptionButton}
                                 onClick={() => navigate("/subscription")}
-                                style={{"--background-color": contentColor, "--color": textColor} as React.CSSProperties}
+                                style={{"--background-color": contentColor, "--color": textColor} as CSSProperties}
                             >
                                 <span>Тариф и оплата</span>
                             </div>
                         </div>
                         {!subscription.isTrialUsed() && (
                             <div className={styles.trialContainer} onClick={handleUseTrial}>
-                                <div className={styles.trialInfo} style={{"--background-color": "#BEF81133"} as React.CSSProperties}>
+                                <div className={styles.trialInfo} style={{"--background-color": "#BEF81133"} as CSSProperties}>
                                     <img height="13px" width="13px" src="/assets/icons/trial-lock.svg" alt=" " />
                                     <span>Пробный доступ</span>
                                 </div>

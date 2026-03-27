@@ -4,6 +4,7 @@ import {useEffect, useState} from "react";
 import {useLocation} from "wouter";
 
 import {fetchBriefing} from "../../../api/briefing";
+import Avatar from "../../../components/common/Avatar/Avatar";
 import Header from "../../../components/common/Header/Header";
 import {useBriefingStore} from "../../../store/finder";
 import {useStore} from "../../../store/store";
@@ -45,14 +46,14 @@ export default function BriefingIntro() {
 
     return (
         <div className={styles.container}>
-            <Header />
+            <Header bottom={48} backTo="/" />
             <div className={styles.introBackground}>
                 <img src="/assets/finder/briefing/intro-background.svg" alt=" " />
             </div>
             <div className={styles.userContainer}>
-                <img height="120px" width="120px" src={user!.avatar_url} alt="Аватар" />
+                <Avatar height="120px" width="120px" src={user!.avatar_url} />
                 <span className={styles.hello}>ПРИВЕТ</span>
-                <span className={styles.username}>@{user?.username}</span>
+                <span className={styles.username}>@{user!.getUsername()}</span>
             </div>
             <div className={styles.introTitle}>
                 <div className={styles.row}>
@@ -63,7 +64,7 @@ export default function BriefingIntro() {
                     <img height="19px" width="19px" className={styles.smallStep} src="/assets/finder/briefing/eagle.svg" alt=" " />
                     <span>Cardinal</span>
                     <div className={styles.midStep}>
-                        <span className={styles.colored}>*</span>
+                        <span style={{color: "#7211F8"}}>*</span>
                     </div>
                     <span>начнёт</span>
                     <img height="19px" width="24px" className={styles.largeStep} src="/assets/finder/briefing/spy.svg" alt=" " />
@@ -82,7 +83,7 @@ export default function BriefingIntro() {
             <div className={styles.afterContainer}>
                 <div className={styles.afterTitle}>
                     <span>После брифинга </span>
-                    <span className={styles.colored}>{">"}</span>
+                    <span style={{color: "#7211F8"}}>{">"}</span>
                 </div>
 
                 {afterTexts.map(({id, textParts}) => (
@@ -113,7 +114,7 @@ export default function BriefingIntro() {
             </button>
             <div className={styles.additionalButtons}>
                 {additionalButtons.map(({text, url}, i) => (
-                    <button key={i} className={styles.additionalButton} onClick={() => navigate(url)}>
+                    <button key={i} className={styles.additionalButton} onClick={() => Telegram.WebApp.openLink(url, {try_instant_view: true})}>
                         {text}
                     </button>
                 ))}

@@ -49,23 +49,29 @@
     font-size: 25px;
     font-weight: 500;
     line-height: 26px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }
 
 .answerInput {
-    padding: 11px 0 11px 16px;
+    width: 100%;
+    padding: 11px 16px 11px 16px;
     margin-top: 18px;
     border: none;
-    color: white;
+    color: #FFFFFF;
     caret-color: #7211F8;
     background-color: #7474801F;
     border-radius: 12px;
+    resize: none;
+    box-sizing: border-box;
+
 
     font-family: var(--font-ui);
     font-size: 15px;
     font-weight: 500;
     line-height: 22px;
     letter-spacing: 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
 .answerInput::placeholder {
@@ -89,7 +95,7 @@
     color: red;
     font-family: var(--font-ui);
     font-weight: bold;
-    font-size: 12px;
+    font-size: 15px;
 }
 
 .tip {
@@ -115,7 +121,7 @@
     flex: 1;
     padding: 16px;
     border: none;
-    color: white;
+    color: #FFFFFF;
     background-color: #7211F8;
 }
 

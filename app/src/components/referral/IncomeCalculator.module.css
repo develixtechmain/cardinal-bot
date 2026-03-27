@@ -10,12 +10,19 @@
 }
 
 .title {
+    margin-right: 3px;
+    display: flex;
+    justify-content: space-between;
     padding-left: 7px;
     font-family: var(--font-secondary);
     font-size: 15px;
     font-weight: 700;
     line-height: 20px;
     letter-spacing: -0.03em;
+}
+
+.title > img {
+    flex-shrink: 0;
 }
 
 .subtitle {
@@ -25,31 +32,34 @@
     font-size: 14px;
     font-weight: 300;
     line-height: 16px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }
 
 .incomeBlock {
+    margin-left: 8px;
     position: relative;
 }
 
 .incomeTitle {
+    max-width: 24dvw;
+    margin: 4px 0 11px;
     font-size: 9px;
     font-weight: 700;
-    line-height: 24px;
+    line-height: 7px;
     letter-spacing: -0.03em;
 }
 
 .incomeValue {
-    text-wrap: nowrap;
     font-family: var(--font-secondary);
     font-size: 15px;
     font-weight: 700;
-    line-height: 32px;
+    line-height: 15px;
     letter-spacing: -0.02em;
 }
 
 .count {
     height: 61px;
+    width: 36dvw;
     display: flex;
     flex-direction: column;
     padding: 6px 16px;
@@ -65,12 +75,12 @@
     position: absolute;
     top: 0;
     left: 36%;
-    width: calc(64vw - 74px);
+    width: calc(64vw - 84px);
     transform: translateX(0);
     height: 61px;
     display: flex;
     flex-direction: column;
-    padding: 6px 16px;
+    padding: 6px 26px 6px 16px;
     color: #BEF811;
     background-color: #364213;
     border: 1px solid #BEF811;
@@ -78,14 +88,30 @@
     z-index: 2;
 }
 
+.summaryEagle {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
+
 .incomeSubtitle {
-    margin-left: 200px;
+    display: flex;
+    flex-direction: row;
+    justify-content: end;
+    margin-top: 10px;
     margin-right: 9px;
     color: #FFFFFF6B;
+    text-align: right;
     font-size: 7px;
     font-weight: 400;
     line-height: 9px;
     letter-spacing: -0.03em;
+}
+
+.incomeSubtitle > span {
+    display: block;
+    width: 32dvw;
+    min-width: 120px;
 }
 
 .sliderWrapper {
@@ -142,25 +168,25 @@
 }
 
 .slider::-webkit-slider-thumb {
-    margin-top: -3px;
     -webkit-appearance: none;
+    margin-top: -3px;
     width: 19px;
     height: 19px;
     border-radius: 50%;
-    background-color: #BEF811;
-    -webkit-mask: radial-gradient(circle 5px at 50% 50%, transparent 99%, #000 100%);
-    mask: radial-gradient(circle 5px at 50% 50%, transparent 99%, #000 100%);
     cursor: pointer;
     border: none;
+
+    background: radial-gradient(circle at center, #8BB412 5px, transparent 6px), #BEF811;
 }
 
 .slider::-moz-range-thumb {
+    -moz-appearance: none;
     margin-top: -3px;
     width: 19px;
     height: 19px;
     border-radius: 50%;
-    background-color: #BEF811;
-    mask: radial-gradient(circle 5px at 50% 50%, transparent 99%, #000 100%);
     cursor: pointer;
     border: none;
+
+    background: radial-gradient(circle at center, #8BB412 5px, transparent 6px), #BEF811;
 }

@@ -1,7 +1,7 @@
 import styles from "./AboutFinderModal.module.css";
 import {FC} from "react";
 
-import {navigate} from "wouter/use-hash-location";
+import {useLocation} from "wouter";
 
 import AboutToolBlock from "../../common/AboutToolModal/AboutToolBlock";
 import AboutToolModal from "../../common/AboutToolModal/AboutToolModal";
@@ -14,6 +14,7 @@ interface AboutFinderModalProps {
 }
 
 const AboutFinderModal: FC<AboutFinderModalProps> = ({isOpen, onClose}) => {
+    const [, navigate] = useLocation();
     const header = (
         <AboutToolModalHeader
             title={[{text: "ИИ лид"}, {text: "//", styles: {color: "#7211F8"}}, {text: "файндер"}]}
@@ -27,8 +28,6 @@ const AboutFinderModal: FC<AboutFinderModalProps> = ({isOpen, onClose}) => {
                 },
                 {text: "Такой уровень точности и релевантности пока недоступен ни на одной другой платформе."}
             ]}
-            icon={<img height="19px" width="38px" src="/assets/contact-catcher/about-icon.svg" alt=" " />}
-            onClose={onClose}
         />
     );
 
@@ -45,7 +44,7 @@ const AboutFinderModal: FC<AboutFinderModalProps> = ({isOpen, onClose}) => {
     );
 
     return (
-        <AboutToolModal isOpen={isOpen} onClose={onClose} header={header}>
+        <AboutToolModal isOpen={isOpen} onClose={onClose} header={header} icon={<img height="17px" width="33px" src="/assets/finder/about-icon.svg" alt=" " />}>
             <div className={styles.toolImage}>
                 <img height="159px" width="345px" src="/assets/finder/about-tool.svg" alt=" " />
             </div>

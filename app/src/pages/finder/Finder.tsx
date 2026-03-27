@@ -16,17 +16,18 @@ import ToolSelectionModal from "../../components/common/ToolSelection/ToolSelect
 import ToolSelector from "../../components/common/ToolSelection/ToolSelector";
 import AboutContactCatcherModal from "../../components/contact-catcher/AboutModal/AboutContactCatcherModal";
 import CircleStatus from "../../components/finder/CircleStatus/CircleStatus";
-import TasksLearningModal from "../../components/finder/TasksLearningModal/TasksLearningModal";
+import TaskLimitReachedModal from "../../components/finder/TaskLimitReachedModal/TaskLimitReachedModal";
 import {TasksLearningSection} from "../../components/finder/TasksLearningSection/TasksLearningSection";
 import {TasksStatisticsSection} from "../../components/finder/TasksStatisticsSection/TasksStatisticsSection";
 import {useFinder} from "../../store/finder";
 import {useStore} from "../../store/store";
+import {openLink} from "../../utils/common";
 import {actionButtons, tools} from "../../utils/consts";
 
 import MoveArrowIcon from "../../assets/icons/move-arrow.svg";
 
 export default function Finder() {
-    const [location, navigate] = useLocation();
+    const [, navigate] = useLocation();
     const [loading, setLoading] = useState(true);
     const isTasksLoading = useRef(false);
     const isTasksStatisticsLoading = useRef(false);
@@ -42,10 +43,10 @@ export default function Finder() {
 
     const [isToolSelectionOpen, setIsToolSelectionOpen] = useState(false);
     const [isAboutCatcherOpen, setIsAboutContactCatcherOpen] = useState(false);
-    const [isTasksLearningModalOpen, setIsTasksLearningModalOpen] = useState(false);
+    const [isTaskLimitReachedOpen, setIsTaskLimitReachedOpen] = useState(false);
 
     useEffect(() => {
-        if (tasks.length >= 0 && tasksStats) {
+        if (tasks.length > 0 && tasksStats) {
             setLoading(false);
         }
     }, [tasks, tasksStats]);
@@ -57,7 +58,7 @@ export default function Finder() {
 
             const tasks = await fetchUserTasks();
 
-            if (tasks.length < 1) {
+            if (tasks.length == 0) {
                 navigate("/finder/briefing");
             } else {
                 setTasks(tasks);
@@ -84,7 +85,8 @@ export default function Finder() {
     return (
         <div className={styles.container}>
             <AboutContactCatcherModal isOpen={isAboutCatcherOpen} onClose={() => setIsAboutContactCatcherOpen(false)} />
-            <Header />
+            <TaskLimitReachedModal isOpen={isTaskLimitReachedOpen} onClose={() => setIsTaskLimitReachedOpen(false)} />
+            <Header backTo="" />
             <ToolSelector tool={tools.finder} onClick={() => setIsToolSelectionOpen(true)} />
             <ToolSelectionModal toolId={tools.finder.id} isOpen={isToolSelectionOpen} onClose={() => setIsToolSelectionOpen(false)} />
 
@@ -94,19 +96,18 @@ export default function Finder() {
                 <span> сегодня</span>
             </div>
 
-            <CircleStatus activeCount={subscription?.isActive() ? Object.values(tasksStats!).reduce((sum, stats) => sum + stats.today, 0) : 0} />
+            <CircleStatus activeCount={subscription!.isActive() ? Object.values(tasksStats!).reduce((sum, stats) => sum + stats.today, 0) : 0} />
 
-            {/*TODO URL to channel*/}
             <WideButton
                 color="#7211F833"
                 text={
                     <div className={styles.moveButton}>
                         <MoveArrowIcon color="#7211F8" />
-                        <span style={{color: "#7211F8"}}>Перейти в канал</span>
+                        <span style={{color: "#7211F8"}}>Перейти к заказам</span>
                     </div>
                 }
                 buttonStyle={{borderRadius: 12, height: 54, maxWidth: "70%", margin: "0 auto"}}
-                onClick={() => navigate("https://google.com")}
+                onClick={() => openLink("https://t.me/cardinal_leadfinder_bot")}
             />
 
             <TasksStatisticsSection user={user!} tasks={tasks} tasksStats={tasksStats!} subscription={subscription!} />
@@ -117,11 +118,10 @@ export default function Finder() {
                 isMoreThan3days={subscription!.daysLeft() > 3}
             />
             <TasksLearningSection
-                openLearning={() => setIsTasksLearningModalOpen(true)}
                 isActive={subscription!.isActive()}
                 newTaskAvailable={tasks.length < 5}
+                openTaskLimit={() => setIsTaskLimitReachedOpen(true)}
             />
-            <TasksLearningModal tasks={tasks} isOpen={isTasksLearningModalOpen} onClose={() => setIsTasksLearningModalOpen(false)} />
 
             <Delimiter />
             <ToolsSection

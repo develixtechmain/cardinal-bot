@@ -3,11 +3,12 @@ langchain
 langchain_core
 langchain_openai
 langchain_community
-clickhouse-driver
 python-dateutil
 python-dotenv
 pydantic
 numpy
 httpx
+redis
+xxhash
 asyncpg
 cachetools

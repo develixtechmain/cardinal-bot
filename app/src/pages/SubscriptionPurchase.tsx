@@ -1,10 +1,11 @@
 import styles from "./SubscriptionPurchase.module.css";
-import {FC, useEffect, useRef, useState} from "react";
+import {CSSProperties, ChangeEvent, FC, useEffect, useRef, useState} from "react";
 
 import {useLocation, useParams} from "wouter";
 
 import {checkPurchase, fetchPurchase} from "../api/base";
 import WideButton from "../components/common/Buttons/WideButton";
+import Header from "../components/common/Header/Header";
 import {VerifyBlock} from "../components/subscription/purchase/VerifyBlock";
 import {useErrorStore} from "../store/error";
 import {useStore} from "../store/store";
@@ -91,7 +92,7 @@ const SubscriptionPurchase: FC = () => {
         }
     };
 
-    const handleEmailChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleEmailChange = (event: ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
         setEmail(value);
 
@@ -110,8 +111,15 @@ const SubscriptionPurchase: FC = () => {
         }
     };
 
+    const backStep = (): boolean => {
+        if (step <= 1) return false;
+        setStep(step - 1);
+        return true;
+    };
+
     return (
         <div className={styles.container}>
+            <Header backTo="" backoff="/subscription" icon={null} top={0} backStep={backStep} />
             <div className={styles.stepsBlock}>
                 <div className={styles.stepBlock}>
                     <div className={styles.selectedStep} />
@@ -127,7 +135,10 @@ const SubscriptionPurchase: FC = () => {
                 </div>
             </div>
             {step === 1 && (
-                <div ref={purchaseBlockRef} className={styles.purchaseBlock} style={{"--separator-top": "-100px"} as React.CSSProperties}>
+                <div ref={purchaseBlockRef} className={styles.purchaseBlock} style={{"--separator-top": "-100px"} as CSSProperties}>
+                    <div className={styles.logo}>
+                        <img height="18px" width="72px" src="/assets/subscription/purchase/logo.svg" alt=" " />
+                    </div>
                     <div className={styles.purchaseHeader}>
                         <div className={styles.purchaseTitle}>Наименование товара</div>
                         <div className={styles.purchaseItem}>
@@ -170,7 +181,7 @@ const SubscriptionPurchase: FC = () => {
                         text={
                             <div className={styles.nextStepButton}>
                                 <img height="15px" width="17px" src="/assets/finder/task/forward.svg" alt=" " />
-                                <span style={{color: "white"}}>Далее</span>
+                                <span style={{color: "#FFFFFF"}}>Далее</span>
                             </div>
                         }
                         buttonStyle={{borderRadius: 14, height: 47, marginTop: 55}}
@@ -215,7 +226,7 @@ const SubscriptionPurchase: FC = () => {
                             color="#7211F8"
                             text={
                                 <div className={styles.subscriptionButton}>
-                                    <Money height="13px" width="19px" color="white" />
+                                    <Money height="13px" width="19px" color="#FFFFFF" />
                                     Перейти к оплате
                                 </div>
                             }
@@ -226,13 +237,7 @@ const SubscriptionPurchase: FC = () => {
                                 setStep(3);
                             }}
                         />
-                        <WideButton
-                            color="#7211F833"
-                            textColor="#7211F8"
-                            text="Назад"
-                            buttonStyle={{borderRadius: 14, height: 47}}
-                            onClick={() => setStep(1)}
-                        />
+                        <WideButton color="#7211F833" textColor="#7211F8" text="Назад" buttonStyle={{borderRadius: 14, height: 47}} onClick={backStep} />
                     </div>
                 </div>
             )}

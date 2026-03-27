@@ -2,7 +2,8 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from api.security import authenticate_user, create_token, parse_user_id
-from service import fetch_user_by_id, create_user
+from service import users_tokens_total
+from service.users import create_user, fetch_user_by_id
 
 router = APIRouter()
 
@@ -15,21 +16,22 @@ class AuthRefreshRequest(BaseModel):
     refresh_token: str
 
 
-@router.post("/")
+@router.post("")
 async def auth(request: AuthRequest):
     tg_user, ref = authenticate_user(request.init_data)
     try:
-        user = await fetch_user_by_id(tg_user['id'], True)
+        user = await fetch_user_by_id(tg_user["id"], True)
     except HTTPException as e:
         if e.status_code == 404:
             if ref is None:
                 user = await create_user(tg_user)
             else:
-                ref_tg_id = ref[4:]
+                ref_tg_id = int(ref[4:])
                 ref_user = await fetch_user_by_id(ref_tg_id, True)
-                user = await create_user(tg_user, ref_user['id'])
+                user = await create_user(tg_user, ref_user["id"])
         else:
             raise e
+    users_tokens_total.labels(user_id=str(user["id"]), service="backend", username=str(user["username"])).inc()
     return create_token(user)
 
 

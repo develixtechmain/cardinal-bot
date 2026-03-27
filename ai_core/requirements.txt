@@ -13,3 +13,5 @@ uvicorn
 
 starlette
 PyJWT
+prometheus-client
+prometheus-fastapi-instrumentator

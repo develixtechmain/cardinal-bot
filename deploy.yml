@@ -74,6 +74,7 @@ services:
       Qdrant__ApiKey: ${QDRANT_KEY}
       ApiKey: ${EMBEDDINGS_PROCESSOR_KEY}
       ConnectionStrings__Postgres: ${EMBEDDINGS_PROCESSOR_DB_CONNECTION_STRING}
+      Search__ScoreThreshold: 0.86
     depends_on:
       - qdrant
       - embeddings
@@ -103,6 +104,8 @@ services:
       ALPHA_KEY: ${ALPHA_KEY}
       LAVA_KEY: ${LAVA_KEY}
       LAVA_X_KEY: ${LAVA_WEBHOOK_KEY}
+      ROBOKASSA_PASS_1: ${ROBOKASSA_PASS_1}
+      ROBOKASSA_PASS_2: ${ROBOKASSA_PASS_2}
       SECURITY_KEY: ${SECURITY_KEY}
       AI_CORE_KEY: ${AI_CORE_KEY}
       API_KEY: ${BACKEND_CORE_KEY}
@@ -124,6 +127,7 @@ services:
     image: 162.120.16.215:54710/cardinal/ai-core:0.0.3-SNAPSHOT
     restart: unless-stopped
     environment:
+      ENABLE_METRICS: ${ENABLE_METRICS}
       AI_MODE: prod
       LANGSMITH_TRACING: true
       LANGSMITH_PROJECT: cardinal
@@ -195,9 +199,10 @@ services:
     image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.8
     restart: unless-stopped
     environment:
-      - MODEL_ID=intfloat/multilingual-e5-base
-      - NUM_WORKERS=2
-      - POOLING=mean
+      - MODEL_ID: intfloat/multilingual-e5-base
+      - NUM_WORKERS: 2
+      - POOLING: mean
+      - MAX_CLIENT_BATCH_SIZE: 1000
     volumes:
       - embeddings-data:/data
     deploy:

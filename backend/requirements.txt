@@ -7,7 +7,9 @@ asyncpg
 cachetools
 fastapi
 uvicorn
-
+apscheduler
+redis
+robokassa
 starlette
 PyJWT
 aiogram

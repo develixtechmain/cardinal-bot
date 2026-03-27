@@ -7,7 +7,7 @@ export interface Tool {
     description: string;
     selectorParts: string[];
     url: string;
-    color: "purple" | "blue";
+    external: boolean;
 }
 
 export interface ActionButton {
