@@ -25,6 +25,17 @@ async def fetch_user_by_id(user_id: uuid.UUID):
     raise Exception(f"User {user_id} not found")
 
 
+async def fetch_user_task(task_id):
+    async with pool.acquire() as conn:
+        result = await conn.fetchrow(
+            "SELECT title, tags FROM user_tasks WHERE id = $1", task_id
+        )
+        if result:
+            return result
+        return None
+
+
+
 async def fetch_user_from_db(user_id: uuid.UUID):
     async with pool.acquire() as conn:
         return await conn.fetchrow("SELECT * FROM users WHERE id = $1", user_id)
