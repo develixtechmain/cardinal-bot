@@ -20,15 +20,21 @@ export default function ScrollToTop() {
 
     useEffect(() => {
         const tg = window.Telegram?.WebApp;
-        const intervalId = setInterval(() => {
-            if (!tg) {
-                return;
-            }
+
+        const updateTelegramHeight = () => {
+            if (!tg) return;
             const telegramHeight = tg.viewportStableHeight || tg?.viewportHeight || window.innerHeight;
             document.documentElement.style.setProperty("--tg-vh", `${telegramHeight}px`);
-        }, 1000);
+        };
 
-        return () => clearInterval(intervalId);
+        const intervalId = setInterval(updateTelegramHeight, 500);
+
+        window.addEventListener("resize", updateTelegramHeight);
+
+        return () => {
+            clearInterval(intervalId);
+            window.removeEventListener("resize", updateTelegramHeight);
+        };
     }, []);
 
     return null;

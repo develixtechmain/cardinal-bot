@@ -2,7 +2,8 @@ import os
 from typing import Callable
 
 import jwt
-from fastapi import Request, HTTPException
+from fastapi import HTTPException, Request
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
 from utils import validate_env
@@ -16,9 +17,21 @@ jwt_secret_key: str
 
 INVALID_INIT_DATA = "Invalid Telegram init data"
 KEY_PATHS = {"/api/rules/check", "/api/rules/extract"}
-EXCLUDED_PATHS = {"/docs", "/openapi.json", *KEY_PATHS}
+EXCLUDED_PATHS = {"/metrics", "/docs", "/openapi.json", *KEY_PATHS}
 
 api_key: str
+
+
+class KeyAuthMiddleware(BaseHTTPMiddleware):
+
+    async def dispatch(self, request, call_next):
+        return await key_auth_middleware(request, call_next)
+
+
+class JWTAuthMiddleware(BaseHTTPMiddleware):
+
+    async def dispatch(self, request, call_next):
+        return await jwt_auth_middleware(request, call_next)
 
 
 async def key_auth_middleware(request: Request, call_next: Callable):

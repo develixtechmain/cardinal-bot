@@ -1,9 +1,9 @@
 from typing import Optional
 
-from fastapi import Request, APIRouter
+from fastapi import APIRouter, Request
 from pydantic import BaseModel
 
-from service import fetch_user_by_id, patch_user_by_id
+from service.users import fetch_user_by_id, patch_user_by_id
 
 router = APIRouter()
 

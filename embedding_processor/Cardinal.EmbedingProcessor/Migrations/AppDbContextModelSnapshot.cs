@@ -34,10 +34,6 @@ namespace Cardinal.EmbedingProcessor.Migrations
                     b.Property<Guid>("TaskId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Vectors")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("TaskId");

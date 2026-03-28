@@ -1,6 +1,11 @@
 from enum import Enum
 
 
+class UserChannelType(str, Enum):
+    CORE = "core"
+    RECOMMENDATION = "recommendation"
+
+
 class TransactionStatus(str, Enum):
     TEMPLATE = "template"
     PENDING = "pending"
@@ -12,7 +17,8 @@ class TransactionStatus(str, Enum):
 class TransactionPayment(str, Enum):
     LAVA = "lava"
     ALPHA = "alpha"
-    BALANCE = 'balance'
+    ROBOKASSA = "robokassa"
+    BALANCE = "balance"
 
 
 class SubscriptionPeriod(int, Enum):
@@ -22,11 +28,7 @@ class SubscriptionPeriod(int, Enum):
 
     @property
     def price(self):
-        prices = {
-            SubscriptionPeriod.ONE_MONTH: 4900,
-            SubscriptionPeriod.THREE_MONTHS: 12500,
-            SubscriptionPeriod.TWELVE_MONTHS: 42000
-        }
+        prices = {SubscriptionPeriod.ONE_MONTH: 4900, SubscriptionPeriod.THREE_MONTHS: 12500, SubscriptionPeriod.TWELVE_MONTHS: 42000}
         return prices[self]
 
 

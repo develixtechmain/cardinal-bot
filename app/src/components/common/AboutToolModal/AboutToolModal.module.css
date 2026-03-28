@@ -1,13 +1,57 @@
 .overlay {
-    padding: 16px 17px 17px 16px;
     overflow-y: hidden;
 }
 
 .container {
-    padding: 15px 15px 26px 16px;
+    top: 16px;
+    left: 16px;
+    right: 17px;
+    bottom: 17px;
+    padding: 15px 15px 0 16px;
     border: 1px solid #FFFFFF12;
     background: linear-gradient(to bottom, #202020, #0D0D0D);
     border-radius: 23px;
+    position: fixed;
     height: auto;
-    overflow-y: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    position: sticky;
+    top: 0;
+    min-height: 28px;
+    padding: 7px 6px 7px 14px;
+    gap: 21px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    color: black;
+    background-color: #7211F8;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 18px;
+    letter-spacing: -0.05em;
+    z-index: 9;
+}
+
+.header > span {
+    flex: 1;
+}
+
+.header > img {
+    flex-shrink: 0;
+}
+
+.content {
+    padding-bottom: 26px;
+    overflow-y: scroll;
+    flex: 1;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+
+    -webkit-mask-image: linear-gradient(to bottom, transparent 10px, black 20px);
+    mask-image: linear-gradient(to bottom, transparent 10px, black 20px);
 }

@@ -1,17 +1,12 @@
 .container {
-    padding: 50px 16px 0 16px;
+    padding: 16px 16px 0 16px;
     position: relative;
-    height: var(--tg-vh);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
     overflow-x: hidden;
-    background: radial-gradient(circle at bottom, #7211F8FC 16%, #070707 100%);
+    background: linear-gradient(to bottom, #070707, #7211F8);
 }
 
 .backgroundLogo {
+    pointer-events: none;
     overflow: hidden;
     position: absolute;
     top: 42dvh;
@@ -28,31 +23,30 @@
     display: block;
 }
 
-.progress {
-    margin-bottom: 21px;
-    z-index: 1;
-}
-
-.logo {
-    padding-bottom: 20px;
-    z-index: 1;
+.content {
+    gap: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
 }
 
 .textContainer {
-    padding: 0 60px;
+    padding: 0 29px;
+    gap: 8px;
     display: flex;
     flex-direction: column;
     text-align: center;
-    gap: 8px
+    z-index: 1;
 }
 
 .title {
+    padding: 0 6px;
     font-family: var(--font-secondary);
     font-size: 25px;
     font-weight: 700;
     line-height: 29px;
     letter-spacing: -1px;
-    z-index: 1;
 }
 
 .subtitle {
@@ -61,72 +55,93 @@
     font-weight: 300;
     line-height: 15px;
     letter-spacing: 0;
-    z-index: 1;
-}
-
-.subtitleHeader {
-    font-weight: 600;
-}
-
-.descriptionContainer {
-    display: flex;
-    flex-direction: row;
-    margin-left: 60px;
 }
 
 .description {
-    margin: 16px 15px 14px 0;
+    margin: 22px 15px 0 15px;
+    padding: 8px 13px 10px 14px;
     display: flex;
     flex-direction: column;
     text-align: start;
-    gap: 12px;
-    padding: 8px 14px;
+    gap: 11px;
     border-left: 2px solid #7211F8;
     background-color: #7211F81A;
     border-radius: 7px;
     font-size: 12px;
+    font-weight: 400;
     line-height: 11px;
     letter-spacing: -0.03em;
-    z-index: 1;
 }
 
-.descriptionHeader {
-    font-size: 15px;
+.footer {
+    position: relative;
+    gap: 30px;
+    margin-top: 30px;
+    padding: 30px 0;
+    width: calc(100% + 32px);
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(to bottom, #0D0D0D, #41088F);
+    border-top-left-radius: 18px;
+    border-top-right-radius: 18px;
 }
 
-.leadsButton {
-    cursor: pointer;
-    margin-top: 60px;
-    width: 100%;
-    min-height: 52px;
-    max-height: 52px;
-    border: 1px solid #FFFFFF;
+.footerMessage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 11px 44px 0 44px;
+    gap: 12px;
     color: white;
-    background-color: #FFFFFF33;
-    border-radius: 12px;
     font-family: var(--font-ui);
-    font-size: 17px;
+    font-size: 14px;
     font-weight: 500;
-    line-height: 22px;
+    line-height: 15px;
     letter-spacing: -1px;
+}
+
+.footerIcon {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.footerText {
+    font-family: var(--font-ui);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 15;
+    letter-spacing: -1px;
+}
+
+.footerButtons {
+    gap: 6px;
+    padding: 0 16px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     z-index: 1;
 }
 
-.clientButton {
-    cursor: pointer;
-    width: 100%;
-    min-height: 52px;
-    max-height: 52px;
-    margin-top: 6px;
-    margin-bottom: 16px;
-    border: none;
-    color: black;
-    background-color: white;
+/* FIXME probably buttons can be fixed some better way */
+.footerButtons > div,
+.footerButtons button {
+    height: 52px !important;
+    min-height: 52px !important;
+    max-height: 52px !important;
+    overflow: hidden;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+}
+
+.button {
+    height: 52px;
     border-radius: 12px;
     font-family: var(--font-ui);
     font-size: 17px;
     font-weight: 500;
-    line-height: 22px;
-    letter-spacing: -1px;
-    z-index: 1;
+    line-height: 22;
+    letter-spacing: 0;
 }

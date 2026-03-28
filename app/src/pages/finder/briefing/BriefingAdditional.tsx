@@ -1,5 +1,5 @@
 import styles from "./BriefingAdditional.module.css";
-import {useEffect, useState} from "react";
+import {ChangeEvent, useEffect, useRef, useState} from "react";
 
 import {useLocation} from "wouter";
 
@@ -7,6 +7,7 @@ import {useBriefingStore} from "../../../store/finder";
 
 export default function BriefingAdditional() {
     const [, navigate] = useLocation();
+    const answerAreaRef = useRef<HTMLTextAreaElement>(null);
     const briefingId = useBriefingStore((s) => s.id);
 
     if (!briefingId) {
@@ -37,7 +38,22 @@ export default function BriefingAdditional() {
         setAnswerError("");
     }, [additionalQuestions]);
 
-    const handleAnswerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    useEffect(() => {
+        if (!answerAreaRef.current) return;
+
+        const area = answerAreaRef.current;
+        area.style.height = "auto";
+        area.style.minHeight = "auto";
+
+        requestAnimationFrame(() => {
+            const min = answerError ? 64 : 66;
+            const height = Math.max(min, Math.min(area.scrollHeight, 230)) + "px";
+            area.style.height = height;
+            area.style.minHeight = height;
+        });
+    }, [answerText]);
+
+    const handleAnswerChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
         const answer = event.target.value;
         if (answer.trim() === "") {
             setAnswerError("Введите ответ на вопрос");
@@ -70,8 +86,8 @@ export default function BriefingAdditional() {
             </div>
             <div className={styles.question}>{question?.question || ""}</div>
 
-            <input
-                type="text"
+            <textarea
+                ref={answerAreaRef}
                 id="answer_text"
                 value={answerText}
                 onChange={handleAnswerChange}

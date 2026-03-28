@@ -1,6 +1,6 @@
 import {FC, useEffect, useRef, useState} from "react";
 
-import {Route, Switch} from "wouter";
+import {Route, Switch, useLocation} from "wouter";
 
 import {ProtectedRoute} from "./ProtectedRoute";
 import ScrollToTop from "./ScrollToTop";
@@ -22,8 +22,11 @@ import BriefingIntro from "./pages/finder/briefing/BriefingIntro";
 import BriefingQuestion from "./pages/finder/briefing/BriefingQuestion";
 import BriefingVerify from "./pages/finder/briefing/BriefingVerify";
 import {useStore} from "./store/store";
+import {valuesAreDifferent} from "./utils/common";
 
 const App: FC = () => {
+    const [location] = useLocation();
+
     const isUserLoading = useRef(false);
     const isSubscriptionLoading = useRef(false);
 
@@ -45,10 +48,16 @@ const App: FC = () => {
             return;
         }
 
+        window.Telegram.WebApp.onEvent("backButtonClicked", () => {
+            if (location !== "/") window.history.back();
+        });
+
         if (!isReady) {
             tg.ready();
             setIsReady(true);
         }
+
+        return window.Telegram.WebApp.offEvent("backButtonClicked", () => {});
     }, [isReady]);
 
     useEffect(() => {
@@ -87,10 +96,7 @@ const App: FC = () => {
                     isUserLoading.current = false;
                 }
             } else {
-                if (
-                    user.avatar_url !== user.tg.photo_url ||
-                    (user.username !== user.tg.username && !(user.tg.username == undefined && user.username === "Unknown"))
-                ) {
+                if (valuesAreDifferent(user.avatar_url, user.tg.photo_url) || valuesAreDifferent(user.username, user.tg.username)) {
                     const updatedUser = await patchUser(user);
                     setUser({...updatedUser, tg: tg.initDataUnsafe.user!});
                 }

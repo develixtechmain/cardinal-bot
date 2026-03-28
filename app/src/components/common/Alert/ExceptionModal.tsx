@@ -22,6 +22,7 @@ const ExceptionModal: FC<ExceptionModalProps> = ({isOpen, onClose}) => {
             closeOnContentClick={true}
         >
             <div className={styles.container}>
+                <img height="28px" width="30px" className={styles.closeButon} onClick={onClose} src="/assets/icons/close.svg" alt="CLOSE" />
                 <img height="55px" width="60px" src="/assets/error.svg" alt="ОШИБКА!" />
                 <span>Тех ошибка</span>
                 <span className={styles.description}>

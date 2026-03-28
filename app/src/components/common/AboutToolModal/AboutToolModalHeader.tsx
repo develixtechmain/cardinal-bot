@@ -1,27 +1,19 @@
 import styles from "./AboutToolModalHeader.module.css";
-import {FC, ReactElement} from "react";
+import {FC} from "react";
 
 import {TextPart} from "../../../types";
 import Delimiter from "../Delimiter/Delimiter";
 
 interface AboutToolModalHeaderProps {
-    icon: ReactElement;
     title: TextPart[];
     description: string;
     infoTitle: string;
     infoDescription: TextPart[];
-    onClose: () => void;
 }
 
-const AboutToolModalHeader: FC<AboutToolModalHeaderProps> = ({icon, title, description, infoTitle, infoDescription, onClose}) => {
+const AboutToolModalHeader: FC<AboutToolModalHeaderProps> = ({title, description, infoTitle, infoDescription}) => {
     return (
         <>
-            <div className={styles.header}>
-                {icon}
-                <span>как работает этот инструмент</span>
-                <img height="23px" width="25px" src="/assets/about-exit.svg" alt="CLOSE" onClick={onClose} />
-            </div>
-
             <div className={styles.title}>
                 <span>
                     {title.map(({text, styles}, index) => (

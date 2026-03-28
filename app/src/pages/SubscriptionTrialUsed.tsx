@@ -16,14 +16,14 @@ export const SubscriptionTrialUsed = () => {
         if (!subscription) navigate("/");
     }, []);
 
-    const endsAt = subscription?.subscription_ends_at || subscription?.trial_ends_at;
+    const endsAt = subscription!.subscription_ends_at || subscription!.trial_ends_at;
 
     return (
         <div className={styles.container}>
             <img height="75px" width="75px" className={styles.icon} src="/assets/trial-used.svg" alt=" " />
             <div className={styles.textContainer}>
                 <div className={styles.title}>
-                    <span className={styles.colored}>//</span>
+                    <span style={{color: "#BEF811"}}>//</span>
                     <span>Тариф активирован</span>
                 </div>
                 <div className={styles.description}>

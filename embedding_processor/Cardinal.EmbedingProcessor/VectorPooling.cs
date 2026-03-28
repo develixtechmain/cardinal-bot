@@ -43,4 +43,4 @@ public static class VectorPooling
         }
         return result;
     }
-} 
+}

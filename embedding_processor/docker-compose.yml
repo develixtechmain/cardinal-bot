@@ -18,7 +18,7 @@ services:
       - Qdrant__ApiKey=a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d # Ключ API для Qdrant
       # Новые параметры поиска (закомментированы, будут использоваться значения по умолчанию из appsettings.json, если не заданы здесь)
       # - Search__TopN=1000
-      # - Search__ScoreThreshold=0.85
+      - Search__ScoreThreshold=0.865
       # - Search__BayesianAlpha=1.0
       # - Search__BayesianBeta=1.0
       # - Search__MinGroupScoreSumThreshold=0.6
@@ -35,6 +35,7 @@ services:
       - MODEL_ID=intfloat/multilingual-e5-base
       - NUM_WORKERS=2 # Настройте в соответствии с вашими ресурсами CPU
       - POOLING=mean
+      - MAX_CLIENT_BATCH_SIZE=1000
     ports:
       - "10080:80"
     volumes:

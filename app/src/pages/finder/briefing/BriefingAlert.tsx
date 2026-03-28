@@ -4,6 +4,7 @@ import {useEffect, useState} from "react";
 import {useLocation} from "wouter";
 
 import {fetchBriefing} from "../../../api/briefing";
+import Header from "../../../components/common/Header/Header";
 import BriefingFullExampleModal from "../../../components/finder/BriefingExampleModal/BriefingFullExampleModal";
 import {useBriefingStore} from "../../../store/finder";
 import {useStore} from "../../../store/store";
@@ -47,7 +48,13 @@ export default function BriefingAlert() {
     return (
         <div className={styles.container}>
             <BriefingFullExampleModal isOpen={isExamplesOpen} onClose={() => setIsExamplesOpen(false)} />
-            <img height="75px" width="75px" src="/assets/finder/briefing/alert.svg" alt="ВНИМАНИЕ!" />
+            <Header
+                height={75}
+                top={0}
+                bottom={10}
+                backTo=""
+                icon={<img height="75px" width="75px" src="/assets/finder/briefing/alert.svg" alt="ВНИМАНИЕ!" />}
+            />
 
             <div className={styles.alertTitle}>
                 <span>Прочти перед стартом брифинга — </span>
@@ -74,7 +81,7 @@ export default function BriefingAlert() {
                             <div>
                                 {textParts.map(({bold, text}, index) => (
                                     <span key={index}>
-                                        <span style={bold ? undefined : {fontWeight: 400}}>{text}</span>
+                                        <span style={bold ? undefined : {fontWeight: 400, color: "#FFFFFF80"}}>{text}</span>
                                         {index < textParts.length - 1 && <span> </span>}
                                     </span>
                                 ))}

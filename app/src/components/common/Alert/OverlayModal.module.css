@@ -4,10 +4,18 @@
     left: 0;
     height: var(--tg-vh);
     width: 100%;
-    backdrop-filter: blur(4px);
+    backdrop-filter: var(--blur);
     display: flex;
     justify-content: center;
     align-items: var(--align);
     z-index: 1000;
     overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.wrapper {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }

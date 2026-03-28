@@ -2,73 +2,58 @@ import asyncio
 import logging.config
 import os
 from contextlib import asynccontextmanager
+from zoneinfo import ZoneInfo
 
 import dotenv
 import uvicorn
-from fastapi import FastAPI, Request, HTTPException
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from prometheus_fastapi_instrumentator import Instrumentator
-from starlette.middleware.cors import CORSMiddleware
+from starlette.responses import JSONResponse
 
-import ai
-import alpha
 import bot
-import embedding
-import lava
-import selarti
 from api import *
-from api import security
+from api.security import JWTAuthMiddleware, KeyAuthMiddleware, LavaAuthMiddleware, WebhookAuthMiddleware, init_security
 from bot import *
-from service import init_postgresql, disconnect, check_transactions
+from bot.notification.notifier import notifier
+from external import ai, embedding
+from external.payment import alpha, lava, robo
+from service.db import disconnect, init_postgresql, notification_limits_cache_clear, task_stats_cache_clear
+from service.subscriptions import check_transactions, check_unsubscribed, robo_recurrency, unsubscribed_daily_notification
 
 LOGGING_CONFIG = {
     "version": 1,
     "disable_existing_loggers": False,
-    "formatters": {
-        "default": {
-            "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-        },
-    },
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "default",
-            "level": "DEBUG",
-        },
-    },
+    "formatters": {"default": {"format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s"}},
+    "handlers": {"console": {"class": "logging.StreamHandler", "formatter": "default", "level": "DEBUG"}},
     "loggers": {
-        "": {  # root logger
-            "handlers": ["console"],
-            "level": "DEBUG",
-        },
-        "uvicorn.error": {
-            "handlers": ["console"],
-            "level": "DEBUG",
-            "propagate": False,
-        },
-        "uvicorn.access": {
-            "handlers": ["console"],
-            "level": "INFO",
-            "propagate": False,
-        },
+        "": {"handlers": ["console"], "level": "DEBUG"},
+        "uvicorn.error": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
+        "uvicorn.access": {"handlers": ["console"], "level": "INFO", "propagate": False},
     },
 }
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger(__name__)
 
-tasks = [check_transactions]
+cron_scheduler: BackgroundScheduler
+tasks = [check_transactions, check_unsubscribed, robo_recurrency, notifier]
 tasksFutures = []
 
 
 @asynccontextmanager
 async def lifespan(_):
+    global cron_scheduler
+
     logger.info("AI Core startup initiated.")
 
     try:
         dotenv.load_dotenv()
 
         try:
-            security.init_security()
+            init_security()
         except Exception as e:
             raise RuntimeError(f"Failed to configure security") from e
 
@@ -93,9 +78,9 @@ async def lifespan(_):
             raise RuntimeError(f"Failed to configure alpha") from e
 
         try:
-            selarti.init_selarti()
+            robo.init_robokassa()
         except Exception as e:
-            raise RuntimeError(f"Failed to configure selarti") from e
+            raise RuntimeError(f"Failed to configure robokassa") from e
 
         try:
             await bot.init_core_webhook()
@@ -116,6 +101,12 @@ async def lifespan(_):
         instrumentator.expose(app, endpoint="/metrics", include_in_schema=False)
         logger.info(f"Metrics enabled {os.environ.get('ENABLE_METRICS', False)}.")
 
+        cron_scheduler = AsyncIOScheduler(timezone=ZoneInfo("Europe/Moscow"))
+        cron_scheduler.add_job(task_stats_cache_clear, id="task_stats_cache_clear", trigger="cron", hour=23, minute=50, replace_existing=True)
+        cron_scheduler.add_job(unsubscribed_daily_notification, id="unsubscribed_daily_notification", trigger="cron", hour=23, minute=50, replace_existing=True)
+        cron_scheduler.add_job(notification_limits_cache_clear, id="notification_limits_cache_clear", trigger="cron", hour=00, minute=00, replace_existing=True)
+        cron_scheduler.start()
+
         for i, task in enumerate(tasks):
             tasksFutures.append(asyncio.create_task(task()))
             logger.info(f"Task {i} started.")
@@ -133,6 +124,7 @@ async def lifespan(_):
             except asyncio.CancelledError:
                 print(f"Task {i} cancelled gracefully.")
 
+        cron_scheduler.shutdown()
         await disconnect()
 
         await embedding.stop_embedding()
@@ -144,26 +136,24 @@ async def lifespan(_):
         logger.info(f"Backend Core stopped.")
 
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, redirect_slashes=False)
 
-app.middleware("http")(security.key_auth_middleware)
-app.middleware("http")(security.webhook_auth_middleware)
-app.middleware("http")(security.jwt_auth_middleware)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+app.add_middleware(KeyAuthMiddleware)
+app.add_middleware(LavaAuthMiddleware)
+app.add_middleware(WebhookAuthMiddleware)
+app.add_middleware(JWTAuthMiddleware)
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 
+@app.exception_handler(Exception)
 async def exception_handler(_: Request, e: Exception):
-    logger.warning(f"Error response: {e}")
-    raise HTTPException(status_code=500, detail=str(e))
+    logger.warning(f"Error response: {e}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"message": "Internal Server Error", "details": str(e)},
+        headers={"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Credentials": "true", "Access-Control-Allow-Methods": "*", "Access-Control-Allow-Headers": "*"},
+    )
 
-
-app.add_exception_handler(Exception, exception_handler)
 
 app.include_router(auth_router, prefix="/api/auth", tags=["auth"])
 app.include_router(users_router, prefix="/api/users", tags=["users"])
@@ -174,16 +164,12 @@ app.include_router(subscription_router, prefix="/api/subscriptions", tags=["subs
 app.include_router(refs_router, prefix="/api/refs", tags=["refs"])
 app.include_router(refs_redirect_router, prefix="/r", tags=["refs_redirect"])
 
-instrumentator = Instrumentator(
-    should_respect_env_var=True,
-    excluded_handlers=["/metrics", "/docs", "/openapi.json"],
-    env_var_name="ENABLE_METRICS",
-)
+instrumentator = Instrumentator(should_respect_env_var=True, excluded_handlers=["/metrics", "/docs", "/openapi.json"], env_var_name="ENABLE_METRICS")
 instrumentator.instrument(app)
 
 
 def main():
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)
 
 
 if __name__ == "__main__":

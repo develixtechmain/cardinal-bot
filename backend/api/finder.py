@@ -1,12 +1,13 @@
+import datetime
 import logging
 import uuid
 from typing import Optional
 
-from fastapi import Request, APIRouter
-from pydantic import BaseModel, Field, field_validator, conlist
+from fastapi import APIRouter, Request
+from pydantic import BaseModel, Field, field_validator
 
 from bot.recommendations import send_recommendation_to_user
-from service import fetch_tasks_by_user_id, fetch_user_channels_by_user_id, delete_user_channel, delete_task_by_id, patch_task_by_id, save_user_task, fetch_user_tasks_stats
+from service.finder import delete_task_by_id, fetch_tasks_by_user_id, fetch_user_tasks_stats, patch_task_by_id, save_user_task
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -18,11 +19,12 @@ class RecommendationSendRequest(BaseModel):
     task_id: uuid.UUID
     text: str
     username: Optional[str] = None
+    message_created_at: datetime.datetime
 
 
 class CreateTaskRequest(BaseModel):
     title: str = Field(..., min_length=1, max_length=255)
-    cloud: conlist(str, min_length=1)
+    cloud: list[str] = Field(min_length=1)
 
     @field_validator("title")
     @classmethod
@@ -33,7 +35,8 @@ class CreateTaskRequest(BaseModel):
 
 
 class PatchTaskRequest(BaseModel):
-    active: bool
+    title: Optional[str] = None
+    active: Optional[bool] = None
 
 
 @router.get("/tasks/stats")
@@ -49,12 +52,12 @@ async def fetch_tasks(request: Request):
 
 @router.post("/tasks")
 async def create_task(request: Request, create: CreateTaskRequest):
-    return await save_user_task(request.state.user_id, create.cloud)
+    return await save_user_task(request.state.user_id, create.title, create.cloud)
 
 
 @router.patch("/tasks/{task_id}")
 async def patch_task(request: Request, task_id: uuid.UUID, patch: PatchTaskRequest):
-    return await patch_task_by_id(request.state.user_id, task_id, active=patch.active)
+    return await patch_task_by_id(request.state.user_id, task_id, patch)
 
 
 @router.delete("/tasks/{task_id}")
@@ -63,16 +66,6 @@ async def delete_task(request: Request, task_id: uuid.UUID):
 
 
 # RECOMMENDATIONS
-@router.get("/channels/")
-async def fetch_user_channels(request: Request):
-    return await fetch_user_channels_by_user_id(request.state.user_id)
-
-
-@router.delete("/channels/{channel_id}")
-async def delete_user_channel(request: Request, channel_id: uuid.UUID):
-    return await delete_user_channel(request.state.user_id, channel_id)
-
-
 @router.post("/recommendations/send")
 async def recommend_to_user(request: RecommendationSendRequest):
-    await send_recommendation_to_user(request)
+    return await send_recommendation_to_user(request)

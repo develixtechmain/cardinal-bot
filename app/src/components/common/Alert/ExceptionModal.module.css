@@ -2,13 +2,20 @@
     color: red;
 }
 
+.closeButon {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
 .container {
     gap: 8px;
-    padding: 19px 20px 28px 20px;
+    padding: 19px 28px 28px 28px;
     display: flex;
+    position: relative;
     flex-direction: column;
     justify-content: center;
-    margin: 0 15px 0 15px;
+    margin: 0 32px;
     align-items: center;
     border: 1px solid #F81B11;
     background-color: #F81B1133;
@@ -17,14 +24,14 @@
     font-size: 22px;
     font-weight: 590;
     line-height: 28px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
     text-align: center;
 }
 
 .description {
     font-family: var(--font-primary);
-    font-size: 22px;
-    font-weight: 590;
-    line-height: 28px;
-    letter-spacing: -1px;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 15px;
+    letter-spacing: -0.04em;
 }

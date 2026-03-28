@@ -52,18 +52,16 @@ export default function BriefingVerify() {
 
     return (
         <div className={styles.container}>
-            <svg className={styles.loadingContainer} viewBox="0 0 131 131">
+            <svg height="131px" width="131px" className={styles.loadingContainer} viewBox="0 0 131 131">
                 <image height="121" width="121" x={5} y={5} href="/assets/finder/briefing/loading-eagle.svg" />
-                <circle cx="65.5" cy="65.5" r="63" fill="none" stroke="#7211F8" strokeWidth="5" strokeDasharray={299} className={styles.loadingStroke}>
+                <circle cx="65.5" cy="65.5" r="63" fill="none" stroke="#7211F8" strokeWidth="5" strokeDasharray={299}>
                     <animateTransform attributeName="transform" type="rotate" from="0 65.5 65.5" to="360 65.5 65.5" dur="3s" repeatCount="indefinite" />
                 </circle>
             </svg>
-            <div className={styles.infoBlock}>
-                <span className={styles.title}>Анализируем ваши ответы…</span>
-                <span className={styles.subtitle}>Это займёт меньше минуты.</span>
-                <div className={styles.description}>
-                    ИИ внимательно изучает ваши ответы, чтобы подобрать нужные теги. Если информации окажется недостаточно — ИИ задаст дополнительные вопросы
-                </div>
+            <div className={styles.title}>Анализируем ваши ответы…</div>
+            <div className={styles.subtitle}>Это займёт меньше минуты.</div>
+            <div className={styles.description}>
+                ИИ внимательно изучает ваши ответы, чтобы подобрать нужные теги. Если информации окажется недостаточно — ИИ задаст дополнительные вопросы
             </div>
             <div className={styles.gradientBottom} />
         </div>

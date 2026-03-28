@@ -1,5 +1,5 @@
 import styles from "./CircleStatus.module.css";
-import {useLayoutEffect, useRef, useState} from "react";
+import {CSSProperties, useLayoutEffect, useRef, useState} from "react";
 
 import {useStore} from "../../../store/store";
 
@@ -57,7 +57,7 @@ export default function CircleStatus({activeCount}: Props) {
                         top: leadsCircleCenterY - COUNTS_RADIUS * Math.sin(angle0),
                         transform: "translate(-50%, -50%) rotate(180deg)",
                         "--count-color": "#7211F8"
-                    } as React.CSSProperties
+                    } as CSSProperties
                 }
             >
                 0
@@ -71,7 +71,7 @@ export default function CircleStatus({activeCount}: Props) {
                         top: leadsCircleCenterY - (COUNTS_RADIUS + 1) * Math.sin(angle33),
                         transform: "translate(-50%, -50%)",
                         "--count-color": activeCount >= TOTAL_CIRCLES ? "#7211F8" : "#202020"
-                    } as React.CSSProperties
+                    } as CSSProperties
                 }
             >
                 33
@@ -85,15 +85,15 @@ export default function CircleStatus({activeCount}: Props) {
                         top: leadsCircleCenterY,
                         transform: "translate(-50%, -50%)",
                         "--background-color": isExpired ? "#3C3C3C" : "#7211F861"
-                    } as React.CSSProperties
+                    } as CSSProperties
                 }
             >
                 <LeadsBackground
                     height="115px"
                     width="192px"
-                    style={{position: "relative", top: 19, left: -24, "--content-color": isExpired ? "#232323" : "#44128A"} as React.CSSProperties}
+                    style={{position: "relative", top: 19, left: -24, "--content-color": isExpired ? "#232323" : "#44128A"} as CSSProperties}
                 />
-                <div className={`${styles.coreCount}`} style={{"--count-color": "#F2F2F2"} as React.CSSProperties}>
+                <div className={`${styles.coreCount}`} style={{"--count-color": "#F2F2F2"} as CSSProperties}>
                     {activeCount}
                 </div>
             </div>

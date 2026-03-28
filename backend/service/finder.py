@@ -1,44 +1,81 @@
+import asyncio
 import json
+import logging
 import uuid
 from typing import List
 
+from asyncpg import UniqueViolationError
 from fastapi import HTTPException
 
-from embedding import save_tags
-from service import get_pool, onboarding_cache
+from bot.notification.notification import NotificationType
+from bot.notification.queue import push_notification_with_payload
+from external import embedding
+from service.db import get_pool, get_task_stats, set_task_stats
+from utils import data_to_update_query
+
+logger = logging.getLogger(__name__)
 
 
 async def fetch_user_tasks_stats(user_id: uuid.UUID):
     async with get_pool().acquire() as conn:
-        result = await conn.fetch("""
+        query = """
             SELECT ut.id AS id, COALESCE(ROUND(AVG(ts.count)), 0) AS avg, COALESCE(SUM(ts.count), 0) AS total, 
             COALESCE(SUM(CASE WHEN ts.date = CURRENT_DATE THEN ts.count ELSE 0 END), 0) AS today
             FROM user_tasks ut
             LEFT JOIN task_statistics ts ON ut.id = ts.task_id
             WHERE ut.user_id = $1
             GROUP BY ut.id;
-        """, user_id)
+        """
+        result = await conn.fetch(query, user_id)
         if result:
             stats = {}
             for task in result:
-                stats[task['id']] = {
-                    'today': task['today'],
-                    'avg': task['avg'],
-                    'total': task['total']
-                }
+                stats[task["id"]] = {"today": task["today"], "avg": task["avg"], "total": task["total"]}
             return stats
         return {}
 
 
+async def increment_stats(task_id):
+    async with get_pool().acquire() as conn:
+        try:
+            exists = get_task_stats(task_id)
+            if exists:
+                result = await conn.execute("UPDATE task_statistics SET count = count + 1 WHERE task_id = $1 AND date = CURRENT_DATE", task_id)
+                logger.info(f"Task {task_id} stat updated from cache")
+            else:
+                try:
+                    result = await conn.execute("INSERT INTO task_statistics (task_id, date, count) VALUES ($1, CURRENT_DATE, 1)", task_id)
+                    logger.info(f"Task {task_id} stat inserted without cache")
+                except UniqueViolationError:
+                    result = await conn.execute("UPDATE task_statistics SET count = count + 1 WHERE task_id = $1 AND date = CURRENT_DATE", task_id)
+                    logger.info(f"Task {task_id} stat updated without cache")
+            if result.startswith(("INSERT", "UPDATE")):
+                if not exists:
+                    set_task_stats(task_id)
+            else:
+                logger.warning(f"Unexpected result executing increment for {task_id}: {result}")
+        except Exception as e:
+            logger.warning(f"Failed to increment stats for {task_id}: {e}")
+
+
 # TASKS
+async def fetch_task_title_by_id(user_id: uuid.UUID, task_id: uuid.UUID):
+    async with get_pool().acquire() as conn:
+        result = await conn.fetchval("SELECT title FROM user_tasks WHERE user_id = $1 AND id = $2", user_id, task_id)
+        if result:
+            return result
+        raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
+
+
 async def fetch_tasks_by_user_id(user_id: uuid.UUID):
     async with get_pool().acquire() as conn:
-        result = await conn.fetch("""
+        query = """
             WITH stats AS (
                 SELECT task_id, SUM(count) as total_count FROM task_statistics GROUP BY task_id
             ), today_stats AS (
                 SELECT task_id, count as today_count FROM task_statistics WHERE date = CURRENT_DATE
             )
+
             SELECT 
                 ut.*,
                 COALESCE(stats.total_count, 0) as total_count,
@@ -47,108 +84,60 @@ async def fetch_tasks_by_user_id(user_id: uuid.UUID):
             LEFT JOIN stats ON ut.id = stats.task_id
             LEFT JOIN today_stats ON ut.id = today_stats.task_id
             WHERE ut.user_id = $1;
-        """, user_id)
+        """
+        result = await conn.fetch(query, user_id)
         return result if result else []
 
 
-async def save_user_task(user_id: uuid.UUID, cloud: List[str]):
+async def save_user_task(user_id: uuid.UUID, title: str, cloud: List[str]):
     async with get_pool().acquire() as conn:
-        count = await conn.fetchval("SELECT COUNT(1) user_tasks WHERE user_id = $1", user_id)
-        if count >= 5:
-            raise HTTPException(status_code=409, detail="User reached tasks limit")
-
         async with conn.transaction():
-            result = await conn.fetchrow("INSERT INTO user_tasks (user_id, title, tags) VALUES ($1, $2, $3) RETURNING *", user_id, cloud[0], json.dumps(cloud))
+            count = await conn.fetchval("SELECT COUNT(1) FROM user_tasks WHERE user_id = $1;", user_id)
+            if count >= 5:
+                raise HTTPException(status_code=409, detail="User reached tasks limit")
+
+            result = await conn.fetchrow("INSERT INTO user_tasks (user_id, title, tags) VALUES ($1, $2, $3) RETURNING *;", user_id, title, json.dumps(cloud))
             if result:
-                await save_tags(user_id, result['id'], cloud)
+                await embedding.save_tags(user_id, result["id"], cloud)
+                if count == 0:
+                    asyncio.create_task(push_notification_with_payload(user_id, NotificationType.BRIEFING_COMPLETED, {"must_core": True}))
                 return result
         raise Exception("Failed to create user task")
 
 
-async def patch_task_by_id(user_id: uuid.UUID, task_id: uuid.UUID, active: bool):
+async def patch_task_by_id(user_id: uuid.UUID, task_id: uuid.UUID, patch):
     async with get_pool().acquire() as conn:
         async with conn.transaction():
-            result = await conn.execute("UPDATE user_tasks SET active = $3 WHERE user_id = $1 AND id = $2 RETURNING *", user_id, task_id, active)
+            task = await conn.fetchrow("SELECT * FROM user_tasks WHERE user_id = $1 AND id = $2 FOR UPDATE;", user_id, task_id)
+            if task is None:
+                raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
+
+            updates = {}
+            if patch.title and task["title"] != patch.title:
+                updates["title"] = patch.title
+
+            if patch.active is not None and task["active"] != patch.active:
+                updates["active"] = patch.active
+
+            update_query, update_params = data_to_update_query(updates, 3)
+            if not update_query or not update_params:
+                return task
+
+            if updates.get("active"):
+                await embedding.save_tags(user_id, task_id, json.loads(task["tags"]))
+            elif updates.get("active") is False:
+                await embedding.delete_tags_by_task_id(task_id)
+
+            result = await conn.fetchrow(f"UPDATE user_tasks SET {update_query} WHERE user_id = $1 AND id = $2 RETURNING *;", user_id, task_id, *update_params)
             if result:
                 return result
-            raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
+    raise Exception("Failed to patch user task")
 
 
 async def delete_task_by_id(user_id: uuid.UUID, task_id: uuid.UUID):
     async with get_pool().acquire() as conn:
-        result = await conn.execute("DELETE FROM user_tasks WHERE user_id = $1 AND id = $2", user_id, task_id)
+        await embedding.delete_tags_by_task_id(task_id)
+
+        result = await conn.execute("DELETE FROM user_tasks WHERE user_id = $1 AND id = $2;", user_id, task_id)
         if result == "DELETE 0":
             raise HTTPException(status_code=404, detail="Task not found")
-
-
-# RECOMMENDATIONS
-async def fetch_user_channels_by_user_id(user_id: uuid.UUID):
-    async with get_pool().acquire() as conn:
-        result = await conn.fetch("SELECT * FROM user_channels WHERE user_id = $1", user_id)
-        if result:
-            return result
-        return []
-
-
-async def save_user_channel(user_id: uuid.UUID, chat_id: int):
-    async with get_pool().acquire() as conn:
-        result = await conn.fetchrow("INSERT INTO user_channels (user_id, chat_id) VALUES ($1, $2) ON CONFLICT (user_id, chat_id) DO NOTHING RETURNING id", user_id, chat_id)
-        return result is not None
-
-
-async def delete_user_channel(user_id: uuid.UUID, user_channel_id: uuid.UUID):
-    async with get_pool().acquire() as conn:
-        result = await conn.execute("DELETE FROM user_channels WHERE user_id = $1 AND id = $2", user_id, user_channel_id)
-        if result == "DELETE 0":
-            raise HTTPException(status_code=404, detail="Channel not found")
-
-
-# ONBOARDING
-async def fetch_onboarding_by_id(onboarding_id: uuid.UUID, renew: bool = False):
-    if not renew and onboarding_id in onboarding_cache:
-        return onboarding_cache[onboarding_id]
-
-    onboarding = await fetch_onboarding_from_db(onboarding_id)
-    if onboarding:
-        onboarding_cache[onboarding_id] = onboarding
-        return onboarding
-    raise HTTPException(status_code=404, detail=f"Onboarding {onboarding_id} not found")
-
-
-async def fetch_onboarding_from_db(onboarding_id: uuid.UUID):
-    async with get_pool().acquire() as conn:
-        result = await conn.fetchrow("SELECT * FROM user_onboardings WHERE id = $1", onboarding_id)
-        if result:
-            return result
-        return None
-
-
-async def create_onboarding(user_id: uuid.UUID):
-    async with get_pool().acquire() as conn:
-        result = await conn.fetchrow("SELECT * FROM user_onboardings WHERE user_id = $1", user_id)
-        if result:
-            return result
-
-        result = await conn.fetchrow("INSERT INTO user_onboardings (user_id) VALUES ($1) RETURNING *", user_id)
-        if result:
-            return result
-        raise Exception("Failed to create onboarding")
-
-
-async def update_onboarding_questions(onboarding_id: uuid.UUID, questions):
-    await fetch_onboarding_by_id(onboarding_id)
-    async with get_pool().acquire() as conn:
-        await conn.execute("UPDATE user_onboardings SET questions = $2 WHERE id = $1", onboarding_id, json.dumps([{"question": key, "answer": value} for key, value in questions.items()]))
-    onboarding_cache.pop(onboarding_id, None)
-
-
-async def complete_onboarding(onboarding_id: uuid.UUID):
-    async with get_pool().acquire() as conn:
-        await conn.execute("UPDATE user_onboardings SET status = 'completed' WHERE id = $1", onboarding_id)
-        onboarding_cache.pop(onboarding_id, None)
-
-
-async def delete_onboarding_by_id(onboarding_id: uuid.UUID):
-    async with get_pool().acquire() as conn:
-        await conn.execute("DELETE FROM user_onboardings WHERE id = $1", onboarding_id)
-        onboarding_cache.pop(onboarding_id, None)

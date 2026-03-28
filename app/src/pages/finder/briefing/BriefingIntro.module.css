@@ -1,7 +1,3 @@
-.colored {
-    color: #7211F8;
-}
-
 .smallStep {
     padding-right: 2px;
 }
@@ -32,7 +28,7 @@
 
 .introBackground {
     position: absolute;
-    top: 65px;
+    top: 51px;
     left: 0;
     width: 100vw;
     height: auto;
@@ -47,7 +43,6 @@
 }
 
 .userContainer {
-    margin-top: 40px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -89,7 +84,7 @@
     font-weight: 500;
     line-height: 24px;
     text-align: center;
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }
 
 .introDescription {
@@ -170,7 +165,7 @@
 .startButton {
     width: 100%;
     padding: 14px;
-    color: white;
+    color: #FFFFFF;
     background-color: #7211F8;
     border: none;
     border-radius: 12px;
@@ -178,7 +173,7 @@
     font-size: 17px;
     font-weight: 500;
     line-height: 22px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
     z-index: 1;
 }
 
@@ -193,7 +188,7 @@
 
 .additionalButton {
     margin-bottom: 11px;
-    color: white;
+    color: #FFFFFF;
     display: flex;
     flex: 1;
     justify-content: center;
@@ -205,5 +200,5 @@
     font-size: 17px;
     font-weight: 500;
     line-height: 22px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }

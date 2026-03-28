@@ -1,12 +1,13 @@
 .container {
     height: var(--header-height);
-    margin-top: 35px;
+    margin-top: var(--margin-top);
+    margin-bottom: var(--margin-bottom);
     display: flex;
     align-items: center;
     width: 100%;
     position: relative;
-    padding-bottom: 22px;
     justify-content: flex-start;
+    z-index: 9;
 }
 
 .header {

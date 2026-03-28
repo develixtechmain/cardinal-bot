@@ -19,6 +19,8 @@
 }
 
 .value {
+    overflow: hidden;
+    text-overflow: ellipsis;
     padding-left: 22px;
     font-size: 20px;
     font-weight: 700;

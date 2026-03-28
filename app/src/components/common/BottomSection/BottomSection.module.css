@@ -1,8 +1,12 @@
-.bottomSection {
+.footer {
+    gap: 6px;
+    display: flex;
+    flex-direction: column;
 }
 
 .infoCards {
     display: flex;
+    flex-direction: row;
     gap: 6px;
 }
 
@@ -40,13 +44,13 @@
     display: flex;
     flex: 1;
     text-align: center;
-    margin: 16px 12px 12px 12px;
-    padding: 0 20px;
+    margin: 16px 6px 12px 6px;
+    padding: 0 8px;
     font-family: var(--font-ui);
-    font-size: 8px;
+    font-size: 10px;
     font-weight: 300;
-    line-height: 8px;
-    letter-spacing: -0.03em;
+    line-height: 12px;
+    letter-spacing: 0;
 }
 
 .moveButton {
@@ -63,7 +67,31 @@
     letter-spacing: -0.05em;
 }
 
+.offers {
+    padding: 9px 12px;
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    color: #FFFFFF4F;
+    background-color: #141414;
+    border-radius: 32px;
+    font-size: 13px;
+    font-weight: 400;
+    line-height: 18px;
+    letter-spacing: -1px;
+}
+
+.offer {
+    padding: 6px;
+    background-color: #202020;
+    border-radius: 15px;
+    text-align: center;
+    align-content: center;
+    cursor: pointer;
+}
+
 .footerIcon {
+    margin-top: 6px;
     display: flex;
     justify-content: center;
 }

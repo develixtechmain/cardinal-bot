@@ -1,4 +1,4 @@
-import {create} from "zustand/index";
+import {create} from "zustand";
 
 import {Answer, FinderTask, FinderTaskStatistics, QuestionAnswer} from "../types/finder";
 

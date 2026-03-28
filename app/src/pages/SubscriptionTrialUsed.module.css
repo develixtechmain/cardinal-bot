@@ -1,7 +1,3 @@
-.colored {
-    color: #BEF811;
-}
-
 .container {
     height: var(--tg-vh);
     padding: 0 16px;
@@ -28,14 +24,14 @@
     font-size: 22px;
     font-weight: 700;
     line-height: 26px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }
 
 .description {
     align-self: stretch;
     margin: 16px 22px 8px 0;
     padding: 15px 28px 20px 28px;
-    composes: colored;
+    color: #BEF811;
     border-left: 2px solid #BEF811;
     background-color: #BEF8111A;
     border-radius: 7px;
@@ -60,7 +56,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    composes: colored;
+    color: #BEF811;
     border: 1px solid #BEF811;
     background-color: transparent;
     border-radius: 7px;
@@ -110,7 +106,7 @@
     border-radius: 11px;
     font-size: 17px;
     line-height: 22px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
     justify-content: center;
 }
 

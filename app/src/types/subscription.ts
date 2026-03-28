@@ -14,19 +14,16 @@ export class SubscriptionImpl implements Subscription {
     }
 
     daysLeft(): number {
+        const endDate = this.subscription_ends_at ?? (this.trial_starts_at && this.trial_ends_at ? this.trial_ends_at : null);
+        if (!endDate) return 0;
+
         const now = new Date();
+        const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
 
-        if (this.subscription_ends_at) {
-            const diffMs = this.subscription_ends_at.getTime() - now.getTime();
-            return diffMs > 0 ? Math.ceil(diffMs / (1000 * 60 * 60 * 24)) : 0;
-        }
+        const end = Date.UTC(endDate.getUTCFullYear(), endDate.getUTCMonth(), endDate.getUTCDate());
 
-        if (this.trial_starts_at && this.trial_ends_at) {
-            const diffMs = this.trial_ends_at.getTime() - now.getTime();
-            return diffMs > 0 ? Math.ceil(diffMs / (1000 * 60 * 60 * 24)) : 0;
-        }
-
-        return 0;
+        const diffDays = (end - today) / (1000 * 60 * 60 * 24);
+        return diffDays > 0 ? diffDays : 0;
     }
 
     isTrialUsed(): boolean {
@@ -37,14 +34,14 @@ export class SubscriptionImpl implements Subscription {
         return !this.isActive();
     }
 
-    isActive(): boolean {
+    isActive(withTrial: boolean = true): boolean {
         const now = new Date();
 
         if (this.subscription_ends_at && this.subscription_ends_at.getTime() >= now.getTime()) {
             return true;
         }
 
-        if (this.trial_starts_at && this.trial_ends_at) {
+        if (withTrial && this.trial_starts_at && this.trial_ends_at) {
             return this.trial_ends_at.getTime() > now.getTime();
         }
 

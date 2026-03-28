@@ -40,14 +40,14 @@ const ClubSection: FC = () => {
                 {benefits.map(({id, textParts}) => (
                     <div key={id} className={styles.benefit}>
                         <Mark height="15px" width="15px" color="#7211F8" />
-                        <div>
+                        <span className={styles.benefitText}>
                             {textParts.map(({bold, text}, index) => (
-                                <span key={index} className={styles.benefitText}>
+                                <span key={index}>
                                     <span style={bold ? undefined : {opacity: 0.5}}>{text}</span>
                                     {index < textParts.length - 1 && <span> </span>}
                                 </span>
                             ))}
-                        </div>
+                        </span>
                     </div>
                 ))}
             </div>
@@ -57,7 +57,7 @@ const ClubSection: FC = () => {
                 <span>Только для активных пользователей</span>
             </div>
 
-            {subscription!.isActive() ? (
+            {subscription!.isActive(false) ? (
                 <WideButton
                     color="#7211F833"
                     text={

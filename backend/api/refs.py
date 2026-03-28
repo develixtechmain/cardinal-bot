@@ -1,4 +1,4 @@
-from fastapi import Request, APIRouter
+from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse
 
 from service.refs import fetch_user_refs
@@ -10,7 +10,7 @@ redirect_router = APIRouter()
 
 @redirect_router.get("/{user_id}")
 async def redirect(user_id: int):
-    return RedirectResponse(url=f"https://t.me/CardinalAPP_bot/Cardinal?startapp=ref_{user_id}")
+    return RedirectResponse(url=f"https://t.me/CardinalAPP_bot?start=ref_{user_id}")
 
 
 @router.get("/me")

@@ -9,9 +9,10 @@ interface ModalProps {
     children: ReactNode;
     closeOnContentClick?: boolean;
     centered?: boolean;
+    blur?: number;
 }
 
-const OverlayModal: FC<ModalProps> = ({isOpen, onClose, children, closeOnContentClick = false, centered = true}) => {
+const OverlayModal: FC<ModalProps> = ({isOpen, onClose, children, closeOnContentClick = false, centered = true, blur = 4}) => {
     if (!isOpen) return null;
 
     const handleOverlayClick = () => {
@@ -24,8 +25,14 @@ const OverlayModal: FC<ModalProps> = ({isOpen, onClose, children, closeOnContent
     };
 
     return createPortal(
-        <div className={styles.overlay} onClick={handleOverlayClick} style={{"--align": centered ? "center" : "start"} as CSSProperties}>
-            <div onClick={handleContentClick}>{children}</div>
+        <div
+            className={styles.overlay}
+            onClick={handleOverlayClick}
+            style={{"--align": centered ? "center" : "start", "--blur": `blur(${blur}px)`} as CSSProperties}
+        >
+            <div className={styles.wrapper} onClick={handleContentClick}>
+                {children}
+            </div>
         </div>,
         document.body
     );

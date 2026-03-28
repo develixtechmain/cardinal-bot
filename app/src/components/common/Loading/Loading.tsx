@@ -25,7 +25,7 @@ export const Loading = () => {
 
     return (
         <div className={styles.logo}>
-            <img height="111px" width="187px" src="/assets/logo.svg" alt="Loading" color={"white"} />
+            <img height="111px" width="187px" src="/assets/logo.svg" alt="Loading" color="#FFFFFF" />
             <div className={styles.percentageContainer}>
                 <div style={{flex: 1}} />
                 <div className={styles.percentage}>{percentage}%</div>

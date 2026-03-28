@@ -17,11 +17,11 @@ export const fetchBriefing = async (userId: string): Promise<Briefing> => {
     return res;
 };
 
-export const answerQuestions = async (briefingId: string, answer: QuestionAnswer[]): Promise<string[]> => {
+export const answerQuestions = async (briefingId: string, answers: QuestionAnswer[]): Promise<string[]> => {
     const response = await authFetch("ai_core", `/onboarding/${briefingId}/answer`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(answer)
+        body: JSON.stringify(answers.map((answer) => ({...answer, selections: answer.selections ? Array.from(answer.selections) : []})))
     });
 
     const res = await response.json();
@@ -51,7 +51,7 @@ export const createTask = async (cloudTask: {title: string; tags: string[]}) => 
     const response = await authFetch("backend", `/finder/tasks`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({cloudTask})
+        body: JSON.stringify({title: cloudTask.title, cloud: cloudTask.tags})
     });
 
     const res = await response.json();

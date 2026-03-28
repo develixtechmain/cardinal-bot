@@ -1,8 +1,9 @@
 import styles from "./BriefingQuestion.module.css";
-import {useEffect, useRef, useState} from "react";
+import {CSSProperties, ChangeEvent, useEffect, useRef, useState} from "react";
 
 import {useLocation} from "wouter";
 
+import Header from "../../../components/common/Header/Header";
 import {Loading} from "../../../components/common/Loading/Loading";
 import BriefingExampleModal from "../../../components/finder/BriefingExampleModal/BriefingExampleModal";
 import {useBriefingStore} from "../../../store/finder";
@@ -17,6 +18,7 @@ export default function BriefingQuestion() {
         navigate("/finder/briefing/alert");
     }
 
+    const areaRef = useRef<HTMLTextAreaElement>(null);
     const answers = useBriefingStore((s) => s.answers);
     const setAnswers = useBriefingStore((s) => s.setAnswers);
     const [questionIndex, setQuestionIndex] = useState<number>(0);
@@ -71,6 +73,18 @@ export default function BriefingQuestion() {
         }
     }, [answers, questionIndex]);
 
+    useEffect(() => {
+        if (!areaRef.current) return;
+
+        const area = areaRef.current;
+        area.style.height = "auto";
+        area.style.minHeight = "auto";
+
+        requestAnimationFrame(() => {
+            area.style.minHeight = Math.max(66, Math.min(area.scrollHeight, 230)) + "px";
+        });
+    }, [answerText, questionIndex]);
+
     const question = baseQuestions[questionIndex];
 
     if (!question) {
@@ -80,7 +94,7 @@ export default function BriefingQuestion() {
     const buttonNames = answers && answers[0] ? question.examples(questionIndex === 0 ? [] : [...answers[0].selections]) : [];
     const foundButtonNames = buttonNames.filter((buttonName) => buttonName.toLowerCase().includes(selectionSearchText.toLowerCase()));
 
-    const handleAnswerChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleAnswerChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
         handleChange(event.target.value);
     };
 
@@ -99,7 +113,7 @@ export default function BriefingQuestion() {
     };
 
     const handleHint = () => {
-        handleChange(question.hint.example);
+        handleChange(question.hint.example!);
         setSelectionSearchText("");
         setIsExampleOpen(false);
     };
@@ -146,15 +160,20 @@ export default function BriefingQuestion() {
     return (
         <div className={styles.container}>
             <BriefingExampleModal isOpen={isExampleOpen} question={question} onClose={() => setIsExampleOpen(false)} useHint={handleHint} />
-            <img height="40px" width="150px" style={{alignSelf: "center"}} src={`/assets/finder/briefing/progress-${questionIndex}.svg`} alt=" " />
+            <Header
+                height={30}
+                bottom={25}
+                backTo={questionIndex > 0 ? undefined : ""}
+                icon={<img height="30px" width="150px" style={{alignSelf: "center"}} src={`/assets/finder/briefing/progress-${questionIndex}.svg`} alt=" " />}
+            />
 
             <span className={styles.question}>{question.question}</span>
             <span className={styles.description}>{question.description}</span>
 
             {!question.selection && (
                 <>
-                    <input
-                        type="text"
+                    <textarea
+                        ref={areaRef}
                         id="answer_text"
                         value={answerText}
                         onChange={handleAnswerChange}
@@ -180,7 +199,7 @@ export default function BriefingQuestion() {
                                     ref={isLast ? lastSelectedButtonRef : undefined}
                                     onClick={() => setAnswerSelections(new Set([...answerSelections].filter((buttonName) => buttonName !== selection)))}
                                     className={styles.selectedButton}
-                                    style={{"--background-color": "#7211F833"} as React.CSSProperties}
+                                    style={{"--background-color": "#7211F833"} as CSSProperties}
                                 >
                                     <span>{selection}</span>
                                     <img height="15px" width="15px" src="/assets/finder/briefing/selection-cancel.svg" alt=" " />
@@ -196,7 +215,7 @@ export default function BriefingQuestion() {
                             autoComplete={"off"}
                             placeholder={"Поиск"}
                             className={styles.selectionSearchInput}
-                            style={searchIsAlone ? {marginLeft: 11} : undefined}
+                            style={searchIsAlone ? {marginLeft: 8} : undefined}
                         />
                     </div>
 

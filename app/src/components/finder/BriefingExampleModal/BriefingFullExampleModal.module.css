@@ -3,7 +3,7 @@
 }
 
 .overlay {
-    padding: 18px;
+    padding: 16px;
     overflow-y: hidden;
 }
 
@@ -25,7 +25,7 @@
     font-size: 25px;
     font-weight: 500;
     line-height: 22px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }
 
 .headerDescription {
@@ -34,7 +34,7 @@
     font-size: 13px;
     font-weight: 400;
     line-height: 14px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }
 
 .blockHeader {
@@ -43,7 +43,7 @@
     font-size: 18px;
     font-weight: 500;
     line-height: 25px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }
 
 .blockAdvice {
@@ -51,10 +51,10 @@
     font-size: 13px;
     font-weight: 400;
     line-height: 14px;
-    letter-spacing: -1px;
+    letter-spacing: 0;
 }
 
-.questions{
+.questions {
     display: flex;
     flex-direction: column;
     gap: 4px;

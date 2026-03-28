@@ -1,11 +1,11 @@
 import styles from "./ToolSelector.module.css";
-import {FC, Fragment} from "react";
+import {CSSProperties, FC, Fragment} from "react";
 
 import {useStore} from "../../../store/store";
 import {Tool} from "../../../types/home";
 
-import CatcherSelector from "../../../assets/contact-catcher/selector.svg";
-import FinderSelector from "../../../assets/finder/selector.svg";
+import CatcherSelectorOpen from "../../../assets/contact-catcher/selector-open.svg";
+import FinderSelectorOpen from "../../../assets/finder/selector-open.svg";
 
 interface ToolSelectorProps {
     tool: Tool;
@@ -14,14 +14,14 @@ interface ToolSelectorProps {
 
 const ToolSelectionModal: FC<ToolSelectorProps> = ({tool, onClick}) => {
     const subscription = useStore((s) => s.subscription);
-    const selectorStyle = {"--content-color": subscription!.isSubscriptionExpired() ? "#3C3C3C" : "#7211F8"} as React.CSSProperties;
+    const selectorStyle = {"--content-color": subscription!.isSubscriptionExpired() ? "#3C3C3C" : "#7211F8"} as CSSProperties;
 
     return (
         <div className={styles.container} onClick={onClick}>
             {tool.id == "finder" ? (
-                <FinderSelector height="37px" width="58px" style={selectorStyle} />
+                <FinderSelectorOpen height="37px" width="58px" style={selectorStyle} />
             ) : (
-                <CatcherSelector height="37px" width="58px" style={selectorStyle} />
+                <CatcherSelectorOpen height="37px" width="58px" style={selectorStyle} />
             )}
             <span className={styles.title}>
                 {tool.selectorParts.map((part, index) => (

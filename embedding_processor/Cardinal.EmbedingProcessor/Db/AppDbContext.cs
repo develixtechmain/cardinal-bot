@@ -12,17 +12,8 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        var converter = new ValueConverter<List<Guid>, string>(
-            v => string.Join(",", v),
-            v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(Guid.Parse).ToList());
-
-        var recommendationBuilder = modelBuilder.Entity<Recommendation>();
-
-        recommendationBuilder.HasKey(p => p.Id);
-        recommendationBuilder.HasIndex(p => p.TaskId);    
-        
-        recommendationBuilder
-            .Property(r => r.Vectors)
-            .HasConversion(converter);
+        var rb = modelBuilder.Entity<Recommendation>();
+        rb.HasKey(p => p.Id);
+        rb.HasIndex(p => p.TaskId);
     }
 }

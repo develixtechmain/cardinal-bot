@@ -3,6 +3,7 @@ import {FC} from "react";
 
 import {useLocation} from "wouter";
 
+import {SUPPORT_URL} from "../../../utils/consts";
 import WideButton from "../Buttons/WideButton";
 
 const AboutToolModalFooter: FC = () => {
@@ -58,7 +59,7 @@ const AboutToolModalFooter: FC = () => {
                         </div>
                     }
                     buttonStyle={{border: "1px solid #7211F8", borderRadius: 10, minHeight: 45, marginTop: 9}}
-                    onClick={() => navigate("https://google.com")}
+                    onClick={() => Telegram.WebApp.openLink(SUPPORT_URL, {try_instant_view: true})}
                 />
             </div>
         </>

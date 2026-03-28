@@ -23,7 +23,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContextPool<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("Postgres")));
 
-builder.Services.AddHttpClient(); 
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
@@ -31,6 +31,10 @@ var scope = app.Services.CreateScope();
 var ctx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
 await ctx.Database.MigrateAsync();
+
+var httpFactory = scope.ServiceProvider.GetRequiredService<IHttpClientFactory>();
+var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+await QdrantInitializer.EnsureCollectionExists(httpFactory, config);
 
 app.UseSwagger();
 app.UseSwaggerUI();

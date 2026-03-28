@@ -1,7 +1,7 @@
 import styles from "./AboutContactCatcherModal.module.css";
 import {CSSProperties, FC, useEffect, useRef, useState} from "react";
 
-import {navigate} from "wouter/use-hash-location";
+import {useLocation} from "wouter";
 
 import AboutToolBlock from "../../common/AboutToolModal/AboutToolBlock";
 import AboutToolModal from "../../common/AboutToolModal/AboutToolModal";
@@ -15,6 +15,8 @@ interface AboutCatcherModalProps {
 }
 
 const AboutContactCatcherModal: FC<AboutCatcherModalProps> = ({isOpen, onClose}) => {
+    const [, navigate] = useLocation();
+
     const imageRef = useRef<HTMLDivElement>(null);
     const [imageSpace, setImageSpace] = useState(0);
 
@@ -30,9 +32,7 @@ const AboutContactCatcherModal: FC<AboutCatcherModalProps> = ({isOpen, onClose})
         updateImageSpace();
         window.addEventListener("resize", updateImageSpace);
 
-        return () => {
-            window.removeEventListener("resize", updateImageSpace);
-        };
+        return () => window.removeEventListener("resize", updateImageSpace);
     }, []);
 
     const handleImageLoad = () => {
@@ -52,8 +52,6 @@ const AboutContactCatcherModal: FC<AboutCatcherModalProps> = ({isOpen, onClose})
                 {text: "Перехватчик — это технология, которая собирает контакты людей, звонящих или заходящих на сайты ваших конкурентов."},
                 {text: "Это те самые клиенты, которые ищут ваш продукт прямо сейчас.", bold: true}
             ]}
-            icon={<img height="19px" width="38px" src="/assets/contact-catcher/about-icon.svg" alt=" " />}
-            onClose={onClose}
         />
     );
 
@@ -65,12 +63,17 @@ const AboutContactCatcherModal: FC<AboutCatcherModalProps> = ({isOpen, onClose})
             color="linear-gradient(to right, #7211F8, #430A92)"
             text="Перехватить заявки конкурентов"
             buttonStyle={{height: 47, borderRadius: 10, fontSize: 15, fontWeight: 500, lineHeight: 24, letterSpacing: "-0.03em"}}
-            onClick={() => navigate("https://google.com")}
+            onClick={() => navigate("/subscription")}
         />
-    ); // TODO contact catcher
+    );
 
     return (
-        <AboutToolModal isOpen={isOpen} onClose={onClose} header={header}>
+        <AboutToolModal
+            isOpen={isOpen}
+            onClose={onClose}
+            header={header}
+            icon={<img height="19px" width="38px" src="/assets/contact-catcher/about-icon.svg" alt=" " />}
+        >
             <div ref={imageRef} className={styles.toolImage}>
                 <img height="336px" width="342px" src="/assets/contact-catcher/about-tool.svg" alt=" " onLoad={handleImageLoad} />
             </div>
@@ -100,11 +103,10 @@ const AboutContactCatcherModal: FC<AboutCatcherModalProps> = ({isOpen, onClose})
                     </div>
                 </div>
             </div>
-            {/*TODO contact catcher*/}
             <WideButton
                 color="#7211F8"
                 text="Подключить этот инструмент"
-                onClick={() => navigate("https://google.com")}
+                onClick={() => navigate("/subscription")}
                 buttonStyle={{height: 47, borderRadius: 10, fontSize: 15, fontWeight: 500, lineHeight: 24, letterSpacing: "-0.03em"}}
             />
             <Delimiter style={{backgroundColor: "#FFFFFF14", maxWidth: "100%", marginLeft: 2, marginRight: 2}} />

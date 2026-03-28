@@ -7,17 +7,14 @@ from utils import validate_env
 
 client: httpx.AsyncClient
 
-timeout = httpx.Timeout(connect=10.0, read=10.0, write=10.0, pool=10)
+timeout = httpx.Timeout(connect=60.0, read=60.0, write=60.0, pool=10)
 
 logger = logging.getLogger(__name__)
 
 
 async def check_rules(text: str, rules: list[str]):
     try:
-        res = await client.post("/rules/check", json={
-            "text": text,
-            "rules": rules
-        })
+        res = await client.post("/rules/check", json={"text": text, "rules": rules})
         logger.debug(f"Response status: {res.status_code}, Response: {res.text}")
         res.raise_for_status()
         return True
@@ -28,10 +25,7 @@ async def check_rules(text: str, rules: list[str]):
 
 async def extract_rules(text: str, user_text: str):
     try:
-        res = await client.post("/rules/extract", json={
-            "text": text,
-            "userText": user_text
-        })
+        res = await client.post("/rules/extract", json={"text": text, "userText": user_text})
         logger.debug(f"Response status: {res.status_code}, Response: {res.text}")
         res.raise_for_status()
         return res.json()
@@ -48,11 +42,7 @@ def init_ai():
     if ai_core_host.endswith("/"):
         ai_core_host = ai_core_host[:-1]
 
-    client = httpx.AsyncClient(base_url=ai_core_host + "/api", headers={
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "X-API-KEY": os.environ["AI_CORE_KEY"],
-    }, timeout=timeout, verify=False)
+    client = httpx.AsyncClient(base_url=ai_core_host + "/api", headers={"Accept": "application/json", "Content-Type": "application/json", "X-API-KEY": os.environ["AI_CORE_KEY"]}, timeout=timeout)
 
 
 async def stop_ai():

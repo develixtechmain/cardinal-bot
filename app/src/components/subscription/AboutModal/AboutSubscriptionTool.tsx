@@ -49,8 +49,8 @@ const AboutSubscriptionTool: FC<AboutToolProps> = ({icon, title, description, ab
                         <Mark height="15px" width="15px" className={styles.purple} style={{flexShrink: 0}} />
                         <span>
                             {aboutParts.map(({text, bold}, i) => (
-                                <span key={i} className={styles.markText}>
-                                    <span style={bold ? {fontWeight: 700, color: "white"} : undefined}>{text}</span>
+                                <span key={i}>
+                                    <span style={bold ? {fontWeight: 700, color: "#FFFFFF"} : undefined}>{text}</span>
                                     {i < aboutParts.length - 1 && <span> </span>}
                                 </span>
                             ))}
@@ -85,8 +85,8 @@ const AboutSubscriptionTool: FC<AboutToolProps> = ({icon, title, description, ab
                         <Mark height="15px" width="15px" className={styles.green} style={{flexShrink: 0}} />
                         <span>
                             {summaryParts.map(({text, bold}, i) => (
-                                <span key={i} className={styles.markText}>
-                                    <span style={bold ? {fontWeight: 700, color: "white"} : undefined}>{text}</span>
+                                <span key={i}>
+                                    <span style={bold ? {fontWeight: 700, color: "#FFFFFF"} : undefined}>{text}</span>
                                     {i < summaryParts.length - 1 && <span> </span>}
                                 </span>
                             ))}
@@ -100,7 +100,7 @@ const AboutSubscriptionTool: FC<AboutToolProps> = ({icon, title, description, ab
                     color="#7211F8"
                     text={
                         <div className={styles.subscriptionButton}>
-                            <FullEagle height="19px" width="33px" color="white" />
+                            <FullEagle height="19px" width="33px" color="#FFFFFF" />
                             <span>Офоромить подписку</span>
                         </div>
                     }

@@ -5,8 +5,7 @@ const specialists = new Map([
             services: ["Создание промптов для ИИ", "Промпт-оптимизация", "ИИ-контент", "ИИ для бизнеса"],
             additionalServices: ["Консультации по ИИ-инструментам", "AI-навыки для персонала", "Оптимизация AI-промптов"],
             projectTypes: ["Контент генерация AI", "Промпты для ИИ чат-ботов", "ИИ-картинки и видео"],
-            applications: ["ChatGPT", "Midjourney", "Stable Diffusion", "OpenAI API", "DALL-E"],
-            wrongTerms: ["настройка ChatGPT", "команды для ИИ", "AI-скрипты", "ИИ обучение (вместо промптов)"]
+            applications: ["ChatGPT", "Midjourney", "Stable Diffusion", "OpenAI API", "DALL-E"]
         }
     ],
     [
@@ -15,8 +14,7 @@ const specialists = new Map([
             services: ["Разработка и обучение ML-моделей", "AI для бизнеса", "Интеграция ИИ в продуктах", "Разработка ИИ-решений"],
             additionalServices: ["Оптимизация ML-моделей", "Сбор данных для ML", "Консультации по внедрению ИИ"],
             projectTypes: ["Предиктивная аналитика", "Системы компьютерного зрения", "Проекты NLP", "AI-ассистенты"],
-            applications: ["TensorFlow", "PyTorch", "scikit-learn", "OpenCV", "Hugging Face"],
-            wrongTerms: ["AI-разработчик", "Data Scientist", "программист нейросетей", "машинное обучение"]
+            applications: ["TensorFlow", "PyTorch", "scikit-learn", "OpenCV", "Hugging Face"]
         }
     ],
     [
@@ -30,8 +28,7 @@ const specialists = new Map([
                 "Озвучивание текстов голосом ИИ",
                 "Генерация изображений для рекламных креативов"
             ],
-            applications: ["Midjourney", "Stable Diffusion", "Runway ML", "Synthesia", "ElevenLabs"],
-            wrongTerms: ["нейросеть рисует картинку", "AI-видео", "сделать deepfake", "озвучка видео нейросетью"]
+            applications: ["Midjourney", "Stable Diffusion", "Runway ML", "Synthesia", "ElevenLabs"]
         }
     ],
     [
@@ -40,8 +37,7 @@ const specialists = new Map([
             services: ["ИИ-интеграция процессов", "Бизнес-автоматизация ИИ", "Разработка стратегии по интеграции AI в бизнес", "ИИ для сотрудников"],
             additionalServices: ["Аудит процессов под ИИ", "Подбор ИИ-инструментов", "Поствнедренческая поддержка ИИ"],
             projectTypes: ["Автоматизация поддержки", "ИИ для внутренних бизнес задач", "Маркетинг и продажи с ИИ", "Цифровая трансформация"],
-            applications: ["OpenAI API", "Zapier", "LangChain", "Microsoft Power Automate", "Azure Cognitive Services"],
-            wrongTerms: ["AI-консультант", "внедрение ChatGPT", "автоматизация бизнеса нейросетью", "цифровой трансформатор"]
+            applications: ["OpenAI API", "Zapier", "LangChain", "Microsoft Power Automate", "Azure Cognitive Services"]
         }
     ],
     [
@@ -50,8 +46,7 @@ const specialists = new Map([
             services: ["Разработка чат-ботов для Telegram", "WA чат-боты", "Автоматизация через ботов", "Чат-боты для поддержки"],
             additionalServices: ["Сопровождение чат-ботов", "Оптимизация чат-бота", "Разработка сценариев бота"],
             projectTypes: ["Tg бот - приём заказов", "Саппорт через бота", "Маркетинг чат-бот", "Интеграция бота с сайтом"],
-            applications: ["Telegram Bot API", "Salebot", "Chatplace", "WhatsApp Business API", "ManyChat", "Chatfuel", "Python (Aiogram)"],
-            wrongTerms: ["чатбот (слитно)", "бот для телеграм", "боты whatsapp", "авточат"]
+            applications: ["Telegram Bot API", "Salebot", "Chatplace", "WhatsApp Business API", "ManyChat", "Chatfuel", "Python (Aiogram)"]
         }
     ],
     [
@@ -65,8 +60,7 @@ const specialists = new Map([
                 "Консультации по архитектуре веб-приложений"
             ],
             projectTypes: ["e-commerce проекты", "Корпоративные веб-порталы", "CRM/ERP системы", "Лендинги с серверной частью"],
-            applications: ["Node.js", "React", "MongoDB", "Django", "MySQL"],
-            wrongTerms: ["вебмастер", "full stack разработчик", "фулстек", "программист сайтов"]
+            applications: ["Node.js", "React", "MongoDB", "Django", "MySQL"]
         }
     ],
     [
@@ -89,8 +83,7 @@ const specialists = new Map([
                 "Разработка ботов и утилит на Python",
                 "Создание API для мобильных или веб-приложений"
             ],
-            applications: ["Django", "Flask", "BeautifulSoup", "Selenium", "Pandas"],
-            wrongTerms: ["Python программист", "разработчик на питоне", "скрипты на Python", "автоматизация на Python"]
+            applications: ["Django", "Flask", "BeautifulSoup", "Selenium", "Pandas"]
         }
     ],
     [
@@ -104,8 +97,7 @@ const specialists = new Map([
             ],
             additionalServices: ["Поддержка фронтенда", "CI/CD и сборка фронта", "Технический UI/UX аудит"],
             projectTypes: ["SPA", "Лендинги и промо-сайты", "Веб-интерфейсы для внутренних систем", "PWA"],
-            applications: ["React", "Vue.js", "Next.js", "TypeScript", "Webpack"],
-            wrongTerms: ["верстальщик", "Front end разработчик", "JavaScript программист", "фронтенд"]
+            applications: ["React", "Vue.js", "Next.js", "TypeScript", "Webpack"]
         }
     ],
     [
@@ -120,8 +112,7 @@ const specialists = new Map([
             ],
             additionalServices: ["Анализ трендов и музыки", "Концепт-реализация роликов", "Консультирование по ведению и продвижению Reels"],
             projectTypes: ["Reels для Instagram", "Короткие видео для TikTok", "YouTube Shorts", "Рекламные вирусные ролики"],
-            applications: ["Adobe Premiere Pro", "CapCut", "InShot", "Adobe After Effects", "Final Cut Pro"],
-            wrongTerms: ["тиктокер", "видеомейкер", "Instagram видео", "короткие ролики"]
+            applications: ["Adobe Premiere Pro", "CapCut", "InShot", "Adobe After Effects", "Final Cut Pro"]
         }
     ],
     [
@@ -130,8 +121,7 @@ const specialists = new Map([
             services: ["2D-анимация и моушн-дизайн", "3D-анимация и VFX", "Анимация логотипов и инфографики", "Монтаж с графикой"],
             additionalServices: ["Storyboard для анимации", "Анимация из статичных дизайнов", "Выбор стиля анимации"],
             projectTypes: ["Рекламные моушн-ролики", "Explainer-видео", "Анимированные баннеры и заставки", "Графика для соцсетей"],
-            applications: ["Adobe After Effects", "Cinema 4D", "Adobe Premiere Pro", "Blender", "Adobe Illustrator"],
-            wrongTerms: ["аниматор", "motion дизайн", "моушн графика", "видеодизайнер"]
+            applications: ["Adobe After Effects", "Cinema 4D", "Adobe Premiere Pro", "Blender", "Adobe Illustrator"]
         }
     ],
     [
@@ -140,8 +130,7 @@ const specialists = new Map([
             services: ["Сценарии коротких видео", "Идеи для вирусных видео", "Создание контент стратегии", "Адаптация сценариев под форматы Reels/Shorts"],
             additionalServices: ["Оптимизация сценариев под ЦА", "Улучшение сценариев роликов", "Адаптация формата под нишу"],
             projectTypes: ["Сценарии для Reels", "Сценарии для TikTok", "Сценарии для Short", "Креатив для рекламы"],
-            applications: [],
-            wrongTerms: ["сценарист коротких видео", "сценарий для TikTok", "копирайтер видео", "идея для ролика"]
+            applications: []
         }
     ],
     [
@@ -150,8 +139,7 @@ const specialists = new Map([
             services: ["Контент для соцсетей", "Контент-план для соцсетей", "Посты для соцсетей", "Съёмка и монтаж видео"],
             additionalServices: ["Единый стиль для соцсетей", "Аналитика контента", "Консультации по стилю аккаунта"],
             projectTypes: ["Ведение Instagram", "Контент для ВК", "Ведение Telegram-канала", "Ведение TikTok"],
-            applications: ["Canva", "Adobe Photoshop", "CapCut", "Snapseed", "InShot"],
-            wrongTerms: ["контентщик", "админ соцсетей", "создатель контента", "сммщик"]
+            applications: ["Canva", "Adobe Photoshop", "CapCut", "Snapseed", "InShot"]
         }
     ],
     [
@@ -165,8 +153,7 @@ const specialists = new Map([
                 "Серии сторис для прогрева ЦА",
                 "Сторитейл под запуск инфопродукта"
             ],
-            applications: ["Canva", "Adobe Photoshop", "InShot", "Mojo", "StoryArt"],
-            wrongTerms: ["оформление сторис", "дизайн историй", "сториз", "истории Instagram"]
+            applications: ["Canva", "Adobe Photoshop", "InShot", "Mojo", "StoryArt"]
         }
     ],
     [
@@ -175,8 +162,7 @@ const specialists = new Map([
             services: ["Монтаж видео любой сложности", "Цветокоррекция", "Аудиообработка", "Видео для YouTube и рекламы"],
             additionalServices: ["SFX", "Видео ресайз", "Коррекция смонтированных роликов"],
             projectTypes: ["Монтаж видео для YouTube", "Создание рекламных видеороликов", "Монтаж видео для соцсетей", "Постпродакшн для интервью и подкастов"],
-            applications: ["Adobe Premiere Pro", "Final Cut Pro", "DaVinci Resolve", "Adobe After Effects", "Adobe Audition"],
-            wrongTerms: ["монтаж видео", "склеить видео", "режиссер монтажа", "нарезка видео"]
+            applications: ["Adobe Premiere Pro", "Final Cut Pro", "DaVinci Resolve", "Adobe After Effects", "Adobe Audition"]
         }
     ],
     [
@@ -191,8 +177,7 @@ const specialists = new Map([
                 "Консультации по улучшению веб-дизайна"
             ],
             projectTypes: ["Лендинги и промо-сайты", "Интернет-магазины", "Корпоративные сайты", "Дизайн-системы", "Веб-интерфейсы"],
-            applications: ["Figma", "Sketch", "Adobe XD", "Adobe Photoshop", "Tilda"],
-            wrongTerms: ["прототип", "верстка", "программирование сайта", "посадочная страница", "многостраничный сайт", "макет сайта", "UI/UX дизайн"]
+            applications: ["Figma", "Sketch", "Adobe XD", "Adobe Photoshop", "Tilda"]
         }
     ],
     [
@@ -218,8 +203,7 @@ const specialists = new Map([
                 "Упаковка и этикетки",
                 "Дизайн корпоративных презентаций"
             ],
-            applications: ["Adobe Photoshop", "Adobe Illustrator", "CorelDRAW", "Adobe InDesign", "Figma"],
-            wrongTerms: ["фотошопер", "графдизайнер", "дизайн логотипа", "оформитель"]
+            applications: ["Adobe Photoshop", "Adobe Illustrator", "CorelDRAW", "Adobe InDesign", "Figma"]
         }
     ],
     [
@@ -235,8 +219,7 @@ const specialists = new Map([
             ],
             additionalServices: ["UX-аудит", "Анализ пользовательских сценариев", "Настройка дизайн-процесса в команде", "Проработка CJM"],
             projectTypes: ["Моб приложения", "Веб-сервисы", "Редизайн приложений с упором на UX", "Создание прототипов"],
-            applications: ["Figma", "Sketch", "Adobe XD", "Miro", "Axure RP"],
-            wrongTerms: ["дизайнер интерфейса", "UX анализ", "юзабилити дизайн", "UI/UX"]
+            applications: ["Figma", "Sketch", "Adobe XD", "Miro", "Axure RP"]
         }
     ],
     [
@@ -245,8 +228,7 @@ const specialists = new Map([
             services: ["Карточки WB/OZON", "Инфографика для карточек", "Продающий визуал карточек", "Промо-дизайн для WB/OZON"],
             additionalServices: ["Аудит карточек товаров", "Разработка шаблонов для карточек", "Консультации по карточкам"],
             projectTypes: ["Карточки для WB", "Карточки для OZON", "Инфографика для товарных карточек", "Оформление бренд-зоны магазина на маркетплейсе"],
-            applications: ["Adobe Photoshop", "Adobe Illustrator", "Figma", "Canva", "Adobe Lightroom"],
-            wrongTerms: ["оформление товара на WB", "дизайн карточки товара", "картинки для маркетплейса", "баннер WB"]
+            applications: ["Adobe Photoshop", "Adobe Illustrator", "Figma", "Canva", "Adobe Lightroom"]
         }
     ],
     [
@@ -261,8 +243,7 @@ const specialists = new Map([
                 "Рекламные иллюстрации",
                 "Иллюстрации для фотостоков"
             ],
-            applications: ["Adobe Illustrator", "Adobe Photoshop", "Procreate", "Corel Painter", "Clip Studio Paint"],
-            wrongTerms: ["художник", "digital artist", "рисунок на заказ", "карикатурист"]
+            applications: ["Adobe Illustrator", "Adobe Photoshop", "Procreate", "Corel Painter", "Clip Studio Paint"]
         }
     ],
     [
@@ -281,8 +262,7 @@ const specialists = new Map([
                 "Модели продуктов и прототипов для презентаций",
                 "3D-контент для VR/AR приложений"
             ],
-            applications: ["Blender", "3ds Max", "Maya", "ZBrush", "Substance Painter"],
-            wrongTerms: ["3D дизайнер", "3D моделист", "визуализатор", "3D artist"]
+            applications: ["Blender", "3ds Max", "Maya", "ZBrush", "Substance Painter"]
         }
     ],
     [
@@ -291,8 +271,7 @@ const specialists = new Map([
             services: ["Интерьер жилых помещений", "Интерьер коммерческих помещений", "Планировка и мебель", "3D-визуализация интерьера", "Материалы и декор"],
             additionalServices: ["Авторский надзор", "Консультации по перепланировке", "Подготовка чертежей для строителей", "Декорирование интерьера"],
             projectTypes: ["Дизайн квартиры/дома", "Коммерческий интерьер", "Обновление интерьера", "Дизайн кафе и гостиниц", "Ландшафтный дизайн"],
-            applications: ["AutoCAD", "3ds Max (V-Ray)", "SketchUp", "Archicad", "Adobe Photoshop"],
-            wrongTerms: ["декоратор", "оформитель интерьера", "дизайн комнаты", "архитектор-дизайнер"]
+            applications: ["AutoCAD", "3ds Max (V-Ray)", "SketchUp", "Archicad", "Adobe Photoshop"]
         }
     ],
     [
@@ -301,8 +280,7 @@ const specialists = new Map([
             services: ["Ведение и продвижение соцсетей", "Контент-план и постинг", "Анализ метрик SMM", "Рост вовлеченности и аудитории"],
             additionalServices: ["Модерация и репутация", "Инфлюенс-маркетинг", "Чат-боты для соцсетей", " Личный бренд в соцсетях"],
             projectTypes: ["Продвижение в Instagram", "Комплексное ведение соцсетей", "Активности в соцсетях", "Анализ SMM-стратегии"],
-            applications: ["Facebook Business Suite", "VK Рекламный кабинет", "Canva", "Hootsuite", "Google Analytics"],
-            wrongTerms: ["админ соцсетей", "SMMщик", "менеджер по соцсетям", "продвижение в Instagram"]
+            applications: ["Facebook Business Suite", "VK Рекламный кабинет", "Canva", "Hootsuite", "Google Analytics"]
         }
     ],
     [
@@ -311,8 +289,7 @@ const specialists = new Map([
             services: ["Комплексная стратегия digital-marketing", "Запуск рекламных кампаний", "Анализ воронки и конверсии", "Мультиканальная лидогенерация"],
             additionalServices: ["Настройка веб-аналитики", "Аудит маркетинга", "Оптимизация рекламных каналов", "Анализ маркетинговых трендов"],
             projectTypes: ["Комплексное онлайн-продвижение", "Performance-маркетинг", "Cопровождение запуска продукта", "Аудит Digital-стратегии"],
-            applications: ["Google Analytics", "Яндекс Метрика", "Google Tag Manager", "MailChimp", "Яндекс Директ"],
-            wrongTerms: ["digital-маркетолог", "маркетолог", "менеджер по интернет-продвижению", "продвижение онлайн"]
+            applications: ["Google Analytics", "Яндекс Метрика", "Google Tag Manager", "MailChimp", "Яндекс Директ"]
         }
     ],
     [
@@ -326,8 +303,7 @@ const specialists = new Map([
                 "Техническое SEO больших порталов",
                 "Выведение нового сайта в ТОП поисковых систем"
             ],
-            applications: ["Google Search Console", "Яндекс Вебмастер", "Ahrefs", "Semrush", "Key Collector"],
-            wrongTerms: ["SEO оптимизатор", "сеошник", "раскрутка сайта", "продвижение в Гугле"]
+            applications: ["Google Search Console", "Яндекс Вебмастер", "Ahrefs", "Semrush", "Key Collector"]
         }
     ],
     [
@@ -336,8 +312,7 @@ const specialists = new Map([
             services: ["Настройка контекстной", "Оптимизация PPC", "Анализ рекламы и ROI"],
             additionalServices: ["Аудит контекстной рекламы", "Настройка ремаркетинга/ретаргетинга", "A/B тестирование", "Настройка целей в аналитике"],
             projectTypes: ["Контекст для интернет-магазина", "Контекст для услуг", "КМС/РСЯ кампании", "Ретаргетинг"],
-            applications: ["Яндекс Директ", "Google Ads", "Google Analytics", "Яндекс Метрика", "Google Tag Manager"],
-            wrongTerms: ["директолог", "настройка Яндекс Директ", "специалист по рекламе", "контекстная реклама"]
+            applications: ["Яндекс Директ", "Google Ads", "Google Analytics", "Яндекс Метрика", "Google Tag Manager"]
         }
     ],
     [
@@ -346,8 +321,7 @@ const specialists = new Map([
             services: ["Продюсирование онлайн-курсов", "Запуск вебинаров и марафонов", "Стратегия монетизации инфопродукта", "Координация команды"],
             additionalServices: ["Анализ ниши и ЦА", "Разработка продуктовой матрицы", "Автоворонка под продукт", "Ценообразование и упаковка"],
             projectTypes: ["Запуск онлайн-курса", "Автовебинары", "Продающие вебинары", "Прогрев ЦА к запуску"],
-            applications: ["GetCourse", "JustClick", "Webinar.ru", "Zoom", "Tilda"],
-            wrongTerms: ["инфопродюсер", "запуск онлайн-курса", "организатор вебинаров", "менеджер онлайн-школы"]
+            applications: ["GetCourse", "JustClick", "Webinar.ru", "Zoom", "Tilda"]
         }
     ],
     [
@@ -356,8 +330,7 @@ const specialists = new Map([
             services: ["Генерация креативных идей и форматов", "Разработка УТП и офферов", "Упаковка продукта", "Креативные концепции Reels/Tiktok"],
             additionalServices: ["Мозговой штурм с командой", "Анализ конкурентов", "Позиционирование и сторитейлинг", "Улучшение воронок"],
             projectTypes: ["Креатив для ролика", "Копирайтинг промо-материалов"],
-            applications: ["Miro", "Notion", "MindManager", "Adobe Creative Cloud", "Google Docs"],
-            wrongTerms: ["бренд-стратег", "копирайтер", "креативный маркетолог", "идеолог"]
+            applications: ["Miro", "Notion", "MindManager", "Adobe Creative Cloud", "Google Docs"]
         }
     ],
     [
@@ -376,8 +349,7 @@ const specialists = new Map([
                 "Консультации по выбору платформы для автоворонки"
             ],
             projectTypes: ["Автоворонка инфобиз", "Цепочка писем для прогрева", "Чат-бот в tg", "Автоматизация кросс-продаж"],
-            applications: ["BotHelp", "Senler", "ManyChat", "Salebot", "Chat place"],
-            wrongTerms: ["настройка автоворонки", "email-маркетолог", "рассылка писем", "прогрев лидов"]
+            applications: ["BotHelp", "Senler", "ManyChat", "Salebot", "Chat place"]
         }
     ],
     [
@@ -391,8 +363,7 @@ const specialists = new Map([
                 "Разработка и дизайн креативов"
             ],
             projectTypes: ["Лидген через таргет", "Таргетированная реклама с автоворонкой", "Ретаргет"],
-            applications: ["Facebook Ads Manager", "VK Рекламный кабинет", "MyTarget", "TikTok Ads", "Facebook Pixel"],
-            wrongTerms: ["таргетинг", "реклама в Instagram", "специалист по таргету", "Facebook реклама"]
+            applications: ["Facebook Ads Manager", "VK Рекламный кабинет", "MyTarget", "TikTok Ads", "Facebook Pixel"]
         }
     ],
     [
@@ -411,8 +382,7 @@ const specialists = new Map([
                 "Анализ и перезапуск стагнирующего аккаунта на маркетплейсе",
                 "Ежедневное сопровождение продаж на нескольких маркетплейсах"
             ],
-            applications: ["Wildberries Seller Center", "OZON Seller Account", "Яндекс.Маркет кабинет продавца", "MPStats", "Excel/Google Sheets"],
-            wrongTerms: ["менеджер Wildberries", "вывод товара на Ozon", "специалист маркетплейсов", "продажи на маркетплейсе"]
+            applications: ["Wildberries Seller Center", "OZON Seller Account", "Яндекс.Маркет кабинет продавца", "MPStats", "Excel/Google Sheets"]
         }
     ],
     [
@@ -437,8 +407,7 @@ const specialists = new Map([
                 "Авито API и парсеры",
                 "Excel/Google Sheets",
                 "Telegram-боты для мониторинга Авито"
-            ],
-            wrongTerms: ["специалист по Авито", "продвижение на Авито", "продать на Авито", "разместить объявления"]
+            ]
         }
     ],
     [
@@ -463,8 +432,7 @@ const specialists = new Map([
                 "Контент для email-рассылки или коммерческого предложения",
                 "Сценарии рекламных видеороликов"
             ],
-            applications: ["Google Docs", "Microsoft Word", "Grammarly", "Главред", "Text.ru (проверка уникальности)"],
-            wrongTerms: ["рерайтер", "контент-райтер", "copywriter", "тексты на заказ"]
+            applications: ["Google Docs", "Microsoft Word", "Grammarly", "Главред", "Text.ru (проверка уникальности)"]
         }
     ],
     [
@@ -489,8 +457,7 @@ const specialists = new Map([
                 "Администрирование блога (публикация статей, модерация)",
                 "Контент-поддержка сайта на WordPress/Tilda"
             ],
-            applications: ["WordPress", "Tilda", "1C-Битрикс", "Joomla", "Notion"],
-            wrongTerms: ["администратор сайта", "наполнение сайта", "контентщик", "модератор сайта"]
+            applications: ["WordPress", "Tilda", "1C-Битрикс", "Joomla", "Notion"]
         }
     ],
     [
@@ -508,8 +475,7 @@ const specialists = new Map([
                 "Сценарий рекламного или корпоративного видеоролика",
                 "Сценарий обучающего видео или курса"
             ],
-            applications: ["Final Draft", "Celtx", "Scrivener", "Google Docs", "Microsoft Word"],
-            wrongTerms: ["драматург", "storytelling", "автор сценария", "копирайтер"]
+            applications: ["Final Draft", "Celtx", "Scrivener", "Google Docs", "Microsoft Word"]
         }
     ],
     [
@@ -534,8 +500,7 @@ const specialists = new Map([
                 "Поиск топ-менеджеров (Executive search)",
                 "Аутсорсинг рекрутинга для компании"
             ],
-            applications: ["LinkedIn", "hh.ru", "Работа.ру", "Excel/Google Sheets", "Huntflow (ATS)"],
-            wrongTerms: ["кадровик", "HR менеджер", "поиск сотрудников", "рекрутёр"]
+            applications: ["LinkedIn", "hh.ru", "Работа.ру", "Excel/Google Sheets", "Huntflow (ATS)"]
         }
     ],
     [
@@ -560,8 +525,7 @@ const specialists = new Map([
                 "Представительство в арбитражном суде по спору",
                 "Консультирование стартапа по интеллектуальной собственности"
             ],
-            applications: ["КонсультантПлюс", "Гарант", "Microsoft Word", "Госуслуги", "Excel"],
-            wrongTerms: ["адвокат", "юрисконсульт", "юрист онлайн", "нотариус (по ошибке)"]
+            applications: ["КонсультантПлюс", "Гарант", "Microsoft Word", "Госуслуги", "Excel"]
         }
     ],
     [
@@ -586,8 +550,7 @@ const specialists = new Map([
                 "Ведение учета ИП на упрощенной системе",
                 "Налоговый аудит и наведение порядка в учете"
             ],
-            applications: ["1С Бухгалтерия", "Контур.Эльба", "Excel", "СБИС", "Моё дело (онлайн-бухгалтерия)"],
-            wrongTerms: ["главный бухгалтер", "расчет налогов", "удаленный бухгалтер", "бухгалтерия (общий запрос)"]
+            applications: ["1С Бухгалтерия", "Контур.Эльба", "Excel", "СБИС", "Моё дело (онлайн-бухгалтерия)"]
         }
     ]
 ]);

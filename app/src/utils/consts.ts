@@ -20,15 +20,6 @@ export const TARIFF_PRICES_NORMALIZED = Object.fromEntries(
 );
 
 export const tools: {[key in ToolID]: Tool} = {
-    "contact-catcher": {
-        id: "contact-catcher",
-        title: "Перехват",
-        subtitle: "контактов",
-        description: "Получайте контакты лидов ваших конкурентов которые звонили им либо посещали их сайты",
-        selectorParts: ["Перехват контактов"],
-        url: "https://google.com", // TODO URL catcher
-        color: "purple"
-    },
     finder: {
         id: "finder",
         title: "ИИ лид",
@@ -36,7 +27,16 @@ export const tools: {[key in ToolID]: Tool} = {
         description: "Получайте самые релевантные заказы на ваши услуги",
         selectorParts: ["ИИ лид", "файндер"],
         url: "/finder",
-        color: "purple"
+        external: false
+    },
+    "contact-catcher": {
+        id: "contact-catcher",
+        title: "Перехват",
+        subtitle: "контактов",
+        description: "Получайте контакты лидов ваших конкурентов которые звонили им либо посещали их сайты",
+        selectorParts: ["Перехват контактов"],
+        url: "https://david-nonstop.ru/perexvat",
+        external: true
     }
 };
 
@@ -107,6 +107,5 @@ export const subscriptionBenefits: Benefit[] = [
     }
 ];
 
-// TODO URL support docs
-export const SUPPORT_URL = "https://google.com";
-export const DOCS_URL = "https://google.com";
+export const SUPPORT_URL = "https://t.me/cardinal_support_bot";
+export const DOCS_URL = "https://cardinalx.gitbook.io/";

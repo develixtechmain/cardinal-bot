@@ -17,22 +17,18 @@ public class RecommendationController : ControllerBase
     {
         var rec = new Recommendation
         {
-            Id = Guid.Parse(req.RecomendationId),
-            TaskId = req.SubmittedTaskId,
-            Vectors = req.SubmittedVectors,
+            Id = req.RecommendationId,
+            TaskId = req.TaskId,
             CreatedAt = DateTime.UtcNow
         };
         _db.Recommendations.Add(rec);
         await _db.SaveChangesAsync();
         return Ok();
     }
-    
-    
 }
 
 public class ConfirmRecommendationRequest
 {
-    public string RecomendationId { get; set; }
-    public Guid SubmittedTaskId { get; set; }
-    public List<Guid> SubmittedVectors { get; set; }
+    public Guid RecommendationId { get; set; }
+    public Guid TaskId { get; set; }
 }

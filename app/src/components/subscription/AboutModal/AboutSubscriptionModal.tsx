@@ -24,7 +24,7 @@ const AboutSubscriptionModal: FC<AboutSubscriptionModalProps> = ({isOpen, onClos
                         <img src="/assets/subscription/about/background.svg" alt=" " />
                     </div>
                     <div className={styles.header}>
-                        <span style={{marginRight: 44}}>
+                        <span style={{marginRight: 44, zIndex: 1}}>
                             <span>Один тариф - все функции за </span>
                             <span className={styles.purple}>4900руб</span>
                         </span>
@@ -134,8 +134,8 @@ const AboutSubscriptionModal: FC<AboutSubscriptionModalProps> = ({isOpen, onClos
                         color="#7211F8"
                         text={
                             <div className={styles.purchaseButton}>
-                                <FullEagle height="19px" width="33px" color="white" />
-                                Офоромить подписку
+                                <FullEagle height="19px" width="33px" color="#FFFFFF" />
+                                Оформить подписку
                             </div>
                         }
                         buttonStyle={{minHeight: 47, maxHeight: 47, borderRadius: 12}}

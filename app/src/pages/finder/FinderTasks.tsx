@@ -7,8 +7,10 @@ import {fetchUserTasks, fetchUserTasksStats} from "../../api/finder";
 import WideButton from "../../components/common/Buttons/WideButton";
 import Header from "../../components/common/Header/Header";
 import {Loading} from "../../components/common/Loading/Loading";
+import TaskLimitReachedModal from "../../components/finder/TaskLimitReachedModal/TaskLimitReachedModal";
 import TaskBlock from "../../components/finder/TasksList/TaskBlock";
 import {useFinder} from "../../store/finder";
+import {useStore} from "../../store/store";
 
 import MoveArrowIcon from "../../assets/icons/move-arrow.svg";
 
@@ -22,6 +24,11 @@ export default function Finder() {
     const isTasksStatisticsLoading = useRef(false);
     const tasksStats = useFinder((s) => s.tasksStats);
     const setTasksStats = useFinder((s) => s.setTasksStats);
+
+    const subscription = useStore((state) => state.subscription);
+    const isActive = subscription!.isActive();
+    const [isTaskLimitReachedOpen, setIsTaskLimitReachedOpen] = useState(false);
+    const handleNewTask = tasks.length < 5 ? () => navigate("/finder/briefing/alert") : () => setIsTaskLimitReachedOpen(true);
 
     const [loading, setLoading] = useState(true);
 
@@ -95,7 +102,8 @@ export default function Finder() {
 
     return (
         <div className={styles.container}>
-            <Header backTo="/finder" />
+            <Header backTo="" backoff="/finder" />
+            <TaskLimitReachedModal isOpen={isTaskLimitReachedOpen} onClose={() => setIsTaskLimitReachedOpen(false)} />
             <div className={styles.block}>
                 <div className={styles.header}>
                     <div className={styles.headerText}>
@@ -118,12 +126,12 @@ export default function Finder() {
                     color="#2E2E2E"
                     text={
                         <div className={styles.moveButton}>
-                            <MoveArrowIcon color="white" />
-                            <span style={{color: "white"}}>Добавить новое задание</span>
+                            <MoveArrowIcon color={isActive ? "#FFFFFF" : "#232323"} />
+                            <span style={{color: isActive ? "#FFFFFF" : "#232323"}}>Добавить новое задание</span>
                         </div>
                     }
                     buttonStyle={{borderRadius: 19, height: 50}}
-                    onClick={tasks.length >= 5 ? undefined : () => navigate("/finder/briefing/alert")}
+                    onClick={isActive ? handleNewTask : undefined}
                 />
             </div>
         </div>

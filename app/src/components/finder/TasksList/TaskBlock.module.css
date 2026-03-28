@@ -4,25 +4,213 @@
     border-radius: 19px;
 }
 
+.titleRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 11px;
+    background-color: #2E2E2E;
+    border-radius: 11px;
+    height: 29px;
+}
+
 .title {
-    text-wrap: nowrap;
+    flex: 1;
     gap: 7px;
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding-left: 11px;
-    background-color: #2E2E2E;
-    border-radius: 11px;
-    height: 29px;
-    font-size: 15px;
-    line-height: 24px;
-    letter-spacing: -0.03em;
+    text-wrap: nowrap;
 }
 
 .title > span {
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: calc(100% - 15px);
+    width: calc(100dvw - 225px);
+    font-size: 15px;
+    line-height: 24px;
+    letter-spacing: -0.03em;
+}
+
+.renameButton {
+    flex-shrink: 0;
+    gap: 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    color: #FFFFFF66;
+    font-size: 8px;
+    line-height: 24px;
+    letter-spacing: 0;
+}
+
+.renameContainer {
+    gap: 4px;
+    padding: 5px;
+    margin: 0 32px;
+    display: flex;
+    flex-direction: column;
+    background-color: #141414;
+    border: 1px solid #FFFFFF14;
+    border-radius: 15px;
+}
+
+.renameBlock {
+    gap: 6px;
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    background-color: #202020;
+    border-radius: 9px;
+}
+
+.renameTitle {
+    gap: 6px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+    color: #FFFFFF66;
+    font-size: 10px;
+    font-weight: 400;
+    line-height: 15px;
+    letter-spacing: 0;
+}
+
+.deleteContainer {
+    gap: 5px;
+    display: flex;
+    flex-direction: column;
+    margin: 0 32px;
+    padding: 9px 6px 6px 6px;
+    background-color: #141414;
+    border: 1px solid #FFFFFF14;
+    border-radius: 20px;
+}
+
+.deleteName {
+    margin: 0 3px 4px 3px;
+    padding: 2px 11px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    gap: 7px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: #2E2E2E;
+    border-radius: 11px;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 24px;
+    letter-spacing: -0.03em;
+}
+
+.deleteText {
+    margin-left: 10px;
+    margin-right: 21px;
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font-ui);
+}
+
+.deleteTitle {
+    font-size: 19px;
+    font-weight: 500;
+    line-height: 21px;
+    letter-spacing: -1px;
+}
+
+.deleteDescription {
+    color: #FFFFFFB2;
+    font-size: 12px;
+    font-weight: 300;
+    line-height: 28px;
+    letter-spacing: 0;
+}
+
+.confirmRenameButton {
+    cursor: pointer;
+    flex: 1;
+    border: 1px solid #BEF811;
+    color: #BEF811;
+    background-color: #BEF81133;
+}
+
+.confirmDeleteButton {
+    cursor: pointer;
+    flex: 1;
+    color: #FFFFFF;
+    background-color: #7211F8;
+    border: none;
+}
+
+.titleInput {
+    width: 100% !important;
+    padding: 13px 15px;
+    border: none;
+    color: #FFFFFF;
+    caret-color: #7211F8;
+    background-color: #2E2E2E;
+    border-radius: 7px;
+    resize: none;
+    box-sizing: border-box !important;
+    -webkit-appearance: none;
+    appearance: none;
+    font-family: var(--font-primary);
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 18px;
+    letter-spacing: -1px;
+}
+
+.titleInput::placeholder {
+    color: #8E8E93;
+    font-family: var(--font-ui);
+    font-size: 15px;
+    font-weight: 500;
+    line-height: 22px;
+    letter-spacing: 0;
+}
+
+.titleInput:focus {
+    outline: none;
+}
+
+.titleInputError {
+    border: 1px solid #F81B11;
+}
+
+.actionButtons {
+    gap: 5px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+}
+
+.cancelButton {
+    cursor: pointer;
+    flex: 1;
+    border: 1px solid #F81B11;
+    color: #F81B11;
+    background-color: #F81B1133;
+}
+
+.buttonText {
+    align-self: center;
+    height: 79px;
+    font-family: var(--font-primary);
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 32px;
+    letter-spacing: -0.02em;
+    border-radius: 12px;
+}
+
+.buttonText:hover,
+.buttonText:focus {
+    outline: none;
 }
 
 .statsBlock {
@@ -31,7 +219,7 @@
     margin-top: 3px;
     margin-bottom: 21px;
     gap: 2px;
-    padding: 4px 4px 8px 4px;
+    padding: 4px;
     background-color: #FFFFFF11;
     border-radius: 11px;
 }
@@ -115,7 +303,7 @@
 }
 
 .totalBlock {
-    height: 28px;
+    flex: 1;
     padding: 2px 10px;
     display: flex;
     flex-direction: row;
@@ -124,11 +312,15 @@
     background-color: var(--block-color);
     color: var(--content-color);
     border-radius: 8px;
+    font-family: var(--font-secondary);
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 24px;
+    letter-spacing: -0.03em;
 }
 
 .dailyText {
-    height: 26px;
-    padding: 2px 10px;
+    padding: 1px 10px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -142,8 +334,8 @@
 }
 
 .dailyCount {
-    height: 26px;
-    padding: 2px 9px;
+    flex: 1;
+    padding: 1px 9px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -200,16 +392,15 @@
 
 .buttons {
     height: 46px;
-    margin-top: 25px;
     margin-bottom: 3px;
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: space-between;
     gap: 2px;
 }
 
 .playPauseButton {
+    flex: 1;
     cursor: pointer;
     height: 24px;
     padding: 10px 14px;
@@ -228,6 +419,7 @@
 }
 
 .editButton {
+    flex: 1;
     cursor: pointer;
     height: 22px;
     padding: 11px 14px;
@@ -246,6 +438,7 @@
 }
 
 .deleteButton {
+    flex: 1;
     cursor: pointer;
     height: 22px;
     padding: 11px 14px;
@@ -263,7 +456,7 @@
     align-items: center;
     justify-content: center;
     gap: 5px;
-    color: white;
+    color: #FFFFFF;
     font-family: var(--font-ui);
     font-size: 15px;
     font-weight: 500;
@@ -272,6 +465,7 @@
 }
 
 .dot {
+    flex-shrink: 0;
     height: 4px;
     width: 4px;
     border-radius: 50%;

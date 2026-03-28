@@ -1,4 +1,5 @@
 aio-pika
-tgcrypto
+TgCrypto-pyrofork
 pyrofork
+redis
 python-dotenv
