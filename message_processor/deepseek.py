@@ -13,6 +13,23 @@ min_confidence: float
 
 logger = logging.getLogger(__name__)
 
+
+def _parse_json_from_llm_response(raw: str) -> dict:
+    """Parse JSON from model output; strips optional ``` / ```json fences."""
+    text = raw.strip()
+    if text.startswith("```"):
+        first_nl = text.find("\n")
+        if first_nl != -1:
+            text = text[first_nl + 1 :]
+        else:
+            text = text.strip("`")
+        closing = text.rfind("```")
+        if closing != -1:
+            text = text[:closing]
+        text = text.strip()
+    return json.loads(text)
+
+
 SYSTEM_PROMPT = (
     "You are an AI agent that evaluates how well a client's request description matches "
     "a specialist's service offering.\n\n"
@@ -57,7 +74,7 @@ async def check_relevance(message_text: str, title: str, tags: list) -> dict | N
         return None
 
     try:
-        parsed = json.loads(result)
+        parsed = _parse_json_from_llm_response(result)
         confidence = float(parsed.get("confidence", 0))
         reasoning = parsed.get("reasoning", "")
         return {"confidence": confidence, "reasoning": reasoning}
