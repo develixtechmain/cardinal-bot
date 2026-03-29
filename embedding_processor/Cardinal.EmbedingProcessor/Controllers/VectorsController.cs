@@ -162,7 +162,7 @@ public class VectorsController : ControllerBase
             score_threshold = _config.GetValue<double>("Search:ScoreThreshold", 0.85)
         };
 
-        _logger.LogInformation($"Search parameters: ScoreThreshold {_config.GetValue<double>("Search:ScoreThreshold", 0.85)}, TopN {_config.GetValue<int>("Search:TopN", 1000)}")
+        _logger.LogInformation($"Search parameters: ScoreThreshold {_config.GetValue<double>("Search:ScoreThreshold", 0.85)}, TopN {_config.GetValue<int>("Search:TopN", 1000)}");
 
         var qdrantResp = await qdrantClient.PostAsJsonAsync(searchUrl, searchBody);
         qdrantResp.EnsureSuccessStatusCode();
