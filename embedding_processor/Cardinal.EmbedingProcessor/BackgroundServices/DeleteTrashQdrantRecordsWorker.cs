@@ -64,7 +64,8 @@ public class DeleteTrashQdrantRecordsWorker(IServiceProvider serviceProvider, IL
                         JsonConvert.SerializeObject(new
                         {
                             with_payload = new[] { "user_id" },
-                            with_vector = false
+                            with_vector = false,
+                            limit = int.MaxValue
                         }), Encoding.UTF8, "application/json"
                     ), stoppingToken);
 
