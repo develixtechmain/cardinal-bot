@@ -64,7 +64,10 @@ async def save_message(message):
 
     try:
         async with pool.acquire() as conn:
-            await conn.execute("INSERT INTO telegram_messages (message) VALUES $1", message)
+            await conn.execute(
+                "INSERT INTO telegram_messages (message) VALUES ($1::jsonb)",
+                json.dumps(message, ensure_ascii=False, default=str),
+            )
             logger.info(f"Message {message_id} from {chat_id} saved.")
     except Exception as e:
         logger.warning(f"Failed to save message {message_id} from {chat_id}: {e}")
