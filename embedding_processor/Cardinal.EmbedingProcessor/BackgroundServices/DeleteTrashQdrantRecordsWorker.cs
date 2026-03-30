@@ -82,13 +82,12 @@ public class DeleteTrashQdrantRecordsWorker(IServiceProvider serviceProvider, IL
                     JsonConvert.DeserializeObject<GetPointsResult>(
                         await response.Content.ReadAsStringAsync(stoppingToken));
 
-                if (qdrantResponse == null || qdrantResponse.Points.Length == 0)
-                {
-                    logger.LogInformation("No one points found");
+                if (qdrantResponse?.Points is not { Length: > 0 })
                     continue;
                 }
 
-                var pointsToDelete = qdrantResponse.Points.Where(p => userIds.Contains(p.Payload.UserId) == false)
+                var pointsToDelete = qdrantResponse.Points
+                    .Where(p => p.Payload == null || userIds.Contains(p.Payload.UserId) == false)
                     .ToList();
 
                 var removeDataUrl = $"{qdrantHost}/collections/{collectionName}/points/delete?wait=true";
