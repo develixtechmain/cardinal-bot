@@ -6,14 +6,30 @@ using Npgsql;
 
 namespace Cardinal.EmbedingProcessor.BackgroundServices;
 
-public class DeleteTrashQdrantRecordsWorker(IServiceProvider serviceProvider, ILogger<DeleteTrashQdrantRecordsWorker> logger) : BackgroundService
+public class DeleteTrashQdrantRecordsWorker(
+    IServiceProvider serviceProvider,
+    ILogger<DeleteTrashQdrantRecordsWorker> logger) : BackgroundService
 {
     #region Private DTOs
-    private record GetPointsResult([JsonProperty("points")]Point[]  Points);
-    private record Point([JsonProperty("id")]Guid Id, [JsonProperty("payload")]PointPayload Payload);
-    private record PointPayload([JsonProperty("user_id")]Guid UserId);
+
+    public class GetPointsResult
+    {
+        [JsonProperty("points")] public List<Point> Points { get; set; } = new();
+    }
+
+    public class Point
+    {
+        [JsonProperty("id")] public Guid Id { get; set; }
+        [JsonProperty("payload")] public PointPayload? Payload { get; set; }
+    }
+
+    public class PointPayload
+    {
+        [JsonProperty("user_id")] public Guid UserId { get; set; }
+    }
+
     #endregion
-    
+
     private readonly IServiceProvider _serviceProvider = serviceProvider;
     private readonly string _sqlQuery = "select id from \"public\".\"users\"";
     private readonly int _pauseBetweenExecutionsMinutes = 30;
@@ -68,9 +84,9 @@ public class DeleteTrashQdrantRecordsWorker(IServiceProvider serviceProvider, IL
                     with_vector = false,
                     limit = int.MaxValue
                 });
-                
+
                 logger.LogInformation("GetQdrantPoints body : {body}", body);
-                
+
                 var response = await client.PostAsync(getDataUrl,
                     new StringContent(
                         body, Encoding.UTF8, "application/json"
@@ -86,9 +102,10 @@ public class DeleteTrashQdrantRecordsWorker(IServiceProvider serviceProvider, IL
                     JsonConvert.DeserializeObject<GetPointsResult>(
                         await response.Content.ReadAsStringAsync(stoppingToken));
 
-                if (qdrantResponse?.Points is not { Length: > 0 })
+                if (qdrantResponse?.Points is not { Count: > 0 })
                 {
-                    logger.LogError("Can't get Qdrant records: {StatusCode}. Body : {body}", (int)response.StatusCode, await response.Content.ReadAsStringAsync(stoppingToken));
+                    logger.LogError("Can't get Qdrant records: {StatusCode}. Body : {body}", (int)response.StatusCode,
+                        await response.Content.ReadAsStringAsync(stoppingToken));
                     continue;
                 }
 
@@ -114,7 +131,8 @@ public class DeleteTrashQdrantRecordsWorker(IServiceProvider serviceProvider, IL
             }
             catch (Exception e)
             {
-                logger.LogError($"Error in remove trash qdrant points process: {e.Message}. Stack Trace: {e.StackTrace}");
+                logger.LogError(
+                    $"Error in remove trash qdrant points process: {e.Message}. Stack Trace: {e.StackTrace}");
             }
             finally
             {
