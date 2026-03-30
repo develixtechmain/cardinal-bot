@@ -12,7 +12,12 @@ public class DeleteTrashQdrantRecordsWorker(
 {
     #region Private DTOs
 
-    public class GetPointsResult
+    public class QdrantScrollResponse
+    {
+        [JsonProperty("result")] public QdrantScrollResult? Result { get; set; }
+    }
+
+    public class QdrantScrollResult
     {
         [JsonProperty("points")] public List<Point> Points { get; set; } = new();
     }
@@ -98,18 +103,19 @@ public class DeleteTrashQdrantRecordsWorker(
                     continue;
                 }
 
+                var scrollBody = await response.Content.ReadAsStringAsync(stoppingToken);
                 var qdrantResponse =
-                    JsonConvert.DeserializeObject<GetPointsResult>(
-                        await response.Content.ReadAsStringAsync(stoppingToken));
+                    JsonConvert.DeserializeObject<QdrantScrollResponse>(scrollBody);
+                var points = qdrantResponse?.Result?.Points;
 
-                if (qdrantResponse?.Points is not { Count: > 0 })
+                if (points is not { Count: > 0 })
                 {
                     logger.LogError("Can't get Qdrant records: {StatusCode}. Body : {body}", (int)response.StatusCode,
-                        await response.Content.ReadAsStringAsync(stoppingToken));
+                        scrollBody);
                     continue;
                 }
 
-                var pointsToDelete = qdrantResponse.Points
+                var pointsToDelete = points
                     .Where(p => userIds.Contains(p.Payload.UserId) == false)
                     .ToList();
 
