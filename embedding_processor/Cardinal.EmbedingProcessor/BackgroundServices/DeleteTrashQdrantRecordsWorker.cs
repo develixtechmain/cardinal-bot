@@ -62,14 +62,18 @@ public class DeleteTrashQdrantRecordsWorker(IServiceProvider serviceProvider, IL
 
                 var getDataUrl = $"{qdrantHost}/collections/{collectionName}/points/scroll";
 
+                var body = JsonConvert.SerializeObject(new
+                {
+                    with_payload = new[] { "user_id" },
+                    with_vector = false,
+                    limit = int.MaxValue
+                });
+                
+                logger.LogInformation("GetQdrantPoints body : {body}", body);
+                
                 var response = await client.PostAsync(getDataUrl,
                     new StringContent(
-                        JsonConvert.SerializeObject(new
-                        {
-                            with_payload = new[] { "user_id" },
-                            with_vector = false,
-                            limit = int.MaxValue
-                        }), Encoding.UTF8, "application/json"
+                        body, Encoding.UTF8, "application/json"
                     ), stoppingToken);
 
                 if (response.IsSuccessStatusCode == false)
@@ -83,11 +87,13 @@ public class DeleteTrashQdrantRecordsWorker(IServiceProvider serviceProvider, IL
                         await response.Content.ReadAsStringAsync(stoppingToken));
 
                 if (qdrantResponse?.Points is not { Length: > 0 })
+                {
+                    logger.LogError("Can't get Qdrant records: {StatusCode}. Body : {body}", (int)response.StatusCode, await response.Content.ReadAsStringAsync(stoppingToken));
                     continue;
                 }
 
                 var pointsToDelete = qdrantResponse.Points
-                    .Where(p => p.Payload == null || userIds.Contains(p.Payload.UserId) == false)
+                    .Where(p => userIds.Contains(p.Payload.UserId) == false)
                     .ToList();
 
                 var removeDataUrl = $"{qdrantHost}/collections/{collectionName}/points/delete?wait=true";
