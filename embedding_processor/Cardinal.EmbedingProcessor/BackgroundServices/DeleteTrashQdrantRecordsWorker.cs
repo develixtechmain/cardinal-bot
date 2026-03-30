@@ -44,7 +44,10 @@ public class DeleteTrashQdrantRecordsWorker(IServiceProvider serviceProvider, IL
                 }
 
                 if (userIds.Count == 0)
+                {
+                    logger.LogInformation("No one user id found");
                     continue;
+                }
 
 
                 var client = httpClientFactory.CreateClient();
@@ -70,14 +73,20 @@ public class DeleteTrashQdrantRecordsWorker(IServiceProvider serviceProvider, IL
                     ), stoppingToken);
 
                 if (response.IsSuccessStatusCode == false)
+                {
                     logger.LogError("Can't get Qdrant records: {StatusCode}", (int)response.StatusCode);
+                    continue;
+                }
 
                 var qdrantResponse =
                     JsonConvert.DeserializeObject<GetPointsResult>(
                         await response.Content.ReadAsStringAsync(stoppingToken));
 
                 if (qdrantResponse == null || qdrantResponse.Points.Length == 0)
+                {
+                    logger.LogInformation("No one points found");
                     continue;
+                }
 
                 var pointsToDelete = qdrantResponse.Points.Where(p => userIds.Contains(p.Payload.UserId) == false)
                     .ToList();
@@ -93,7 +102,10 @@ public class DeleteTrashQdrantRecordsWorker(IServiceProvider serviceProvider, IL
                     ), stoppingToken);
 
                 if (response.IsSuccessStatusCode == false)
+                {
                     logger.LogError("Can't delete TrashQdrant records: {StatusCode}", (int)response.StatusCode);
+                    continue;
+                }
             }
             catch (Exception e)
             {
@@ -101,6 +113,7 @@ public class DeleteTrashQdrantRecordsWorker(IServiceProvider serviceProvider, IL
             }
             finally
             {
+                logger.LogInformation("Run DeleteTrashQdrantRecords completed");
                 await Task.Delay(TimeSpan.FromMinutes(_pauseBetweenExecutionsMinutes), stoppingToken);
             }
         }
