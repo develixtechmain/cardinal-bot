@@ -10,10 +10,30 @@ services:
     ports:
       - "3000:3000"
 
+  trace-service:
+    build:
+      context: ./trace_service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      TRACE_SERVICE_API_KEY: ${TRACE_SERVICE_API_KEY:-}
+      DB_HOST: postgresql
+      DB_NAME: ${POSTGRESQL_DB:-cardinal}
+      DB_USER: ${POSTGRESQL_USER:-cardinal}
+      DB_PASS: ${POSTGRESQL_PASS}
+      DB_PORT: ${POSTGRESQL_PORT:-5432}
+      PORT: "8010"
+    ports:
+      - "8010:8010"
+    depends_on:
+      - postgresql
+
   telegram-parser:
     image: registry.develixtech.com/admin/cardinal-tg-parser:0.0.4
     restart: unless-stopped
     environment:
+      TRACE_SERVICE_URL: ${TRACE_SERVICE_URL:-http://trace-service:8010}
+      TRACE_INGEST_KEY: ${TRACE_SERVICE_API_KEY:-}
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
       RABBITMQ_USER: ${RABBITMQ_USER:-cardinal}
@@ -43,6 +63,8 @@ services:
     image: registry.develixtech.com/admin/cardinal-tg-parser:0.0.4
     restart: unless-stopped
     environment:
+      TRACE_SERVICE_URL: ${TRACE_SERVICE_URL:-http://trace-service:8010}
+      TRACE_INGEST_KEY: ${TRACE_SERVICE_API_KEY:-}
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
       RABBITMQ_USER: ${RABBITMQ_USER:-cardinal}
@@ -72,6 +94,8 @@ services:
     image: registry.develixtech.com/admin/cardinal-message-processor:0.0.4
     restart: unless-stopped
     environment:
+      TRACE_SERVICE_URL: ${TRACE_SERVICE_URL:-http://trace-service:8010}
+      TRACE_INGEST_KEY: ${TRACE_SERVICE_API_KEY:-}
       ENABLE_METRICS: ${ENABLE_METRICS:-false}
       LANGSMITH_TRACING: ${LANGSMITH_TRACING:-true}
       LANGSMITH_PROJECT: ${LANGSMITH_PROJECT:-cardinal}
@@ -142,6 +166,8 @@ services:
     image: registry.develixtech.com/admin/cardinal-bot-backend:0.0.4
     restart: unless-stopped
     environment:
+      TRACE_SERVICE_URL: ${TRACE_SERVICE_URL:-http://trace-service:8010}
+      TRACE_INGEST_KEY: ${TRACE_SERVICE_API_KEY:-}
       ENABLE_METRICS: ${ENABLE_METRICS:-false}
       WEBHOOK_URL: ${WEBHOOK_URL}
       AI_CORE_HOST: http://ai-core:8000

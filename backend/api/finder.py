@@ -20,6 +20,7 @@ class RecommendationSendRequest(BaseModel):
     text: str
     username: Optional[str] = None
     message_created_at: datetime.datetime
+    correlation_id: Optional[uuid.UUID] = None
 
 
 class CreateTaskRequest(BaseModel):
@@ -67,5 +68,11 @@ async def delete_task(request: Request, task_id: uuid.UUID):
 
 # RECOMMENDATIONS
 @router.post("/recommendations/send")
-async def recommend_to_user(request: RecommendationSendRequest):
-    return await send_recommendation_to_user(request)
+async def recommend_to_user(http_request: Request, body: RecommendationSendRequest):
+    hdr = http_request.headers.get("X-Correlation-ID") or http_request.headers.get("x-correlation-id")
+    if hdr and not body.correlation_id:
+        try:
+            body = body.model_copy(update={"correlation_id": uuid.UUID(hdr.strip())})
+        except ValueError:
+            pass
+    return await send_recommendation_to_user(body)

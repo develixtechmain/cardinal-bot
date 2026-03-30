@@ -4,6 +4,7 @@ import logging
 import os
 import random
 import sys
+import uuid
 from functools import partial
 from typing import Any, Awaitable, Protocol
 
@@ -32,6 +33,7 @@ from pyrogram.raw.types import (
 from pyrogram.types import InlineKeyboardButton, Message
 
 from buttons import ButtonsHandle, handle_buttons, handle_fast_click_button, handle_fast_id_url_button, handle_fast_url_button, handle_generic_button
+from trace_emit import emit as trace_emit_event
 from utils import validate_env
 
 
@@ -186,6 +188,7 @@ async def process_message(app, message: Message, edit):
 
 def message_to_payload(app, message: Message) -> dict:
     return {
+        "correlation_id": str(uuid.uuid4()),
         "chat_title": str(message.chat.title) if message.chat.title else None,
         "chat_username": str(message.chat.username) if message.chat.username else None,
         "user_id": str(message.from_user.id) if message.from_user and message.from_user.id else None,
@@ -234,7 +237,22 @@ async def rabbitmq_job(worker: int):
 
             payload.pop("app", None)
             payload.pop("reply_markup", None)
+            cid = payload.get("correlation_id")
+            chat_id_str = str(payload.get("chat_id", ""))
+            msg_id_int = int(payload["message_id"]) if payload.get("message_id") is not None else None
             await rabbitmq_channel.default_exchange.publish(routing_key=queue_name, message=aio_pika.Message(body=json.dumps(payload).encode(), delivery_mode=aio_pika.DeliveryMode.PERSISTENT))
+            if cid:
+                asyncio.create_task(
+                    trace_emit_event(
+                        cid,
+                        "telegram_parser",
+                        "publish",
+                        "ok",
+                        {"chat_id": chat_id_str, "message_id": payload.get("message_id")},
+                        source_chat_id=chat_id_str or None,
+                        source_message_id=msg_id_int,
+                    )
+                )
             size = queue.qsize()
             if size % 100 == 0 and size > 0:
                 logger.info(f"Queue size: {size}")
