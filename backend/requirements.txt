@@ -4,6 +4,7 @@ email-validator
 numpy
 httpx
 asyncpg
+aio-pika
 cachetools
 fastapi
 uvicorn
