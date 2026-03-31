@@ -28,6 +28,27 @@ services:
     depends_on:
       - postgresql
 
+  admin-ui:
+    build:
+      context: ./admin_ui
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      ADMIN_LOGIN: ${ADMIN_LOGIN:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      ADMIN_JWT_EXPIRY_HOURS: ${ADMIN_JWT_EXPIRY_HOURS:-24}
+      DB_HOST: postgresql
+      DB_NAME: ${POSTGRESQL_DB:-cardinal}
+      DB_USER: ${POSTGRESQL_USER:-cardinal}
+      DB_PASS: ${POSTGRESQL_PASS}
+      DB_PORT: ${POSTGRESQL_PORT:-5432}
+      PORT: "8011"
+    ports:
+      - "8011:8011"
+    depends_on:
+      - postgresql
+
   telegram-parser:
     image: registry.develixtech.com/admin/cardinal-tg-parser:0.0.4
     restart: unless-stopped
