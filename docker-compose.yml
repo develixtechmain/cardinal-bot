@@ -38,11 +38,17 @@ services:
       TRACE_DB_USER: ${TRACE_DB_USER:-trace}
       TRACE_DB_PASS: ${TRACE_DB_PASS}
       TRACE_DB_PORT: ${TRACE_DB_PORT:-5432}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
+      RABBITMQ_USER: ${RABBITMQ_USER:-cardinal}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
       PORT: "8010"
     ports:
       - "8010:8010"
     depends_on:
       - trace-postgresql
+      - rabbitmq
 
   admin-ui:
     build:

@@ -1,17 +1,26 @@
+import asyncio
 import logging
 import os
 from contextlib import asynccontextmanager
 
-import asyncpg
 from fastapi import Depends, FastAPI, HTTPException, Request
 
 from config import trace_api_key
 from db import close_db, get_pool, init_db
 from ingest import ingest_event_pool
 from models import TraceEventIngest
+from queue import close_queue, init_queue, publish, run_worker
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger(__name__)
+
+_worker_task: asyncio.Task | None = None
+
+
+async def _ingest_from_queue(body: dict) -> None:
+    """Called by the worker for each message consumed from RabbitMQ."""
+    event = TraceEventIngest.model_validate(body)
+    await ingest_event_pool(get_pool(), event)
 
 
 def verify_trace_api_key(request: Request) -> None:
@@ -25,8 +34,17 @@ def verify_trace_api_key(request: Request) -> None:
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    global _worker_task
     await init_db()
+    await init_queue()
+    _worker_task = asyncio.create_task(run_worker(_ingest_from_queue))
     yield
+    _worker_task.cancel()
+    try:
+        await _worker_task
+    except asyncio.CancelledError:
+        pass
+    await close_queue()
     await close_db()
 
 
@@ -40,15 +58,12 @@ async def health():
 
 @app.post("/internal/traces/events", dependencies=[Depends(verify_trace_api_key)])
 async def post_event(body: TraceEventIngest):
-    pool = get_pool()
     try:
-        event_id = await ingest_event_pool(pool, body)
-    except asyncpg.ForeignKeyViolationError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid parent_event_id or correlation: {e}") from e
+        await publish(body.model_dump(mode="json"))
     except Exception as e:
-        logger.exception("ingest failed")
+        logger.exception("failed to enqueue trace event")
         raise HTTPException(status_code=500, detail=str(e)) from e
-    return {"id": event_id, "correlation_id": str(body.correlation_id)}
+    return {"queued": True, "correlation_id": str(body.correlation_id)}
 
 
 def main():
