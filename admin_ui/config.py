@@ -5,10 +5,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def trace_api_key() -> str:
-    return os.environ.get("TRACE_SERVICE_API_KEY", "")
-
-
 def database_url_parts():
     """Dedicated trace DB (trace-postgresql), separate from main cardinal DB."""
     host = os.environ.get("TRACE_DB_HOST", "trace-postgresql")
@@ -17,3 +13,22 @@ def database_url_parts():
     password = os.environ.get("TRACE_DB_PASS", "")
     database = os.environ.get("TRACE_DB_NAME", "trace")
     return host, port, user, password, database
+
+
+def admin_login() -> str:
+    return os.environ.get("ADMIN_LOGIN", "admin")
+
+
+def admin_password() -> str:
+    return os.environ.get("ADMIN_PASSWORD", "")
+
+
+def jwt_secret() -> str:
+    secret = os.environ.get("ADMIN_JWT_SECRET", "")
+    if not secret:
+        raise RuntimeError("ADMIN_JWT_SECRET env var is required")
+    return secret
+
+
+def jwt_expiry_hours() -> int:
+    return int(os.environ.get("ADMIN_JWT_EXPIRY_HOURS", "24"))

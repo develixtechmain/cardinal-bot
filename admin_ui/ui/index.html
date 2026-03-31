@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cardinal Admin</title>
+  <link rel="stylesheet" href="/ui/styles.css" />
+</head>
+<body>
+
+  <!-- Login screen -->
+  <section id="loginSection" class="panel login-panel">
+    <h1>Cardinal Admin</h1>
+    <form id="loginForm" autocomplete="on">
+      <label for="loginInput">Логин</label>
+      <input type="text" id="loginInput" name="username" autocomplete="username" placeholder="admin" required />
+      <label for="passInput">Пароль</label>
+      <input type="password" id="passInput" name="password" autocomplete="current-password" placeholder="Пароль" required />
+      <button type="submit">Войти</button>
+    </form>
+    <div id="loginErr" class="error" hidden></div>
+  </section>
+
+  <!-- Main app (hidden until logged in) -->
+  <div id="appSection" hidden>
+    <header class="header">
+      <div>
+        <h1>Cardinal · трассировка сообщений</h1>
+        <p class="muted">Панель администратора</p>
+      </div>
+      <button type="button" id="btnLogout" class="linkish">Выйти</button>
+    </header>
+
+    <section class="panel">
+      <label for="searchQ">Поиск</label>
+      <div class="row">
+        <input type="text" id="searchQ" placeholder="UUID корреляции, chat_id:message_id или пусто — последние" />
+        <button type="button" id="btnSearch">Найти</button>
+      </div>
+      <p class="muted hint">UUID из логов, chat_id:message_id или подстрока сводки.</p>
+    </section>
+
+    <div id="err" class="error" hidden></div>
+
+    <section id="listSection" class="panel" hidden>
+      <h2>Результаты</h2>
+      <table class="table" id="resultsTable">
+        <thead>
+          <tr>
+            <th>Correlation ID</th>
+            <th>Чат / сообщение</th>
+            <th>Событий</th>
+            <th>Обновлён</th>
+            <th>Сводка</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section id="detailSection" class="panel" hidden>
+      <div class="detail-head">
+        <h2>Таймлайн</h2>
+        <button type="button" id="btnBack" class="linkish">← К списку</button>
+      </div>
+      <p id="detailSummary" class="summary"></p>
+      <p id="detailMeta" class="muted"></p>
+      <div class="timeline" id="timeline"></div>
+      <details class="raw">
+        <summary>Сырой JSON</summary>
+        <pre id="rawJson"></pre>
+      </details>
+    </section>
+  </div>
+
+  <script src="/ui/app.js"></script>
+</body>
+</html>

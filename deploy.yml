@@ -6,18 +6,35 @@ services:
     ports:
       - "3000:3000"
 
+  trace-postgresql:
+    image: postgres:17.6-alpine3.22
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${TRACE_DB_NAME:-trace}
+      POSTGRES_USER: ${TRACE_DB_USER:-trace}
+      POSTGRES_PASSWORD: ${TRACE_DB_PASS}
+    volumes:
+      - trace-postgresql-data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
   trace-service:
     image: registry.develixtech.com/admin/cardinal-trace-service:0.0.4
     restart: unless-stopped
     environment:
       TRACE_SERVICE_API_KEY: ${TRACE_SERVICE_API_KEY}
-      DB_HOST: ${POSTGRESQL_HOST}
-      DB_NAME: ${POSTGRESQL_DB}
-      DB_USER: ${POSTGRESQL_USER}
-      DB_PASS: ${POSTGRESQL_PASS}
+      TRACE_DB_HOST: ${TRACE_DB_HOST:-trace-postgresql}
+      TRACE_DB_NAME: ${TRACE_DB_NAME:-trace}
+      TRACE_DB_USER: ${TRACE_DB_USER:-trace}
+      TRACE_DB_PASS: ${TRACE_DB_PASS}
+      TRACE_DB_PORT: ${TRACE_DB_PORT:-5432}
       PORT: "8010"
     depends_on:
-      - postgresql
+      - trace-postgresql
     deploy:
       resources:
         limits:
@@ -26,6 +43,31 @@ services:
           memory: 128M
     ports:
       - "8010:8010"
+
+  admin-ui:
+    image: registry.develixtech.com/admin/cardinal-admin-ui:0.0.4
+    restart: unless-stopped
+    environment:
+      ADMIN_LOGIN: ${ADMIN_LOGIN}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      ADMIN_JWT_EXPIRY_HOURS: ${ADMIN_JWT_EXPIRY_HOURS:-24}
+      TRACE_DB_HOST: ${TRACE_DB_HOST:-trace-postgresql}
+      TRACE_DB_NAME: ${TRACE_DB_NAME:-trace}
+      TRACE_DB_USER: ${TRACE_DB_USER:-trace}
+      TRACE_DB_PASS: ${TRACE_DB_PASS}
+      TRACE_DB_PORT: ${TRACE_DB_PORT:-5432}
+      PORT: "8011"
+    depends_on:
+      - trace-postgresql
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+    ports:
+      - "8011:8011"
 
   telegram-parser:
     image: registry.develixtech.com/admin/cardinal-tg-parser:0.0.4
@@ -286,5 +328,6 @@ volumes:
   embeddings-data:
   postgresql-data:
   embeddings-postgresql-data:
+  trace-postgresql-data:
   pyrogram-sessions:
     external: true

@@ -73,25 +73,3 @@ async def test_post_event_ok(patch_db_pool, mock_conn):
         j = r.json()
         assert j["correlation_id"] == cid
         assert j["id"] == 42
-
-
-@pytest.mark.asyncio
-async def test_ui_static_served(patch_db_pool):
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as ac:
-        r = await ac.get("/ui/styles.css")
-        assert r.status_code == 200
-        assert b"timeline" in r.content
-
-
-@pytest.mark.asyncio
-async def test_get_trace_not_found(patch_db_pool, mock_conn):
-    mock_conn.fetchrow = AsyncMock(return_value=None)
-
-    transport = ASGITransport(app=app)
-    async with AsyncClient(transport=transport, base_url="http://test") as ac:
-        r = await ac.get(
-            f"/internal/traces/{uuid.uuid4()}",
-            headers={"X-Trace-API-Key": "test-secret-key"},
-        )
-        assert r.status_code == 404
