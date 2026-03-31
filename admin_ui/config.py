@@ -6,11 +6,12 @@ load_dotenv()
 
 
 def database_url_parts():
-    host = os.environ.get("DB_HOST", os.environ.get("POSTGRESQL_HOST", "postgresql"))
-    port = int(os.environ.get("DB_PORT", os.environ.get("POSTGRESQL_PORT", "5432")))
-    user = os.environ.get("DB_USER", os.environ.get("POSTGRESQL_USER", "cardinal"))
-    password = os.environ.get("DB_PASS", os.environ.get("POSTGRESQL_PASS", ""))
-    database = os.environ.get("DB_NAME", os.environ.get("POSTGRESQL_DB", "cardinal"))
+    """Dedicated trace DB (trace-postgresql), separate from main cardinal DB."""
+    host = os.environ.get("TRACE_DB_HOST", "trace-postgresql")
+    port = int(os.environ.get("TRACE_DB_PORT", "5432"))
+    user = os.environ.get("TRACE_DB_USER", "trace")
+    password = os.environ.get("TRACE_DB_PASS", "")
+    database = os.environ.get("TRACE_DB_NAME", "trace")
     return host, port, user, password, database
 
 
