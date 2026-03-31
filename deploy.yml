@@ -26,7 +26,6 @@ services:
     image: registry.develixtech.com/admin/cardinal-trace-service:0.0.4
     restart: unless-stopped
     environment:
-      TRACE_SERVICE_API_KEY: ${TRACE_SERVICE_API_KEY}
       TRACE_DB_HOST: ${TRACE_DB_HOST:-trace-postgresql}
       TRACE_DB_NAME: ${TRACE_DB_NAME:-trace}
       TRACE_DB_USER: ${TRACE_DB_USER:-trace}
@@ -37,7 +36,8 @@ services:
       RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
       RABBITMQ_USER: ${RABBITMQ_USER:-cardinal}
       RABBITMQ_PASS: ${RABBITMQ_PASS}
-      PORT: "8010"
+      TRACE_BATCH_SIZE: ${TRACE_BATCH_SIZE:-50}
+      TRACE_BATCH_TIMEOUT: ${TRACE_BATCH_TIMEOUT:-2.0}
     depends_on:
       - trace-postgresql
       - rabbitmq
@@ -47,8 +47,6 @@ services:
           memory: 256M
         reservations:
           memory: 128M
-    ports:
-      - "8010:8010"
 
   admin-ui:
     image: registry.develixtech.com/admin/cardinal-admin-ui:0.0.4
@@ -79,8 +77,6 @@ services:
     image: registry.develixtech.com/admin/cardinal-tg-parser:0.0.4
     restart: unless-stopped
     environment:
-      TRACE_SERVICE_URL: ${TRACE_SERVICE_URL:-http://trace-service:8010}
-      TRACE_INGEST_KEY: ${TRACE_SERVICE_API_KEY}
       RABBITMQ_HOST: ${RABBITMQ_HOST}
       RABBITMQ_VHOST: ${RABBITMQ_VHOST}
       RABBITMQ_USER: ${RABBITMQ_USER}
@@ -103,8 +99,6 @@ services:
     image: registry.develixtech.com/admin/cardinal-message-processor:0.0.4
     restart: unless-stopped
     environment:
-      TRACE_SERVICE_URL: ${TRACE_SERVICE_URL:-http://trace-service:8010}
-      TRACE_INGEST_KEY: ${TRACE_SERVICE_API_KEY}
       ENABLE_METRICS: ${ENABLE_METRICS}
       LANGSMITH_TRACING: true
       LANGSMITH_PROJECT: cardinal
@@ -165,8 +159,11 @@ services:
     image: registry.develixtech.com/admin/cardinal-bot-backend:0.0.4
     restart: unless-stopped
     environment:
-      TRACE_SERVICE_URL: ${TRACE_SERVICE_URL:-http://trace-service:8010}
-      TRACE_INGEST_KEY: ${TRACE_SERVICE_API_KEY}
+      RABBITMQ_HOST: ${RABBITMQ_HOST}
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
+      RABBITMQ_USER: ${RABBITMQ_USER:-cardinal}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
       ENABLE_METRICS: ${ENABLE_METRICS}
       WEBHOOK_URL: https://cardinal-x.online
       AI_CORE_HOST: http://cardinal-ai-core-1:8000
