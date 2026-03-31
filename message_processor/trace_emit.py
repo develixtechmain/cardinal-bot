@@ -59,4 +59,4 @@ async def emit(
         r = await c.post(f"{base}/internal/traces/events", json=body, headers={"X-Trace-API-Key": key})
         r.raise_for_status()
     except Exception as e:
-        logger.debug("trace emit failed: %s", e)
+        logger.warning("trace emit failed: %s", e)

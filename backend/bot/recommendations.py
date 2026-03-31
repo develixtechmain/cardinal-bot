@@ -79,7 +79,10 @@ async def send_unsubscribed_daily(chat_id, payload):
 
 
 async def send_recommendation_to_user(recommendation):
-    cid = str(recommendation.correlation_id) if getattr(recommendation, "correlation_id", None) else str(uuid.uuid4())
+    cid = str(recommendation.correlation_id) if recommendation.correlation_id else None
+    if not cid:
+        logger.warning("recommendation %s received without correlation_id, trace chain broken", recommendation.id)
+        cid = str(uuid.uuid4())
 
     async with get_pool().acquire() as conn:
         subscription = await conn.fetchrow("SELECT * FROM user_subscriptions WHERE user_id = $1;", recommendation.user_id)

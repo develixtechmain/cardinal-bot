@@ -215,7 +215,13 @@ async def _process_message(body: bytes):
         "message_processor",
         "embedding_search",
         "ok",
-        {"candidates": len(search_response)},
+        {
+            "candidates": len(search_response),
+            "candidates_detail": [
+                {"user_id": str(c.get("userId")), "task_id": str(c.get("taskId")), "score": c.get("score")}
+                for c in search_response
+            ],
+        },
         source_chat_id=source_chat_id,
         source_message_id=source_message_id,
     )
@@ -250,6 +256,29 @@ async def _process_message(body: bytes):
     except Exception as e:
         raise Exception(f"Failed to find candidate for {message['message_id']} from {message['chat_id']}") from e
 
+    await trace_emit(
+        correlation_id,
+        "message_processor",
+        "candidate_ranking",
+        "ok",
+        {
+            "selected_user_id": str(selected_candidate["userId"]),
+            "selected_rating": selected_candidate["rating"],
+            "all_ratings": [
+                {
+                    "user_id": str(c.get("userId")),
+                    "task_id": str(c.get("taskId")),
+                    "score": c.get("score"),
+                    "rating": c.get("rating"),
+                    "recent_recommendations": c.get("stats", {}).get("recent_recommendations"),
+                }
+                for c in search_response
+            ],
+        },
+        source_chat_id=source_chat_id,
+        source_message_id=source_message_id,
+    )
+
     rating = selected_candidate["rating"] * 0.9
 
     tasks = []
@@ -273,8 +302,38 @@ async def _process_message(body: bytes):
                     f"User {candidate['userId']} skipped: low relevance "
                     f"(confidence={relevance['confidence']}, reason={relevance['reasoning']})"
                 )
+                await trace_emit(
+                    correlation_id,
+                    "message_processor",
+                    "deepseek_relevance",
+                    "filtered",
+                    {
+                        "user_id": str(candidate["userId"]),
+                        "task_id": str(candidate["taskId"]),
+                        "task_title": user_task["title"],
+                        "confidence": relevance["confidence"],
+                        "reasoning": relevance["reasoning"],
+                    },
+                    source_chat_id=source_chat_id,
+                    source_message_id=source_message_id,
+                )
                 continue
 
+            await trace_emit(
+                correlation_id,
+                "message_processor",
+                "deepseek_relevance",
+                "ok",
+                {
+                    "user_id": str(candidate["userId"]),
+                    "task_id": str(candidate["taskId"]),
+                    "task_title": user_task["title"],
+                    "confidence": relevance["confidence"] if relevance else None,
+                    "reasoning": relevance["reasoning"] if relevance else None,
+                },
+                source_chat_id=source_chat_id,
+                source_message_id=source_message_id,
+            )
             if relevance:
                 logger.info(
                     f"User {candidate['userId']} passed relevance check "

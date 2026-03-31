@@ -2,6 +2,7 @@ import logging
 import os
 from datetime import datetime, timezone
 from typing import Any, Optional
+from uuid import UUID
 
 import httpx
 
@@ -28,8 +29,10 @@ async def emit(
     status: str,
     detail: Optional[dict[str, Any]] = None,
     *,
+    recommendation_id: Optional[UUID] = None,
     source_chat_id: Optional[str] = None,
     source_message_id: Optional[int] = None,
+    duration_ms: Optional[int] = None,
 ) -> None:
     if not trace_enabled():
         return
@@ -43,13 +46,17 @@ async def emit(
         "occurred_at": datetime.now(timezone.utc).isoformat(),
         "detail": detail or {},
     }
+    if recommendation_id is not None:
+        body["recommendation_id"] = str(recommendation_id)
     if source_chat_id is not None:
         body["source_chat_id"] = source_chat_id
     if source_message_id is not None:
         body["source_message_id"] = source_message_id
+    if duration_ms is not None:
+        body["duration_ms"] = duration_ms
     try:
         c = await _client_get()
         r = await c.post(f"{base}/internal/traces/events", json=body, headers={"X-Trace-API-Key": key})
         r.raise_for_status()
     except Exception as e:
-        logger.debug("trace emit failed: %s", e)
+        logger.warning("trace emit failed: %s", e)
