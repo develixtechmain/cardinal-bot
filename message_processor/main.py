@@ -301,6 +301,23 @@ async def _process_message(body: bytes):
                 source_message_id=source_message_id,
             )
             continue
+        subscription = await db.fetch_user_subscription(candidate["userId"])
+        if not subscription or _is_subscription_expired(subscription):
+            await trace_emit(
+                correlation_id,
+                "message_processor",
+                "candidate_filter",
+                "filtered",
+                {
+                    "user_id": str(candidate["userId"]),
+                    "task_id": str(candidate["taskId"]),
+                    "reason": "no_active_subscription",
+                },
+                source_chat_id=source_chat_id,
+                source_message_id=source_message_id,
+            )
+            continue
+
         if candidate["stats"]["recent_recommendations"] >= 33:
             logger.info(f"User {candidate['userId']} skipped recommendation due to daily limit.")
             await trace_emit(
@@ -469,6 +486,21 @@ async def select_candidate(candidates):
             selected_candidate = candidate
 
     return selected_candidate
+
+
+def _is_subscription_expired(subscription):
+    now = datetime.now(timezone.utc)
+    trial_end = subscription["trial_ends_at"]
+    subscription_end = subscription["subscription_ends_at"]
+
+    if trial_end is not None and subscription_end is not None:
+        return now > max(trial_end, subscription_end)
+    elif trial_end is not None:
+        return now > trial_end
+    elif subscription_end is not None:
+        return now > subscription_end
+    else:
+        return True
 
 
 async def calculate_rating(now, cutoff, candidate):

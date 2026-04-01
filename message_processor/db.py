@@ -35,6 +35,14 @@ async def fetch_user_task(task_id):
         return None
 
 
+async def fetch_user_subscription(user_id):
+    async with pool.acquire() as conn:
+        return await conn.fetchrow(
+            "SELECT trial_ends_at, subscription_ends_at FROM user_subscriptions WHERE user_id = $1",
+            user_id,
+        )
+
+
 
 async def fetch_user_from_db(user_id: uuid.UUID):
     async with pool.acquire() as conn:
