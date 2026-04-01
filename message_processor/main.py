@@ -280,7 +280,8 @@ async def _process_message(body: bytes):
         source_message_id=source_message_id,
     )
 
-    rating_threshold = selected_candidate["rating"] * 0.9
+    rating_threshold_pct = float(os.environ.get("RATING_THRESHOLD", 0.5))
+    rating_threshold = selected_candidate["rating"] * rating_threshold_pct
 
     eligible_candidates = []
     for candidate in search_response:
