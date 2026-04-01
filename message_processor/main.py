@@ -301,6 +301,23 @@ async def _process_message(body: bytes):
                 source_message_id=source_message_id,
             )
             continue
+        subscription = await db.fetch_user_subscription(candidate["userId"])
+        if not subscription or _is_subscription_expired(subscription):
+            await trace_emit(
+                correlation_id,
+                "message_processor",
+                "candidate_filter",
+                "filtered",
+                {
+                    "user_id": str(candidate["userId"]),
+                    "task_id": str(candidate["taskId"]),
+                    "reason": "no_active_subscription",
+                },
+                source_chat_id=source_chat_id,
+                source_message_id=source_message_id,
+            )
+            continue
+
         if candidate["stats"]["recent_recommendations"] >= 33:
             logger.info(f"User {candidate['userId']} skipped recommendation due to daily limit.")
             await trace_emit(
@@ -313,23 +330,6 @@ async def _process_message(body: bytes):
                     "task_id": str(candidate["taskId"]),
                     "reason": "daily_limit",
                     "recent_recommendations": candidate["stats"]["recent_recommendations"],
-                },
-                source_chat_id=source_chat_id,
-                source_message_id=source_message_id,
-            )
-            continue
-
-        subscription = await db.fetch_user_subscription(candidate["userId"])
-        if not subscription or _is_subscription_expired(subscription):
-            await trace_emit(
-                correlation_id,
-                "message_processor",
-                "candidate_filter",
-                "filtered",
-                {
-                    "user_id": str(candidate["userId"]),
-                    "task_id": str(candidate["taskId"]),
-                    "reason": "no_active_subscription",
                 },
                 source_chat_id=source_chat_id,
                 source_message_id=source_message_id,
