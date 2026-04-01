@@ -280,12 +280,11 @@ async def _process_message(body: bytes):
         source_message_id=source_message_id,
     )
 
-    rating_threshold_pct = float(os.environ.get("RATING_THRESHOLD", 0.5))
-    rating_threshold = selected_candidate["rating"] * rating_threshold_pct
+    min_score = float(os.environ.get("MIN_CANDIDATE_SCORE", 0.7))
 
     eligible_candidates = []
     for candidate in search_response:
-        if candidate["rating"] <= rating_threshold:
+        if candidate["score"] < min_score:
             await trace_emit(
                 correlation_id,
                 "message_processor",
@@ -294,9 +293,9 @@ async def _process_message(body: bytes):
                 {
                     "user_id": str(candidate["userId"]),
                     "task_id": str(candidate["taskId"]),
-                    "reason": "below_rating_threshold",
-                    "rating": candidate.get("rating"),
-                    "threshold": rating_threshold,
+                    "reason": "below_min_score",
+                    "score": candidate.get("score"),
+                    "min_score": min_score,
                 },
                 source_chat_id=source_chat_id,
                 source_message_id=source_message_id,
