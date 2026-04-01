@@ -27,7 +27,6 @@ def _rabbitmq_url() -> str:
 
 
 async def _flush_batch(batch: list[tuple[aio_pika.IncomingMessage, dict]]) -> None:
-    """Write a batch of events to the DB, ack on success, nack on failure."""
     if not batch:
         return
     pool = get_pool()
@@ -77,13 +76,32 @@ async def consume() -> None:
 
     if batch:
         await _flush_batch(batch)
+    await conn.close()
+
+
+async def _init_db_with_retry(max_retries: int = 10, base_delay: float = 2.0) -> None:
+    for attempt in range(1, max_retries + 1):
+        try:
+            await init_db()
+            return
+        except Exception as e:
+            if attempt == max_retries:
+                raise
+            delay = min(base_delay * attempt, 30.0)
+            logger.warning("DB connect failed (attempt %d/%d): %s — retrying in %.0fs", attempt, max_retries, e, delay)
+            await asyncio.sleep(delay)
 
 
 async def main() -> None:
-    await init_db()
+    await _init_db_with_retry()
     logger.info("trace-service: DB ready")
     try:
-        await consume()
+        while True:
+            try:
+                await consume()
+            except Exception as e:
+                logger.warning("trace-service: consumer error: %s — reconnecting in 5s", e)
+                await asyncio.sleep(5)
     finally:
         await close_db()
 
