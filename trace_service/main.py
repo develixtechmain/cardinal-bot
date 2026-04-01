@@ -23,10 +23,7 @@ def _rabbitmq_url() -> str:
     user = os.environ.get("RABBITMQ_USER", "cardinal")
     password = os.environ.get("RABBITMQ_PASS", "")
     vhost = os.environ.get("RABBITMQ_VHOST", "/")
-    url = f"amqp://{user}:{password}@{host}:{port}{vhost}"
-    safe_url = url.replace(password, "***") if password else url
-    logger.info("trace-service: RabbitMQ URL = %s", safe_url)
-    return url
+    return f"amqp://{user}:{password}@{host}:{port}{vhost}"
 
 
 async def _flush_batch(batch: list[tuple[aio_pika.IncomingMessage, dict]]) -> None:
@@ -66,7 +63,6 @@ async def consume() -> None:
                     logger.warning("trace-service: bad JSON, dropping message")
                     await msg.ack()
                     continue
-                logger.debug("trace-service: received msg cid=%s stage=%s", body.get("correlation_id", "?"), body.get("stage", "?"))
                 batch.append((msg, body))
                 if len(batch) >= BATCH_SIZE:
                     await _flush_batch(batch)

@@ -35,13 +35,10 @@ async def _ensure_channel() -> aio_pika.RobustChannel:
         _connection = None
         _channel = None
     if _channel is None or _channel.is_closed:
-        url = _rabbitmq_url()
-        safe_url = url.replace(os.environ.get("RABBITMQ_PASS", ""), "***")
-        logger.info("trace: connecting to RabbitMQ %s", safe_url)
-        _connection = await aio_pika.connect_robust(url)
+        _connection = await aio_pika.connect_robust(_rabbitmq_url())
         _channel = await _connection.channel()
         await _channel.declare_queue(TRACE_QUEUE, durable=True)
-        logger.info("trace: channel ready, queue '%s' declared", TRACE_QUEUE)
+        logger.info("trace: connected to RabbitMQ")
     return _channel
 
 
@@ -59,7 +56,6 @@ async def emit(
     duration_ms: Optional[int] = None,
 ) -> None:
     if not trace_enabled():
-        logger.debug("trace: disabled (RABBITMQ_PASS not set)")
         return
     body: dict[str, Any] = {
         "correlation_id": correlation_id,
@@ -88,6 +84,5 @@ async def emit(
             ),
             routing_key=TRACE_QUEUE,
         )
-        logger.debug("trace: published %s/%s/%s cid=%s", service, stage, status, correlation_id)
     except Exception as e:
-        logger.warning("trace emit failed: %s", e, exc_info=True)
+        logger.warning("trace emit failed: %s", e)
