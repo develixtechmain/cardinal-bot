@@ -285,14 +285,56 @@ async def _process_message(body: bytes):
     eligible_candidates = []
     for candidate in search_response:
         if candidate["rating"] <= rating_threshold:
+            await trace_emit(
+                correlation_id,
+                "message_processor",
+                "candidate_filter",
+                "filtered",
+                {
+                    "user_id": str(candidate["userId"]),
+                    "task_id": str(candidate["taskId"]),
+                    "reason": "below_rating_threshold",
+                    "rating": candidate.get("rating"),
+                    "threshold": rating_threshold,
+                },
+                source_chat_id=source_chat_id,
+                source_message_id=source_message_id,
+            )
             continue
         if candidate["stats"]["recent_recommendations"] >= 33:
             logger.info(f"User {candidate['userId']} skipped recommendation due to daily limit.")
+            await trace_emit(
+                correlation_id,
+                "message_processor",
+                "candidate_filter",
+                "filtered",
+                {
+                    "user_id": str(candidate["userId"]),
+                    "task_id": str(candidate["taskId"]),
+                    "reason": "daily_limit",
+                    "recent_recommendations": candidate["stats"]["recent_recommendations"],
+                },
+                source_chat_id=source_chat_id,
+                source_message_id=source_message_id,
+            )
             continue
 
         user_task = await db.fetch_user_task(candidate["taskId"])
         if not user_task:
             logger.warning(f"Task {candidate['taskId']} not found, skipping relevance check.")
+            await trace_emit(
+                correlation_id,
+                "message_processor",
+                "candidate_filter",
+                "filtered",
+                {
+                    "user_id": str(candidate["userId"]),
+                    "task_id": str(candidate["taskId"]),
+                    "reason": "task_not_found",
+                },
+                source_chat_id=source_chat_id,
+                source_message_id=source_message_id,
+            )
             continue
 
         tags = user_task["tags"] if isinstance(user_task["tags"], list) else json.loads(user_task["tags"])
