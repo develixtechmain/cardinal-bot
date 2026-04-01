@@ -280,69 +280,78 @@ async def _process_message(body: bytes):
         source_message_id=source_message_id,
     )
 
-    rating = selected_candidate["rating"] * 0.9
+    rating_threshold = selected_candidate["rating"] * 0.9
 
-    tasks = []
+    eligible_candidates = []
     for candidate in search_response:
-        if candidate["rating"] > rating:
-            logger.info(f"User {candidate['userId']} selected for recommendation.")
-            if candidate["stats"]["recent_recommendations"] >= 33:
-                logger.info(f"User {candidate['userId']} skipped recommendation due to daily limit.")
-                continue
+        if candidate["rating"] <= rating_threshold:
+            continue
+        if candidate["stats"]["recent_recommendations"] >= 33:
+            logger.info(f"User {candidate['userId']} skipped recommendation due to daily limit.")
+            continue
 
-            user_task = await db.fetch_user_task(candidate["taskId"])
-            if not user_task:
-                logger.warning(f"Task {candidate['taskId']} not found, skipping relevance check.")
-                continue
+        user_task = await db.fetch_user_task(candidate["taskId"])
+        if not user_task:
+            logger.warning(f"Task {candidate['taskId']} not found, skipping relevance check.")
+            continue
 
-            tags = user_task["tags"] if isinstance(user_task["tags"], list) else json.loads(user_task["tags"])
-            relevance = await check_relevance(message["text"], user_task["title"], tags)
+        tags = user_task["tags"] if isinstance(user_task["tags"], list) else json.loads(user_task["tags"])
+        eligible_candidates.append({"candidate": candidate, "user_task": user_task, "tags": tags})
 
-            if not is_relevant(relevance):
-                logger.info(
-                    f"User {candidate['userId']} skipped: low relevance "
-                    f"(confidence={relevance['confidence']}, reason={relevance['reasoning']})"
-                )
-                await trace_emit(
-                    correlation_id,
-                    "message_processor",
-                    "deepseek_relevance",
-                    "filtered",
-                    {
-                        "user_id": str(candidate["userId"]),
-                        "task_id": str(candidate["taskId"]),
-                        "task_title": user_task["title"],
-                        "confidence": relevance["confidence"],
-                        "reasoning": relevance["reasoning"],
-                    },
-                    source_chat_id=source_chat_id,
-                    source_message_id=source_message_id,
-                )
-                continue
+    async def check_candidate_relevance(entry):
+        candidate = entry["candidate"]
+        user_task = entry["user_task"]
+        tags = entry["tags"]
 
+        relevance = await check_relevance(message["text"], user_task["title"], tags)
+
+        if not is_relevant(relevance):
+            logger.info(
+                f"User {candidate['userId']} skipped: low relevance "
+                f"(confidence={relevance['confidence']}, reason={relevance['reasoning']})"
+            )
             await trace_emit(
                 correlation_id,
                 "message_processor",
                 "deepseek_relevance",
-                "ok",
+                "filtered",
                 {
                     "user_id": str(candidate["userId"]),
                     "task_id": str(candidate["taskId"]),
                     "task_title": user_task["title"],
-                    "confidence": relevance["confidence"] if relevance else None,
-                    "reasoning": relevance["reasoning"] if relevance else None,
+                    "confidence": relevance["confidence"],
+                    "reasoning": relevance["reasoning"],
                 },
                 source_chat_id=source_chat_id,
                 source_message_id=source_message_id,
             )
-            if relevance:
-                logger.info(
-                    f"User {candidate['userId']} passed relevance check "
-                    f"(confidence={relevance['confidence']})"
-                )
+            return None
 
-            tasks.append(save_recommendation(candidate, message))
+        await trace_emit(
+            correlation_id,
+            "message_processor",
+            "deepseek_relevance",
+            "ok",
+            {
+                "user_id": str(candidate["userId"]),
+                "task_id": str(candidate["taskId"]),
+                "task_title": user_task["title"],
+                "confidence": relevance["confidence"] if relevance else None,
+                "reasoning": relevance["reasoning"] if relevance else None,
+            },
+            source_chat_id=source_chat_id,
+            source_message_id=source_message_id,
+        )
+        if relevance:
+            logger.info(
+                f"User {candidate['userId']} passed relevance check "
+                f"(confidence={relevance['confidence']})"
+            )
+        return candidate
 
+    relevance_results = await asyncio.gather(*[check_candidate_relevance(e) for e in eligible_candidates])
+
+    tasks = [save_recommendation(c, message) for c in relevance_results if c is not None]
     await asyncio.gather(*tasks)
     total_processed += 1
     await trace_emit(
@@ -419,17 +428,14 @@ async def calculate_rating(now, cutoff, candidate):
 
     if stats["last_recommendation_at"]:
         time_since_last = now - stats["last_recommendation_at"]
-        time_factor = max(0, 1 - (time_since_last.total_seconds() / 3600))
+        hours_since_last = time_since_last.total_seconds() / 3600
+        time_decay = max(0, 1 - hours_since_last / 24)
     else:
-        time_factor = 0
+        time_decay = 0
 
-    loyalty_bonus = min(0.1, stats["total_recommendations"] / 10000)
-
-    recent_rating = 0.3 * (1 / (stats["recent_recommendations"] + 1))
-    score_rating = 0.3 * candidate["score"]
-    time_rating = 0.25 * (1 - time_factor)
-    loyalty_rating = 0.15 * loyalty_bonus
-    candidate["rating"] = recent_rating + score_rating + time_rating + loyalty_rating
+    recent_rating = 0.6 * (1 / (stats["recent_recommendations"] + 1))
+    time_rating = 0.4 * (1 - time_decay)
+    candidate["rating"] = recent_rating + time_rating
 
 
 async def init_redis():
