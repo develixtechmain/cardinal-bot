@@ -318,6 +318,22 @@ async def _process_message(body: bytes):
             )
             continue
 
+        if not await db.has_active_channel(candidate["userId"]):
+            await trace_emit(
+                correlation_id,
+                "message_processor",
+                "candidate_filter",
+                "filtered",
+                {
+                    "user_id": str(candidate["userId"]),
+                    "task_id": str(candidate["taskId"]),
+                    "reason": "no_active_channel",
+                },
+                source_chat_id=source_chat_id,
+                source_message_id=source_message_id,
+            )
+            continue
+
         if candidate["stats"]["recent_recommendations"] >= 33:
             logger.info(f"User {candidate['userId']} skipped recommendation due to daily limit.")
             await trace_emit(
