@@ -23,19 +23,25 @@ async def ingest_event(conn: asyncpg.Connection, body: TraceEventIngest) -> int:
             except (TypeError, ValueError):
                 pass
 
+    source_text = body.source_text
+    if source_text is None and body.detail:
+        source_text = body.detail.get("source_text")
+
     await conn.execute(
         """
-        INSERT INTO message_trace_roots (correlation_id, source_chat_id, source_message_id, first_seen_at, last_event_at, last_summary)
-        VALUES ($1, $2, $3, $4, $4, $5)
+        INSERT INTO message_trace_roots (correlation_id, source_chat_id, source_message_id, source_text, first_seen_at, last_event_at, last_summary)
+        VALUES ($1, $2, $3, $4, $5, $5, $6)
         ON CONFLICT (correlation_id) DO UPDATE SET
             last_event_at = GREATEST(message_trace_roots.last_event_at, EXCLUDED.last_event_at),
             source_chat_id = COALESCE(message_trace_roots.source_chat_id, EXCLUDED.source_chat_id),
             source_message_id = COALESCE(message_trace_roots.source_message_id, EXCLUDED.source_message_id),
+            source_text = COALESCE(message_trace_roots.source_text, EXCLUDED.source_text),
             last_summary = EXCLUDED.last_summary
         """,
         body.correlation_id,
         str(chat_id) if chat_id is not None else None,
         msg_id,
+        source_text,
         occurred,
         f"{body.service}/{body.stage}",
     )

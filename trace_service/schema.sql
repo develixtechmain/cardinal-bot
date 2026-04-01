@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS message_trace_roots (
     correlation_id UUID PRIMARY KEY,
     source_chat_id TEXT,
     source_message_id BIGINT,
+    source_text TEXT,
     first_seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     last_event_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     last_summary TEXT
@@ -14,6 +15,17 @@ CREATE INDEX IF NOT EXISTS idx_message_trace_roots_last_event
 
 CREATE INDEX IF NOT EXISTS idx_message_trace_roots_source
     ON message_trace_roots (source_chat_id, source_message_id);
+
+-- migration: add source_text column (idempotent)
+DO $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'message_trace_roots' AND column_name = 'source_text'
+    ) THEN
+        ALTER TABLE message_trace_roots ADD COLUMN source_text TEXT;
+    END IF;
+END $$;
 
 CREATE TABLE IF NOT EXISTS message_trace_events (
     id BIGSERIAL PRIMARY KEY,

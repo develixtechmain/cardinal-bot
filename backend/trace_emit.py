@@ -55,6 +55,7 @@ async def emit(
     recommendation_id: Optional[UUID] = None,
     source_chat_id: Optional[str] = None,
     source_message_id: Optional[int] = None,
+    source_text: Optional[str] = None,
     duration_ms: Optional[int] = None,
 ) -> None:
     if not trace_enabled():
@@ -74,6 +75,8 @@ async def emit(
         body["source_chat_id"] = source_chat_id
     if source_message_id is not None:
         body["source_message_id"] = source_message_id
+    if source_text is not None:
+        body["source_text"] = source_text
     if duration_ms is not None:
         body["duration_ms"] = duration_ms
     try:
