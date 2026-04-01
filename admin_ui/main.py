@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import uuid
@@ -202,7 +203,9 @@ async def get_trace(correlation_id: uuid.UUID):
     events_out = []
     for r in ev_rows:
         detail = r["detail"]
-        if hasattr(detail, "keys"):
+        if isinstance(detail, str):
+            detail = json.loads(detail)
+        elif hasattr(detail, "keys"):
             detail = dict(detail)
         events_out.append(
             TraceEventOut(
