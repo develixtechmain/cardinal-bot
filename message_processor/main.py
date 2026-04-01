@@ -392,9 +392,19 @@ async def _process_message(body: bytes):
             )
         return candidate
 
-    relevance_results = await asyncio.gather(*[check_candidate_relevance(e) for e in eligible_candidates])
+    max_recipients = int(os.environ.get("MAX_RECIPIENTS_PER_LEAD", 5))
+    eligible_candidates.sort(key=lambda e: e["candidate"]["rating"], reverse=True)
 
-    tasks = [save_recommendation(c, message) for c in relevance_results if c is not None]
+    approved = []
+    offset = 0
+    while offset < len(eligible_candidates) and len(approved) < max_recipients:
+        batch = eligible_candidates[offset:offset + max_recipients - len(approved)]
+        offset += len(batch)
+
+        results = await asyncio.gather(*[check_candidate_relevance(e) for e in batch])
+        approved.extend([c for c in results if c is not None])
+
+    tasks = [save_recommendation(c, message) for c in approved[:max_recipients]]
     await asyncio.gather(*tasks)
     total_processed += 1
     await trace_emit(
