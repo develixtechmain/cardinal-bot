@@ -17,7 +17,13 @@ async def send_recommendation_to_user(message, candidate, recommendation_id):
         if message["user_username"]:
             payload["username"] = message["user_username"]
 
-        resp = await client.post("/send", json=payload)
+        extra_headers = {}
+        if message.get("correlation_id"):
+            cid = str(message["correlation_id"])
+            payload["correlation_id"] = cid
+            extra_headers["X-Correlation-ID"] = cid
+
+        resp = await client.post("/send", json=payload, headers=extra_headers)
         resp.raise_for_status()
     except Exception as e:
         raise Exception(f"Failed to send recommendation to user") from e

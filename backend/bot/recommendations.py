@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import uuid
 from datetime import datetime, timezone
 from textwrap import dedent
 
@@ -42,6 +43,7 @@ from service.metrics import leads_actions_total, leads_time, users_linked_total
 from service.recommendations import delete_user_recommendation, fetch_recommendation_by_id
 from service.task_rules import fetch_user_rules, save_user_rules
 from service.users import fetch_user_by_id
+from trace_emit import emit as trace_emit
 from utils import escape_markdown_v2, is_subscription_expired, validate_env
 
 logger = logging.getLogger(__name__)
@@ -77,16 +79,46 @@ async def send_unsubscribed_daily(chat_id, payload):
 
 
 async def send_recommendation_to_user(recommendation):
+    cid = str(recommendation.correlation_id) if recommendation.correlation_id else None
+    if not cid:
+        logger.warning("recommendation %s received without correlation_id, trace chain broken", recommendation.id)
+        cid = str(uuid.uuid4())
+
     async with get_pool().acquire() as conn:
         subscription = await conn.fetchrow("SELECT * FROM user_subscriptions WHERE user_id = $1;", recommendation.user_id)
         if not subscription:
+            await trace_emit(
+                cid,
+                "backend",
+                "recommendation_received",
+                "error",
+                {"reason": "subscription_not_found", "user_id": str(recommendation.user_id)},
+                recommendation_id=recommendation.id,
+            )
             raise HTTPException(status_code=404, detail=f"Subscription for {recommendation.user_id} not found")
+
+    await trace_emit(
+        cid,
+        "backend",
+        "recommendation_received",
+        "ok",
+        {"user_id": str(recommendation.user_id)},
+        recommendation_id=recommendation.id,
+    )
 
     if is_subscription_expired(subscription):
         user_id = subscription["user_id"]
         task_title = await fetch_task_title_by_id(user_id, recommendation.task_id)
         payload = {"subscription": subscription, "task_title": task_title, "date": recommendation.message_created_at}
         await push_notification_with_payload(user_id, NotificationType.UNSUBSCRIBED_FOUND, payload)
+        await trace_emit(
+            cid,
+            "backend",
+            "subscription_gate",
+            "filtered",
+            {"reason": "expired"},
+            recommendation_id=recommendation.id,
+        )
         raise HTTPException(status_code=402, detail=f"Subscription {subscription['id']} is expired")
 
     rules = await fetch_user_rules(recommendation.user_id, recommendation.task_id)
@@ -94,10 +126,26 @@ async def send_recommendation_to_user(recommendation):
         logger.debug(f"User recommendation {recommendation.id} skipped due to rules")
         await delete_user_recommendation(recommendation.user_id, recommendation.id)
         logger.debug(f"User recommendation {recommendation.id} removed due to rules")
+        await trace_emit(
+            cid,
+            "backend",
+            "rules_check",
+            "filtered",
+            {},
+            recommendation_id=recommendation.id,
+        )
         return
 
     user_chats = await fetch_user_channels_by_user_id(recommendation.user_id, UserChannelType.RECOMMENDATION)
     if not user_chats:
+        await trace_emit(
+            cid,
+            "backend",
+            "channel_gate",
+            "error",
+            {"reason": "no_recommendation_channel"},
+            recommendation_id=recommendation.id,
+        )
         raise HTTPException(status_code=404, detail="User didn't attach any chat to itself")
 
     task_title = await fetch_task_title_by_id(recommendation.user_id, recommendation.task_id)
@@ -111,6 +159,7 @@ async def send_recommendation_to_user(recommendation):
     now = datetime.now(timezone.utc)
     leads_time.observe((now - message_created_at).total_seconds())
 
+    send_errors = 0
     for chat in user_chats:
         try:
             if recommendation.username:
@@ -121,7 +170,17 @@ async def send_recommendation_to_user(recommendation):
             text = escape_markdown_v2(recommendation.text)
             await bot.send_message(chat_id=chat["chat_id"], text=f"{title}:\n> {text}", reply_markup=keyboard, parse_mode=ParseMode.MARKDOWN_V2)
         except Exception as e:
+            send_errors += 1
             logger.error(f"Failed to send to {chat['chat_id']} for {chat['user_id']}: {e}")
+
+    await trace_emit(
+        cid,
+        "backend",
+        "telegram_send",
+        "ok" if send_errors == 0 else "error",
+        {"chats": len(user_chats), "errors": send_errors},
+        recommendation_id=recommendation.id,
+    )
 
     await increment_stats(recommendation.task_id)
 

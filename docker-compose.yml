@@ -10,6 +10,65 @@ services:
     ports:
       - "3000:3000"
 
+  trace-postgresql:
+    image: postgres:17.6-alpine3.22
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${TRACE_DB_NAME:-trace}
+      POSTGRES_USER: ${TRACE_DB_USER:-trace}
+      POSTGRES_PASSWORD: ${TRACE_DB_PASS}
+    volumes:
+      - cardinal-trace-postgres:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+        reservations:
+          memory: 128M
+
+  trace-service:
+    build:
+      context: ./trace_service
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      TRACE_DB_HOST: trace-postgresql
+      TRACE_DB_NAME: ${TRACE_DB_NAME:-trace}
+      TRACE_DB_USER: ${TRACE_DB_USER:-trace}
+      TRACE_DB_PASS: ${TRACE_DB_PASS}
+      TRACE_DB_PORT: ${TRACE_DB_PORT:-5432}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
+      RABBITMQ_USER: ${RABBITMQ_USER:-cardinal}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
+      TRACE_BATCH_SIZE: ${TRACE_BATCH_SIZE:-50}
+      TRACE_BATCH_TIMEOUT: ${TRACE_BATCH_TIMEOUT:-2.0}
+    depends_on:
+      - trace-postgresql
+      - rabbitmq
+
+  admin-ui:
+    build:
+      context: ./admin_ui
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      ADMIN_LOGIN: ${ADMIN_LOGIN:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
+      ADMIN_JWT_EXPIRY_HOURS: ${ADMIN_JWT_EXPIRY_HOURS:-24}
+      TRACE_DB_HOST: trace-postgresql
+      TRACE_DB_NAME: ${TRACE_DB_NAME:-trace}
+      TRACE_DB_USER: ${TRACE_DB_USER:-trace}
+      TRACE_DB_PASS: ${TRACE_DB_PASS}
+      TRACE_DB_PORT: ${TRACE_DB_PORT:-5432}
+      PORT: "8011"
+    ports:
+      - "8011:8011"
+    depends_on:
+      - trace-postgresql
+
   telegram-parser:
     image: registry.develixtech.com/admin/cardinal-tg-parser:0.0.4
     restart: unless-stopped
@@ -142,6 +201,11 @@ services:
     image: registry.develixtech.com/admin/cardinal-bot-backend:0.0.4
     restart: unless-stopped
     environment:
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: ${RABBITMQ_PORT:-5672}
+      RABBITMQ_VHOST: ${RABBITMQ_VHOST:-/}
+      RABBITMQ_USER: ${RABBITMQ_USER:-cardinal}
+      RABBITMQ_PASS: ${RABBITMQ_PASS}
       ENABLE_METRICS: ${ENABLE_METRICS:-false}
       WEBHOOK_URL: ${WEBHOOK_URL}
       AI_CORE_HOST: http://ai-core:8000
@@ -323,6 +387,8 @@ volumes:
   cardinal-postgres:
     external: true
   cardinal-embeddings-postgres:
+    external: true
+  cardinal-trace-postgres:
     external: true
   pyrogram-sessions:
     external: true

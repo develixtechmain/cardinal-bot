@@ -3,3 +3,4 @@ TgCrypto-pyrofork
 pyrofork
 redis
 python-dotenv
+httpx

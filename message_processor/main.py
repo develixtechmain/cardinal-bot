@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 import os
+import uuid
 from datetime import datetime, timedelta, timezone
 
 import aio_pika
@@ -20,6 +21,7 @@ from ai import check_lead
 from deepseek import check_relevance, is_relevant
 from embedding import search_candidates
 from handlers import HANDLERS, ID_HANDLERS
+from trace_emit import emit as trace_emit
 from utils import validate_env
 
 load_dotenv()
@@ -70,6 +72,20 @@ def log_process():
     )
 
 
+def _trace_ids(message: dict) -> tuple[str, str | None, int | None]:
+    cid = message.get("correlation_id")
+    if not cid:
+        cid = str(uuid.uuid4())
+        message["correlation_id"] = cid
+    chat_id = str(message.get("chat_id", "")) or None
+    mid = message.get("message_id")
+    try:
+        mid_int = int(mid) if mid is not None else None
+    except (TypeError, ValueError):
+        mid_int = None
+    return cid, chat_id, mid_int
+
+
 async def _process_message(body: bytes):
     global total_messages, total_skipped, total_grouped, total_from_group, total_found, total_not_found, total_standardized, total_new, total_refresh, total_scam, total_processed
 
@@ -77,6 +93,21 @@ async def _process_message(body: bytes):
         message = json.loads(body)
     except Exception as e:
         raise Exception(f"Failed to read message") from e
+
+    had_correlation = bool(message.get("correlation_id"))
+    correlation_id, source_chat_id, source_message_id = _trace_ids(message)
+    consume_detail = {"chat_handler_processed": message.get("chat_handler_processed", False)}
+    if not had_correlation:
+        consume_detail["legacy_missing_correlation"] = True
+    await trace_emit(
+        correlation_id,
+        "message_processor",
+        "consume",
+        "ok",
+        consume_detail,
+        source_chat_id=source_chat_id,
+        source_message_id=source_message_id,
+    )
 
     message_text = message["text"]
 
@@ -91,6 +122,15 @@ async def _process_message(body: bytes):
         or message_text.endswith("has been removed because it matches a filter mention (???)")
     ):
         total_skipped += 1
+        await trace_emit(
+            correlation_id,
+            "message_processor",
+            "filter",
+            "skipped",
+            {"reason": "system_or_spam_pattern"},
+            source_chat_id=source_chat_id,
+            source_message_id=source_message_id,
+        )
         log_process()
         return
 
@@ -119,6 +159,15 @@ async def _process_message(body: bytes):
             log_process()
             await redis_client.expire(message_key, redis_ttl)
             total_refresh += 1
+            await trace_emit(
+                correlation_id,
+                "message_processor",
+                "redis_dedup",
+                "filtered",
+                {},
+                source_chat_id=source_chat_id,
+                source_message_id=source_message_id,
+            )
             return
         else:
             total_new += 1
@@ -132,6 +181,15 @@ async def _process_message(body: bytes):
             handler = key_handlers.get(key)
             if handler and await handler(message):
                 total_grouped += 1
+                await trace_emit(
+                    correlation_id,
+                    "message_processor",
+                    "handler_routed",
+                    "ok",
+                    {"handler": "chat_split_or_route"},
+                    source_chat_id=source_chat_id,
+                    source_message_id=source_message_id,
+                )
                 return
 
     logger.log(0, f"Received message:\n{message_text}")
@@ -139,22 +197,87 @@ async def _process_message(body: bytes):
     search_response = await search_candidates(message_text)
     if not search_response:
         total_not_found += 1
+        await trace_emit(
+            correlation_id,
+            "message_processor",
+            "embedding_search",
+            "filtered",
+            {"candidates": 0},
+            source_chat_id=source_chat_id,
+            source_message_id=source_message_id,
+        )
         log_process()
         return
 
     total_found += 1
+    await trace_emit(
+        correlation_id,
+        "message_processor",
+        "embedding_search",
+        "ok",
+        {
+            "candidates": len(search_response),
+            "candidates_detail": [
+                {"user_id": str(c.get("userId")), "task_id": str(c.get("taskId")), "score": c.get("score")}
+                for c in search_response
+            ],
+        },
+        source_chat_id=source_chat_id,
+        source_message_id=source_message_id,
+    )
     is_lead = await check_lead(message)
     if not is_lead:
         total_scam += 1
+        await trace_emit(
+            correlation_id,
+            "message_processor",
+            "lead_check",
+            "filtered",
+            {},
+            source_chat_id=source_chat_id,
+            source_message_id=source_message_id,
+        )
         log_process()
         return
 
     await db.save_message(message)
+    await trace_emit(
+        correlation_id,
+        "message_processor",
+        "db_save_message",
+        "ok",
+        {},
+        source_chat_id=source_chat_id,
+        source_message_id=source_message_id,
+    )
 
     try:
         selected_candidate = await select_candidate(search_response)
     except Exception as e:
         raise Exception(f"Failed to find candidate for {message['message_id']} from {message['chat_id']}") from e
+
+    await trace_emit(
+        correlation_id,
+        "message_processor",
+        "candidate_ranking",
+        "ok",
+        {
+            "selected_user_id": str(selected_candidate["userId"]),
+            "selected_rating": selected_candidate["rating"],
+            "all_ratings": [
+                {
+                    "user_id": str(c.get("userId")),
+                    "task_id": str(c.get("taskId")),
+                    "score": c.get("score"),
+                    "rating": c.get("rating"),
+                    "recent_recommendations": c.get("stats", {}).get("recent_recommendations"),
+                }
+                for c in search_response
+            ],
+        },
+        source_chat_id=source_chat_id,
+        source_message_id=source_message_id,
+    )
 
     rating = selected_candidate["rating"] * 0.9
 
@@ -179,8 +302,38 @@ async def _process_message(body: bytes):
                     f"User {candidate['userId']} skipped: low relevance "
                     f"(confidence={relevance['confidence']}, reason={relevance['reasoning']})"
                 )
+                await trace_emit(
+                    correlation_id,
+                    "message_processor",
+                    "deepseek_relevance",
+                    "filtered",
+                    {
+                        "user_id": str(candidate["userId"]),
+                        "task_id": str(candidate["taskId"]),
+                        "task_title": user_task["title"],
+                        "confidence": relevance["confidence"],
+                        "reasoning": relevance["reasoning"],
+                    },
+                    source_chat_id=source_chat_id,
+                    source_message_id=source_message_id,
+                )
                 continue
 
+            await trace_emit(
+                correlation_id,
+                "message_processor",
+                "deepseek_relevance",
+                "ok",
+                {
+                    "user_id": str(candidate["userId"]),
+                    "task_id": str(candidate["taskId"]),
+                    "task_title": user_task["title"],
+                    "confidence": relevance["confidence"] if relevance else None,
+                    "reasoning": relevance["reasoning"] if relevance else None,
+                },
+                source_chat_id=source_chat_id,
+                source_message_id=source_message_id,
+            )
             if relevance:
                 logger.info(
                     f"User {candidate['userId']} passed relevance check "
@@ -191,16 +344,50 @@ async def _process_message(body: bytes):
 
     await asyncio.gather(*tasks)
     total_processed += 1
+    await trace_emit(
+        correlation_id,
+        "message_processor",
+        "recommendations_batch",
+        "ok",
+        {"tasks": len(tasks)},
+        source_chat_id=source_chat_id,
+        source_message_id=source_message_id,
+    )
     log_process()
 
 
 async def save_recommendation(candidate, message):
+    correlation_id = message.get("correlation_id") or str(uuid.uuid4())
+    source_chat_id = str(message.get("chat_id", "")) or None
+    try:
+        mid = int(message["message_id"])
+    except (TypeError, ValueError, KeyError):
+        mid = None
     try:
         user = await db.fetch_user_by_id(candidate["userId"])
         recommendation_id = await db.save_recommendation(user, candidate["taskId"], message)
         await embedding.confirm_recommendation(recommendation_id, candidate)
         await core.send_recommendation_to_user(message, candidate, recommendation_id)
+        await trace_emit(
+            correlation_id,
+            "message_processor",
+            "http_recommendation",
+            "ok",
+            {"user_id": str(candidate["userId"]), "task_id": str(candidate["taskId"])},
+            recommendation_id=recommendation_id,
+            source_chat_id=source_chat_id,
+            source_message_id=mid,
+        )
     except Exception as e:
+        await trace_emit(
+            correlation_id,
+            "message_processor",
+            "http_recommendation",
+            "error",
+            {"user_id": str(candidate.get("userId")), "error": str(e)[:500]},
+            source_chat_id=source_chat_id,
+            source_message_id=mid,
+        )
         raise Exception(f"Failed to recommend {message['message_id']} from {message['chat_id']} to user {candidate['userId']}") from e
 
 
