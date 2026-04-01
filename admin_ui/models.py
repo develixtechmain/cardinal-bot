@@ -30,6 +30,7 @@ class TraceRootOut(BaseModel):
     correlation_id: uuid.UUID
     source_chat_id: Optional[str]
     source_message_id: Optional[int]
+    source_text: Optional[str] = None
     first_seen_at: datetime
     last_event_at: datetime
     last_summary: Optional[str]
@@ -45,6 +46,7 @@ class TraceSearchItem(BaseModel):
     correlation_id: uuid.UUID
     source_chat_id: Optional[str]
     source_message_id: Optional[int]
+    source_text: Optional[str] = None
     last_event_at: datetime
     last_summary: Optional[str]
     event_count: int

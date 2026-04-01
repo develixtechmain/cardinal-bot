@@ -37,7 +37,7 @@
         <input type="text" id="searchQ" placeholder="UUID корреляции, chat_id:message_id или пусто — последние" />
         <button type="button" id="btnSearch">Найти</button>
       </div>
-      <p class="muted hint">UUID из логов, chat_id:message_id или подстрока сводки.</p>
+      <p class="muted hint">UUID из логов, chat_id:message_id или текст сообщения.</p>
     </section>
 
     <div id="err" class="error" hidden></div>
@@ -52,6 +52,7 @@
             <th>Событий</th>
             <th>Обновлён</th>
             <th>Сводка</th>
+            <th>Текст</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -65,6 +66,7 @@
       </div>
       <p id="detailSummary" class="summary"></p>
       <p id="detailMeta" class="muted"></p>
+      <pre id="detailSourceText" class="source-text-block" hidden></pre>
       <div class="timeline" id="timeline"></div>
       <details class="raw">
         <summary>Сырой JSON</summary>

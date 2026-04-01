@@ -89,7 +89,8 @@ async def search_traces(
         if kind == "empty":
             rows = await conn.fetch(
                 """
-                SELECT r.correlation_id, r.source_chat_id, r.source_message_id, r.last_event_at, r.last_summary,
+                SELECT r.correlation_id, r.source_chat_id, r.source_message_id, r.source_text,
+                       r.last_event_at, r.last_summary,
                        (SELECT COUNT(*)::int FROM message_trace_events e WHERE e.correlation_id = r.correlation_id) AS event_count
                 FROM message_trace_roots r
                 ORDER BY r.last_event_at DESC
@@ -103,7 +104,8 @@ async def search_traces(
             cid = uuid.UUID(value)
             rows = await conn.fetch(
                 """
-                SELECT r.correlation_id, r.source_chat_id, r.source_message_id, r.last_event_at, r.last_summary,
+                SELECT r.correlation_id, r.source_chat_id, r.source_message_id, r.source_text,
+                       r.last_event_at, r.last_summary,
                        (SELECT COUNT(*)::int FROM message_trace_events e WHERE e.correlation_id = r.correlation_id) AS event_count
                 FROM message_trace_roots r
                 WHERE r.correlation_id = $1
@@ -118,7 +120,8 @@ async def search_traces(
             chat_id, msg_id = value
             rows = await conn.fetch(
                 """
-                SELECT r.correlation_id, r.source_chat_id, r.source_message_id, r.last_event_at, r.last_summary,
+                SELECT r.correlation_id, r.source_chat_id, r.source_message_id, r.source_text,
+                       r.last_event_at, r.last_summary,
                        (SELECT COUNT(*)::int FROM message_trace_events e WHERE e.correlation_id = r.correlation_id) AS event_count
                 FROM message_trace_roots r
                 WHERE r.source_chat_id = $1 AND r.source_message_id = $2
@@ -139,10 +142,11 @@ async def search_traces(
             pattern = f"%{value}%"
             rows = await conn.fetch(
                 """
-                SELECT r.correlation_id, r.source_chat_id, r.source_message_id, r.last_event_at, r.last_summary,
+                SELECT r.correlation_id, r.source_chat_id, r.source_message_id, r.source_text,
+                       r.last_event_at, r.last_summary,
                        (SELECT COUNT(*)::int FROM message_trace_events e WHERE e.correlation_id = r.correlation_id) AS event_count
                 FROM message_trace_roots r
-                WHERE r.last_summary ILIKE $1 OR r.correlation_id::text ILIKE $1
+                WHERE r.last_summary ILIKE $1 OR r.correlation_id::text ILIKE $1 OR r.source_text ILIKE $1
                 ORDER BY r.last_event_at DESC
                 LIMIT $2 OFFSET $3
                 """,
@@ -151,7 +155,7 @@ async def search_traces(
                 offset,
             )
             total = await conn.fetchval(
-                "SELECT COUNT(*)::int FROM message_trace_roots WHERE last_summary ILIKE $1 OR correlation_id::text ILIKE $1",
+                "SELECT COUNT(*)::int FROM message_trace_roots WHERE last_summary ILIKE $1 OR correlation_id::text ILIKE $1 OR source_text ILIKE $1",
                 pattern,
             )
 
@@ -160,6 +164,7 @@ async def search_traces(
             correlation_id=r["correlation_id"],
             source_chat_id=r["source_chat_id"],
             source_message_id=r["source_message_id"],
+            source_text=r["source_text"],
             last_event_at=r["last_event_at"],
             last_summary=r["last_summary"],
             event_count=r["event_count"],
@@ -227,6 +232,7 @@ async def get_trace(correlation_id: uuid.UUID):
         correlation_id=root["correlation_id"],
         source_chat_id=root["source_chat_id"],
         source_message_id=root["source_message_id"],
+        source_text=root.get("source_text"),
         first_seen_at=root["first_seen_at"],
         last_event_at=root["last_event_at"],
         last_summary=root["last_summary"],

@@ -24,6 +24,7 @@ class TraceEventIngest(BaseModel):
     otel_span_id: Optional[str] = Field(default=None, max_length=32)
     source_chat_id: Optional[str] = Field(default=None, max_length=64)
     source_message_id: Optional[int] = None
+    source_text: Optional[str] = None
     occurred_at: Optional[datetime] = None
 
 
@@ -46,6 +47,7 @@ class TraceRootOut(BaseModel):
     correlation_id: uuid.UUID
     source_chat_id: Optional[str]
     source_message_id: Optional[int]
+    source_text: Optional[str] = None
     first_seen_at: datetime
     last_event_at: datetime
     last_summary: Optional[str]

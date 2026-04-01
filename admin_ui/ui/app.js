@@ -136,12 +136,14 @@ function renderList(data) {
   tb.innerHTML = "";
   for (const it of data.items || []) {
     const tr = document.createElement("tr");
+    const textSnippet = it.source_text ? it.source_text.slice(0, 120) + (it.source_text.length > 120 ? "\u2026" : "") : "\u2014";
     tr.innerHTML =
       '<td class="mono">' + escapeHtml(it.correlation_id) + "</td>" +
       "<td>" + escapeHtml(it.source_chat_id || "\u2014") + (it.source_message_id != null ? " : " + it.source_message_id : "") + "</td>" +
       "<td>" + it.event_count + "</td>" +
       "<td>" + fmtTime(it.last_event_at) + "</td>" +
-      "<td>" + escapeHtml(it.last_summary || "") + "</td>";
+      "<td>" + escapeHtml(it.last_summary || "") + "</td>" +
+      '<td class="source-text">' + escapeHtml(textSnippet) + "</td>";
     tr.addEventListener("click", () => openDetail(it.correlation_id));
     tb.appendChild(tr);
   }
@@ -159,6 +161,11 @@ async function openDetail(correlationId) {
     const r = data.root;
     document.getElementById("detailMeta").textContent =
       "Корень: " + r.correlation_id + " \u00b7 чат " + (r.source_chat_id || "\u2014") + " \u00b7 msg " + (r.source_message_id ?? "\u2014");
+    const textEl = document.getElementById("detailSourceText");
+    if (textEl) {
+      textEl.textContent = r.source_text || "";
+      textEl.hidden = !r.source_text;
+    }
     const tl = document.getElementById("timeline");
     tl.innerHTML = "";
     let prevTs = null;

@@ -99,6 +99,8 @@ async def _process_message(body: bytes):
     consume_detail = {"chat_handler_processed": message.get("chat_handler_processed", False)}
     if not had_correlation:
         consume_detail["legacy_missing_correlation"] = True
+    message_text = message["text"]
+
     await trace_emit(
         correlation_id,
         "message_processor",
@@ -107,9 +109,8 @@ async def _process_message(body: bytes):
         consume_detail,
         source_chat_id=source_chat_id,
         source_message_id=source_message_id,
+        source_text=message_text[:4096] if message_text else None,
     )
-
-    message_text = message["text"]
 
     total_messages += 1
     if message.get("chat_handler_processed"):
