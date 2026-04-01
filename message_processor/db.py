@@ -43,6 +43,14 @@ async def fetch_user_subscription(user_id):
         )
 
 
+async def has_active_channel(user_id):
+    async with pool.acquire() as conn:
+        return await conn.fetchval(
+            "SELECT EXISTS(SELECT 1 FROM user_channels WHERE user_id = $1 AND channel_type = 'recommendation' AND active = true)",
+            user_id,
+        )
+
+
 
 async def fetch_user_from_db(user_id: uuid.UUID):
     async with pool.acquire() as conn:

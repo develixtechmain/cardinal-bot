@@ -36,7 +36,8 @@ from bot.texts import (
 from consts import UserChannelType
 from external.ai import check_rules, extract_rules
 from external.embedding import accept_recommendation, decline_recommendation
-from service.channels import fetch_user_channels_by_user_id, verify_user_channel
+from aiogram.exceptions import TelegramForbiddenError, TelegramNotFound
+from service.channels import deactivate_channel, fetch_user_channels_by_user_id, verify_user_channel
 from service.db import get_pool
 from service.finder import fetch_task_title_by_id, increment_stats
 from service.metrics import leads_actions_total, leads_time, users_linked_total
@@ -169,6 +170,10 @@ async def send_recommendation_to_user(recommendation):
             title = escape_markdown_v2(title)
             text = escape_markdown_v2(recommendation.text)
             await bot.send_message(chat_id=chat["chat_id"], text=f"{title}:\n> {text}", reply_markup=keyboard, parse_mode=ParseMode.MARKDOWN_V2)
+        except (TelegramForbiddenError, TelegramNotFound) as e:
+            send_errors += 1
+            logger.warning(f"Chat {chat['chat_id']} unavailable for {chat['user_id']}, deactivating: {e}")
+            await deactivate_channel(chat["chat_id"])
         except Exception as e:
             send_errors += 1
             logger.error(f"Failed to send to {chat['chat_id']} for {chat['user_id']}: {e}")
