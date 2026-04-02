@@ -3,6 +3,7 @@ import logging
 import os
 import uuid
 from contextlib import asynccontextmanager
+from datetime import datetime
 from pathlib import Path
 
 import httpx
@@ -451,13 +452,13 @@ async def get_user_leads(
     idx = 2
 
     if date_from.strip():
-        conditions.append(f"r.created_at >= ${idx}::timestamptz")
-        params.append(date_from.strip() + "T00:00:00Z")
+        conditions.append(f"r.created_at >= ${idx}")
+        params.append(datetime.fromisoformat(date_from.strip() + "T00:00:00+00:00"))
         idx += 1
 
     if date_to.strip():
-        conditions.append(f"r.created_at < ${idx}::timestamptz")
-        params.append(date_to.strip() + "T00:00:00Z")
+        conditions.append(f"r.created_at < ${idx}")
+        params.append(datetime.fromisoformat(date_to.strip() + "T00:00:00+00:00"))
         idx += 1
 
     if task_ids.strip():
