@@ -57,6 +57,85 @@ class TraceSearchResponse(BaseModel):
     total: int
 
 
+# ── User models ────────────────────────────────────────────────────────────
+
+class UserListItem(BaseModel):
+    id: uuid.UUID
+    user_id: int
+    username: Optional[str]
+    first_name: Optional[str]
+    last_name: Optional[str]
+    created_at: datetime
+    subscription_ends_at: Optional[datetime]
+    leads_today: int = 0
+    leads_month: int = 0
+
+
+class UserListResponse(BaseModel):
+    items: list[UserListItem]
+    total: int
+
+
+class TaskOut(BaseModel):
+    id: uuid.UUID
+    title: str
+    tags: Any
+    active: bool
+    created_at: datetime
+
+
+class UserDetailResponse(BaseModel):
+    id: uuid.UUID
+    user_id: int
+    username: Optional[str]
+    first_name: Optional[str]
+    last_name: Optional[str]
+    balance: int
+    created_at: datetime
+    subscription_ends_at: Optional[datetime]
+    trial_ends_at: Optional[datetime]
+    tasks: list[TaskOut] = []
+
+
+class LeadItem(BaseModel):
+    id: uuid.UUID
+    task_id: uuid.UUID
+    task_title: Optional[str] = None
+    recommendation: dict[str, Any]
+    accepted: Optional[bool]
+    created_at: datetime
+
+
+class LeadListResponse(BaseModel):
+    items: list[LeadItem]
+    total: int
+
+
+class PaymentItem(BaseModel):
+    id: uuid.UUID
+    amount: int
+    status: str
+    payment: str
+    recurrent: bool
+    created_at: datetime
+    payment_timestamp: Optional[datetime]
+
+
+class PaymentListResponse(BaseModel):
+    items: list[PaymentItem]
+    total: int
+
+
+class BalanceTopUpRequest(BaseModel):
+    amount: int = Field(..., gt=0, le=1000000, description="Amount to add to user balance (max 1,000,000)")
+
+
+class BalanceTopUpResponse(BaseModel):
+    new_balance: int
+    message: str
+    notification_sent: bool = False
+
+
 def parse_search_query(q: str) -> tuple[str, Any]:
     q = q.strip()
     if not q:
