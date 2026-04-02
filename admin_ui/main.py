@@ -300,7 +300,7 @@ async def list_users(
             if numeric_id is not None:
                 rows = await conn.fetch(
                     """
-                    SELECT u.*, us.subscription_ends_at,
+                    SELECT u.*, us.subscription_ends_at, us.trial_ends_at,
                            COALESCE((SELECT SUM(ts.count) FROM task_statistics ts
                                      JOIN user_tasks ut ON ut.id = ts.task_id
                                      WHERE ut.user_id = u.id AND ts.date = CURRENT_DATE), 0) AS leads_today,
@@ -331,7 +331,7 @@ async def list_users(
             else:
                 rows = await conn.fetch(
                     """
-                    SELECT u.*, us.subscription_ends_at,
+                    SELECT u.*, us.subscription_ends_at, us.trial_ends_at,
                            COALESCE((SELECT SUM(ts.count) FROM task_statistics ts
                                      JOIN user_tasks ut ON ut.id = ts.task_id
                                      WHERE ut.user_id = u.id AND ts.date = CURRENT_DATE), 0) AS leads_today,
@@ -360,7 +360,7 @@ async def list_users(
         else:
             rows = await conn.fetch(
                 """
-                SELECT u.*, us.subscription_ends_at,
+                SELECT u.*, us.subscription_ends_at, us.trial_ends_at,
                        COALESCE((SELECT SUM(ts.count) FROM task_statistics ts
                                  JOIN user_tasks ut ON ut.id = ts.task_id
                                  WHERE ut.user_id = u.id AND ts.date = CURRENT_DATE), 0) AS leads_today,
@@ -385,6 +385,7 @@ async def list_users(
             last_name=r.get("last_name"),
             created_at=r["created_at"],
             subscription_ends_at=r.get("subscription_ends_at"),
+            trial_ends_at=r.get("trial_ends_at"),
             leads_today=r.get("leads_today", 0),
             leads_month=r.get("leads_month", 0),
         )
@@ -399,7 +400,7 @@ async def get_user_detail(user_id: uuid.UUID):
     async with mpool.acquire() as conn:
         row = await conn.fetchrow(
             """
-            SELECT u.*, us.subscription_ends_at, us.trial_ends_at
+            SELECT u.*, us.subscription_ends_at, us.trial_ends_at, us.trial_ends_at
             FROM users u
             LEFT JOIN user_subscriptions us ON us.user_id = u.id
             WHERE u.id = $1

@@ -214,12 +214,24 @@ async function loadUsers() {
   } catch (e) { if (e.message !== "Unauthorized") showError("err", e.message); }
 }
 
-function subscriptionBadge(endsAt) {
-  if (!endsAt) return '<span class="badge badge-none">Не активирован</span>';
-  const d = new Date(endsAt);
+function subscriptionBadge(endsAt, trialEndsAt) {
   const now = new Date();
-  if (d > now) return '<span class="badge badge-active">\u2714 до ' + fmtDate(endsAt) + '</span>';
-  return '<span class="badge badge-expired">\u2718 истекла ' + fmtDate(endsAt) + '</span>';
+  // Active subscription
+  if (endsAt) {
+    const d = new Date(endsAt);
+    if (d > now) return '<span class="badge badge-active">\u2714 до ' + fmtDate(endsAt) + '</span>';
+  }
+  // Active trial (no subscription or subscription expired, but trial still running)
+  if (trialEndsAt) {
+    const t = new Date(trialEndsAt);
+    if (t > now) return '<span class="badge badge-active">\u2714 триал до ' + fmtDate(trialEndsAt) + '</span>';
+  }
+  // Had subscription but it expired
+  if (endsAt) return '<span class="badge badge-expired">\u2718 истекла ' + fmtDate(endsAt) + '</span>';
+  // Had trial but it expired
+  if (trialEndsAt) return '<span class="badge badge-expired">\u2718 триал истёк ' + fmtDate(trialEndsAt) + '</span>';
+  // Never activated
+  return '<span class="badge badge-none">Не активирован</span>';
 }
 
 function renderUsersList(data) {
@@ -232,7 +244,7 @@ function renderUsersList(data) {
       "<td>" + escapeHtml(u.username || "\u2014") + "</td>" +
       "<td>" + escapeHtml(name) + "</td>" +
       "<td>" + fmtDate(u.created_at) + "</td>" +
-      "<td>" + subscriptionBadge(u.subscription_ends_at) + "</td>" +
+      "<td>" + subscriptionBadge(u.subscription_ends_at, u.trial_ends_at) + "</td>" +
       "<td>" + u.leads_today + "</td>" +
       "<td>" + u.leads_month + "</td>";
     tr.addEventListener("click", () => navigate("/users/" + u.id));
@@ -321,7 +333,7 @@ async function loadUserDetail(uid, tab) {
 
 function renderUserCard(u) {
   const panel = document.getElementById("userCardPanel");
-  const subBadge = subscriptionBadge(u.subscription_ends_at);
+  const subBadge = subscriptionBadge(u.subscription_ends_at, u.trial_ends_at);
   const trialInfo = u.trial_ends_at ? "Триал до: " + fmtDate(u.trial_ends_at) : "";
 
   let html = '<div class="user-card-grid">';
