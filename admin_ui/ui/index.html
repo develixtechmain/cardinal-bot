@@ -22,57 +22,215 @@
   </section>
 
   <!-- Main app (hidden until logged in) -->
-  <div id="appSection" hidden>
-    <header class="header">
-      <div>
-        <h1>Cardinal · трассировка сообщений</h1>
-        <p class="muted">Панель администратора</p>
+  <div id="appSection" class="app-layout" hidden>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">Cardinal</div>
+      <nav class="sidebar-nav">
+        <a href="/traces/" class="sidebar-link" data-route="traces">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+          Трейсинг
+        </a>
+        <a href="/users/" class="sidebar-link" data-route="users">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Пользователи
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main-content">
+      <header class="header">
+        <div>
+          <h1 id="pageTitle">Cardinal Admin</h1>
+          <p class="muted" id="pageSubtitle">Панель администратора</p>
+        </div>
+        <button type="button" id="btnLogout" class="linkish">Выйти</button>
+      </header>
+
+      <div id="err" class="error" hidden></div>
+
+      <!-- ═══ TRACES PAGE ═══ -->
+      <div id="page-traces" class="page" hidden>
+        <section class="panel">
+          <label for="searchQ">Поиск</label>
+          <div class="row">
+            <input type="text" id="searchQ" placeholder="UUID корреляции, chat_id:message_id или пусто — последние" />
+            <button type="button" id="btnSearch">Найти</button>
+          </div>
+          <p class="muted hint">UUID из логов, chat_id:message_id или текст сообщения.</p>
+        </section>
+
+        <section id="listSection" class="panel" hidden>
+          <h2>Результаты</h2>
+          <table class="table" id="resultsTable">
+            <thead>
+              <tr>
+                <th>Correlation ID</th>
+                <th>Чат / сообщение</th>
+                <th>Событий</th>
+                <th>Обновлён</th>
+                <th>Сводка</th>
+                <th>Текст</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </section>
+
+        <section id="detailSection" class="panel" hidden>
+          <div class="detail-head">
+            <h2>Таймлайн</h2>
+            <button type="button" id="btnBack" class="linkish">← К списку</button>
+          </div>
+          <p id="detailSummary" class="summary"></p>
+          <p id="detailMeta" class="muted"></p>
+          <pre id="detailSourceText" class="source-text-block" hidden></pre>
+          <div class="timeline" id="timeline"></div>
+          <details class="raw">
+            <summary>Сырой JSON</summary>
+            <pre id="rawJson"></pre>
+          </details>
+        </section>
       </div>
-      <button type="button" id="btnLogout" class="linkish">Выйти</button>
-    </header>
 
-    <section class="panel">
-      <label for="searchQ">Поиск</label>
-      <div class="row">
-        <input type="text" id="searchQ" placeholder="UUID корреляции, chat_id:message_id или пусто — последние" />
-        <button type="button" id="btnSearch">Найти</button>
+      <!-- ═══ USERS LIST PAGE ═══ -->
+      <div id="page-users" class="page" hidden>
+        <section class="panel">
+          <label for="userSearchQ">Поиск пользователя</label>
+          <div class="row">
+            <input type="text" id="userSearchQ" placeholder="ID, юзернейм, имя или фамилия" />
+            <button type="button" id="btnUserSearch">Найти</button>
+          </div>
+        </section>
+
+        <section id="usersListSection" class="panel" hidden>
+          <table class="table" id="usersTable">
+            <thead>
+              <tr>
+                <th>Юзернейм</th>
+                <th>Имя</th>
+                <th>Регистрация</th>
+                <th>Подписка</th>
+                <th>Лидов сегодня</th>
+                <th>Лидов за месяц</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <div id="usersPagination" class="pagination"></div>
+        </section>
       </div>
-      <p class="muted hint">UUID из логов, chat_id:message_id или текст сообщения.</p>
-    </section>
 
-    <div id="err" class="error" hidden></div>
+      <!-- ═══ USER DETAIL PAGE ═══ -->
+      <div id="page-user-detail" class="page" hidden>
+        <button type="button" id="btnBackToUsers" class="linkish" style="margin-bottom:1rem">← К списку пользователей</button>
 
-    <section id="listSection" class="panel" hidden>
-      <h2>Результаты</h2>
-      <table class="table" id="resultsTable">
-        <thead>
-          <tr>
-            <th>Correlation ID</th>
-            <th>Чат / сообщение</th>
-            <th>Событий</th>
-            <th>Обновлён</th>
-            <th>Сводка</th>
-            <th>Текст</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </section>
+        <div class="tabs" id="userTabs">
+          <button class="tab active" data-tab="card">Карточка</button>
+          <button class="tab" data-tab="leads">Лиды</button>
+          <button class="tab" data-tab="payments">Оплаты</button>
+        </div>
 
-    <section id="detailSection" class="panel" hidden>
-      <div class="detail-head">
-        <h2>Таймлайн</h2>
-        <button type="button" id="btnBack" class="linkish">← К списку</button>
+        <!-- Card tab -->
+        <div id="tab-card" class="tab-content">
+          <section class="panel" id="userCardPanel"></section>
+        </div>
+
+        <!-- Leads tab -->
+        <div id="tab-leads" class="tab-content" hidden>
+          <section class="panel">
+            <div class="filters-row">
+              <div class="filter-group">
+                <label>Период</label>
+                <div class="date-presets">
+                  <button type="button" class="preset-btn" data-preset="today">Сегодня</button>
+                  <button type="button" class="preset-btn" data-preset="yesterday">Вчера</button>
+                  <button type="button" class="preset-btn" data-preset="week">Неделя</button>
+                  <button type="button" class="preset-btn" data-preset="month">Месяц</button>
+                </div>
+                <div class="row" style="margin-top:0.5rem">
+                  <input type="date" id="leadDateFrom" />
+                  <span class="muted">—</span>
+                  <input type="date" id="leadDateTo" />
+                </div>
+              </div>
+              <div class="filter-group">
+                <label>Задачи</label>
+                <div class="multi-select" id="taskMultiSelect">
+                  <div class="multi-select-trigger" id="taskSelectTrigger">
+                    <span id="taskSelectLabel">Все задачи</span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                  </div>
+                  <div class="multi-select-dropdown" id="taskSelectDropdown" hidden>
+                    <div id="taskSelectOptions"></div>
+                  </div>
+                </div>
+              </div>
+              <button type="button" id="btnLeadSearch" style="align-self:flex-end">Применить</button>
+            </div>
+          </section>
+
+          <section id="leadsListSection" class="panel" hidden>
+            <table class="table" id="leadsTable">
+              <thead>
+                <tr>
+                  <th>Дата</th>
+                  <th>Текст</th>
+                  <th>Статус</th>
+                  <th>Заметки</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <div id="leadsPagination" class="pagination"></div>
+          </section>
+        </div>
+
+        <!-- Payments tab -->
+        <div id="tab-payments" class="tab-content" hidden>
+          <section class="panel">
+            <div class="row" style="gap:1rem;align-items:flex-end;flex-wrap:wrap">
+              <div style="flex:1;min-width:200px">
+                <label for="topUpAmount">Начислить на баланс (₽)</label>
+                <input type="number" id="topUpAmount" min="1" placeholder="Сумма" style="width:100%" />
+              </div>
+              <button type="button" id="btnTopUp">Начислить</button>
+            </div>
+            <div id="topUpResult" class="muted" style="margin-top:0.5rem" hidden></div>
+          </section>
+
+          <section id="paymentsListSection" class="panel" hidden>
+            <h2>История оплат</h2>
+            <table class="table" id="paymentsTable">
+              <thead>
+                <tr>
+                  <th>Дата</th>
+                  <th>Сумма</th>
+                  <th>Статус</th>
+                  <th>Способ</th>
+                  <th>Рекуррент</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <div id="paymentsPagination" class="pagination"></div>
+          </section>
+        </div>
       </div>
-      <p id="detailSummary" class="summary"></p>
-      <p id="detailMeta" class="muted"></p>
-      <pre id="detailSourceText" class="source-text-block" hidden></pre>
-      <div class="timeline" id="timeline"></div>
-      <details class="raw">
-        <summary>Сырой JSON</summary>
-        <pre id="rawJson"></pre>
-      </details>
-    </section>
+
+      <!-- Lead detail modal -->
+      <div id="leadModal" class="modal-overlay" hidden>
+        <div class="modal">
+          <div class="modal-header">
+            <h3>Детали лида</h3>
+            <button type="button" class="modal-close" id="btnCloseModal">&times;</button>
+          </div>
+          <div class="modal-body" id="leadModalBody"></div>
+        </div>
+      </div>
+
+    </main>
   </div>
 
   <script src="/ui/app.js"></script>

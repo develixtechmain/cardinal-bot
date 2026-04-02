@@ -15,6 +15,20 @@ def database_url_parts():
     return host, port, user, password, database
 
 
+def main_database_url_parts():
+    """Main cardinal DB (postgresql), for user/subscription/payment data."""
+    host = os.environ.get("MAIN_DB_HOST", "postgresql")
+    port = int(os.environ.get("MAIN_DB_PORT", "5432"))
+    user = os.environ.get("MAIN_DB_USER", "cardinal")
+    password = os.environ.get("MAIN_DB_PASS", "")
+    database = os.environ.get("MAIN_DB_NAME", "cardinal")
+    return host, port, user, password, database
+
+
+def bot_token() -> str:
+    return os.environ.get("BOT_TOKEN", "")
+
+
 def admin_login() -> str:
     return os.environ.get("ADMIN_LOGIN", "admin")
 

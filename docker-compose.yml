@@ -63,11 +63,18 @@ services:
       TRACE_DB_USER: ${TRACE_DB_USER:-trace}
       TRACE_DB_PASS: ${TRACE_DB_PASS}
       TRACE_DB_PORT: ${TRACE_DB_PORT:-5432}
+      MAIN_DB_HOST: postgresql
+      MAIN_DB_NAME: ${POSTGRESQL_DB:-cardinal}
+      MAIN_DB_USER: ${POSTGRESQL_USER:-cardinal}
+      MAIN_DB_PASS: ${POSTGRESQL_PASS}
+      MAIN_DB_PORT: ${POSTGRESQL_PORT:-5432}
+      BOT_TOKEN: ${BOT_TOKEN}
       PORT: "8011"
     ports:
       - "8011:8011"
     depends_on:
       - trace-postgresql
+      - postgresql
 
   telegram-parser:
     image: registry.develixtech.com/admin/cardinal-tg-parser:0.0.4

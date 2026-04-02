@@ -5,12 +5,15 @@ import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
 
+import httpx
+
 from fastapi import Depends, FastAPI, HTTPException, Query, Response
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from auth import LoginRequest, LoginResponse, authenticate, create_token, verify_token
-from db import close_db, get_pool, init_db
+from auth import LoginRequest, LoginResponse, create_token, verify_token
+from config import bot_token
+from db import close_db, get_pool, get_main_pool, init_db
 from models import (
     TraceDetailResponse,
     TraceEventOut,
@@ -19,6 +22,16 @@ from models import (
     TraceSearchResponse,
     compute_summary_from_events,
     parse_search_query,
+    UserListResponse,
+    UserListItem,
+    UserDetailResponse,
+    TaskOut,
+    LeadListResponse,
+    LeadItem,
+    PaymentListResponse,
+    PaymentItem,
+    BalanceTopUpRequest,
+    BalanceTopUpResponse,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
@@ -43,16 +56,17 @@ if _ui_dir.is_dir():
 
 @app.post("/api/auth/login")
 async def login(body: LoginRequest, response: Response):
-    token = authenticate(body.login, body.password)
-    if not token:
+    import time as _time
+    from config import admin_login, admin_password
+    if body.login != admin_login() or body.password != admin_password() or not admin_password():
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    _, expires = create_token(body.login)
+    token, expires = create_token(body.login)
     response.set_cookie(
         key="admin_token",
         value=token,
         httponly=True,
         samesite="strict",
-        max_age=int((expires.timestamp() - __import__("time").time())),
+        max_age=int((expires.timestamp() - _time.time())),
     )
     return LoginResponse(token=token, expires_at=expires.isoformat())
 
@@ -263,6 +277,321 @@ async def get_trace_summary(correlation_id: uuid.UUID):
     }
 
 
+# ── User endpoints (main DB) ──────────────────────────────────────────────
+
+@app.get("/api/users", dependencies=[Depends(verify_token)])
+async def list_users(
+    q: str = Query("", description="Search by user_id, username, first_name, last_name"),
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+):
+    mpool = get_main_pool()
+    async with mpool.acquire() as conn:
+        if q.strip():
+            escaped_q = q.strip().replace("%", "\\%").replace("_", "\\_")
+            pattern = f"%{escaped_q}%"
+            # Try numeric search for user_id too
+            numeric_id = None
+            try:
+                numeric_id = int(q.strip())
+            except ValueError:
+                pass
+
+            if numeric_id is not None:
+                rows = await conn.fetch(
+                    """
+                    SELECT u.*, us.subscription_ends_at,
+                           COALESCE((SELECT SUM(ts.count) FROM task_statistics ts
+                                     JOIN user_tasks ut ON ut.id = ts.task_id
+                                     WHERE ut.user_id = u.id AND ts.date = CURRENT_DATE), 0) AS leads_today,
+                           COALESCE((SELECT SUM(ts.count) FROM task_statistics ts
+                                     JOIN user_tasks ut ON ut.id = ts.task_id
+                                     WHERE ut.user_id = u.id AND ts.date >= date_trunc('month', CURRENT_DATE)), 0) AS leads_month
+                    FROM users u
+                    LEFT JOIN user_subscriptions us ON us.user_id = u.id
+                    WHERE u.user_id = $1
+                       OR u.username ILIKE $2
+                       OR u.first_name ILIKE $2
+                       OR u.last_name ILIKE $2
+                    ORDER BY u.created_at DESC
+                    LIMIT $3 OFFSET $4
+                    """,
+                    numeric_id, pattern, limit, offset,
+                )
+                total = await conn.fetchval(
+                    """
+                    SELECT COUNT(*)::int FROM users u
+                    WHERE u.user_id = $1
+                       OR u.username ILIKE $2
+                       OR u.first_name ILIKE $2
+                       OR u.last_name ILIKE $2
+                    """,
+                    numeric_id, pattern,
+                )
+            else:
+                rows = await conn.fetch(
+                    """
+                    SELECT u.*, us.subscription_ends_at,
+                           COALESCE((SELECT SUM(ts.count) FROM task_statistics ts
+                                     JOIN user_tasks ut ON ut.id = ts.task_id
+                                     WHERE ut.user_id = u.id AND ts.date = CURRENT_DATE), 0) AS leads_today,
+                           COALESCE((SELECT SUM(ts.count) FROM task_statistics ts
+                                     JOIN user_tasks ut ON ut.id = ts.task_id
+                                     WHERE ut.user_id = u.id AND ts.date >= date_trunc('month', CURRENT_DATE)), 0) AS leads_month
+                    FROM users u
+                    LEFT JOIN user_subscriptions us ON us.user_id = u.id
+                    WHERE u.username ILIKE $1
+                       OR u.first_name ILIKE $1
+                       OR u.last_name ILIKE $1
+                    ORDER BY u.created_at DESC
+                    LIMIT $2 OFFSET $3
+                    """,
+                    pattern, limit, offset,
+                )
+                total = await conn.fetchval(
+                    """
+                    SELECT COUNT(*)::int FROM users u
+                    WHERE u.username ILIKE $1
+                       OR u.first_name ILIKE $1
+                       OR u.last_name ILIKE $1
+                    """,
+                    pattern,
+                )
+        else:
+            rows = await conn.fetch(
+                """
+                SELECT u.*, us.subscription_ends_at,
+                       COALESCE((SELECT SUM(ts.count) FROM task_statistics ts
+                                 JOIN user_tasks ut ON ut.id = ts.task_id
+                                 WHERE ut.user_id = u.id AND ts.date = CURRENT_DATE), 0) AS leads_today,
+                       COALESCE((SELECT SUM(ts.count) FROM task_statistics ts
+                                 JOIN user_tasks ut ON ut.id = ts.task_id
+                                 WHERE ut.user_id = u.id AND ts.date >= date_trunc('month', CURRENT_DATE)), 0) AS leads_month
+                FROM users u
+                LEFT JOIN user_subscriptions us ON us.user_id = u.id
+                ORDER BY u.created_at DESC
+                LIMIT $1 OFFSET $2
+                """,
+                limit, offset,
+            )
+            total = await conn.fetchval("SELECT COUNT(*)::int FROM users")
+
+    items = [
+        UserListItem(
+            id=r["id"],
+            user_id=r["user_id"],
+            username=r.get("username"),
+            first_name=r.get("first_name"),
+            last_name=r.get("last_name"),
+            created_at=r["created_at"],
+            subscription_ends_at=r.get("subscription_ends_at"),
+            leads_today=r.get("leads_today", 0),
+            leads_month=r.get("leads_month", 0),
+        )
+        for r in rows
+    ]
+    return UserListResponse(items=items, total=total or 0)
+
+
+@app.get("/api/users/{user_id}", dependencies=[Depends(verify_token)])
+async def get_user_detail(user_id: uuid.UUID):
+    mpool = get_main_pool()
+    async with mpool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            SELECT u.*, us.subscription_ends_at, us.trial_ends_at
+            FROM users u
+            LEFT JOIN user_subscriptions us ON us.user_id = u.id
+            WHERE u.id = $1
+            """,
+            user_id,
+        )
+        if not row:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        task_rows = await conn.fetch(
+            "SELECT id, title, tags, active, created_at FROM user_tasks WHERE user_id = $1 ORDER BY created_at DESC",
+            user_id,
+        )
+
+    tasks = []
+    for t in task_rows:
+        tags = t["tags"]
+        if isinstance(tags, str):
+            tags = json.loads(tags)
+        tasks.append(TaskOut(id=t["id"], title=t["title"], tags=tags, active=t["active"], created_at=t["created_at"]))
+
+    return UserDetailResponse(
+        id=row["id"],
+        user_id=row["user_id"],
+        username=row.get("username"),
+        first_name=row.get("first_name"),
+        last_name=row.get("last_name"),
+        balance=row["balance"],
+        created_at=row["created_at"],
+        subscription_ends_at=row.get("subscription_ends_at"),
+        trial_ends_at=row.get("trial_ends_at"),
+        tasks=tasks,
+    )
+
+
+@app.get("/api/users/{user_id}/leads", dependencies=[Depends(verify_token)])
+async def get_user_leads(
+    user_id: uuid.UUID,
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    date_from: str = Query("", description="Start date YYYY-MM-DD"),
+    date_to: str = Query("", description="End date YYYY-MM-DD"),
+    task_ids: str = Query("", description="Comma-separated task UUIDs"),
+):
+    mpool = get_main_pool()
+    conditions = ["r.user_id = $1"]
+    params: list = [user_id]
+    idx = 2
+
+    if date_from.strip():
+        conditions.append(f"r.created_at >= ${idx}::timestamptz")
+        params.append(date_from.strip() + "T00:00:00Z")
+        idx += 1
+
+    if date_to.strip():
+        conditions.append(f"r.created_at < ${idx}::timestamptz")
+        params.append(date_to.strip() + "T00:00:00Z")
+        idx += 1
+
+    if task_ids.strip():
+        tids = []
+        for tid in task_ids.split(","):
+            tid = tid.strip()
+            if tid:
+                try:
+                    tids.append(uuid.UUID(tid))
+                except ValueError:
+                    pass
+        if tids:
+            conditions.append(f"r.task_id = ANY(${idx}::uuid[])")
+            params.append(tids)
+            idx += 1
+
+    where = " AND ".join(conditions)
+
+    async with mpool.acquire() as conn:
+        rows = await conn.fetch(
+            f"""
+            SELECT r.*, ut.title AS task_title
+            FROM user_recommendations r
+            LEFT JOIN user_tasks ut ON ut.id = r.task_id
+            WHERE {where}
+            ORDER BY r.created_at DESC
+            LIMIT ${idx} OFFSET ${idx + 1}
+            """,
+            *params, limit, offset,
+        )
+        total = await conn.fetchval(
+            f"SELECT COUNT(*)::int FROM user_recommendations r WHERE {where}",
+            *params,
+        )
+
+    items = []
+    for r in rows:
+        rec = r["recommendation"]
+        if isinstance(rec, str):
+            rec = json.loads(rec)
+        items.append(
+            LeadItem(
+                id=r["id"],
+                task_id=r["task_id"],
+                task_title=r.get("task_title"),
+                recommendation=rec if isinstance(rec, dict) else {"text": str(rec)},
+                accepted=r["accepted"],
+                created_at=r["created_at"],
+            )
+        )
+    return LeadListResponse(items=items, total=total or 0)
+
+
+@app.get("/api/users/{user_id}/payments", dependencies=[Depends(verify_token)])
+async def get_user_payments(
+    user_id: uuid.UUID,
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+):
+    mpool = get_main_pool()
+    async with mpool.acquire() as conn:
+        rows = await conn.fetch(
+            """
+            SELECT id, amount, status, payment, recurrent, created_at, payment_timestamp
+            FROM transactions
+            WHERE user_id = $1
+            ORDER BY created_at DESC
+            LIMIT $2 OFFSET $3
+            """,
+            user_id, limit, offset,
+        )
+        total = await conn.fetchval(
+            "SELECT COUNT(*)::int FROM transactions WHERE user_id = $1",
+            user_id,
+        )
+
+    items = [
+        PaymentItem(
+            id=r["id"],
+            amount=r["amount"],
+            status=r["status"],
+            payment=r["payment"],
+            recurrent=r["recurrent"],
+            created_at=r["created_at"],
+            payment_timestamp=r.get("payment_timestamp"),
+        )
+        for r in rows
+    ]
+    return PaymentListResponse(items=items, total=total or 0)
+
+
+@app.post("/api/users/{user_id}/balance", dependencies=[Depends(verify_token)])
+async def top_up_balance(user_id: uuid.UUID, body: BalanceTopUpRequest):
+    mpool = get_main_pool()
+    async with mpool.acquire() as conn:
+        row = await conn.fetchrow(
+            "UPDATE users SET balance = balance + $2, updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING balance, user_id",
+            user_id, body.amount,
+        )
+        if not row:
+            raise HTTPException(status_code=404, detail="User not found")
+
+    # Send Telegram notification
+    notification_sent = False
+    tg_user_id = row["user_id"]
+    token = bot_token()
+    if token:
+        text = f"\U0001f4b0 На ваш баланс начислено {body.amount} \u20bd\nТекущий баланс: {row['balance']} \u20bd"
+        try:
+            async with httpx.AsyncClient(timeout=10) as client:
+                resp = await client.post(
+                    f"https://api.telegram.org/bot{token}/sendMessage",
+                    json={"chat_id": tg_user_id, "text": text},
+                )
+                tg_body = resp.json()
+                notification_sent = resp.status_code == 200 and tg_body.get("ok", False)
+                if not notification_sent:
+                    logger.warning("Telegram API error for %s: %s", tg_user_id, tg_body)
+        except Exception as exc:
+            logger.warning("Failed to send balance notification to %s: %s", tg_user_id, exc)
+
+    return BalanceTopUpResponse(new_balance=row["balance"], message=f"Начислено {body.amount} \u20bd", notification_sent=notification_sent)
+
+
+@app.get("/api/users/{user_id}/tasks", dependencies=[Depends(verify_token)])
+async def get_user_tasks(user_id: uuid.UUID):
+    mpool = get_main_pool()
+    async with mpool.acquire() as conn:
+        rows = await conn.fetch(
+            "SELECT id, title FROM user_tasks WHERE user_id = $1 AND active = true ORDER BY created_at DESC",
+            user_id,
+        )
+    return [{"id": str(r["id"]), "title": r["title"]} for r in rows]
+
+
 # ── UI serving ──────────────────────────────────────────────────────────────
 
 @app.get("/")
@@ -270,6 +599,16 @@ async def root():
     if _ui_dir.is_dir():
         return FileResponse(_ui_dir / "index.html")
     return JSONResponse({"service": "admin-ui", "docs": "/docs"})
+
+
+@app.get("/{path:path}")
+async def spa_catch_all(path: str):
+    """Serve index.html for all non-API, non-static paths (SPA client-side routing)."""
+    if path.startswith("api/") or path.startswith("ui/") or path in ("docs", "redoc", "openapi.json"):
+        raise HTTPException(status_code=404, detail="Not found")
+    if _ui_dir.is_dir():
+        return FileResponse(_ui_dir / "index.html")
+    raise HTTPException(status_code=404, detail="Not found")
 
 
 def main():
