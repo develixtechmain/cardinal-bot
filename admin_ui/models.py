@@ -137,6 +137,16 @@ class BalanceTopUpResponse(BaseModel):
     notification_sent: bool = False
 
 
+class ExtendSubscriptionRequest(BaseModel):
+    days: int = Field(..., gt=0, le=365, description="Days to extend subscription")
+
+
+class ExtendSubscriptionResponse(BaseModel):
+    subscription_ends_at: Optional[datetime]
+    trial_ends_at: Optional[datetime]
+    message: str
+
+
 def parse_search_query(q: str) -> tuple[str, Any]:
     q = q.strip()
     if not q:

@@ -347,6 +347,31 @@ function renderUserCard(u) {
   if (trialInfo) html += cardField("Триал", trialInfo);
   html += "</div>";
 
+  // Subscription & trial management
+  html += '<div class="panel" style="margin-top:1rem;padding:1rem 1.25rem">';
+  html += '<h3 style="margin:0 0 0.75rem;font-size:1rem">Управление подпиской</h3>';
+  html += '<div style="display:flex;gap:1rem;flex-wrap:wrap">';
+
+  html += '<div style="flex:1;min-width:200px">';
+  html += '<label>Продлить подписку</label>';
+  html += '<div class="row" style="gap:0.5rem">';
+  html += '<input type="number" id="extSubDays" min="1" max="365" placeholder="Дни" style="width:80px;flex:0 0 auto" />';
+  html += '<button type="button" id="btnExtSub">Продлить</button>';
+  html += '</div>';
+  html += '</div>';
+
+  html += '<div style="flex:1;min-width:200px">';
+  html += '<label>Продлить / выдать триал</label>';
+  html += '<div class="row" style="gap:0.5rem">';
+  html += '<input type="number" id="extTrialDays" min="1" max="365" placeholder="Дни" style="width:80px;flex:0 0 auto" />';
+  html += '<button type="button" id="btnExtTrial">Продлить</button>';
+  html += '</div>';
+  html += '</div>';
+
+  html += '</div>';
+  html += '<div id="extResult" class="muted" style="margin-top:0.5rem" hidden></div>';
+  html += '</div>';
+
   // Tasks
   if (u.tasks && u.tasks.length) {
     html += '<div class="task-list"><h3 style="margin:0 0 0.5rem">Задачи (' + u.tasks.length + ')</h3>';
@@ -372,6 +397,40 @@ function renderUserCard(u) {
   }
 
   panel.innerHTML = html;
+
+  // Bind extend subscription button
+  document.getElementById("btnExtSub").addEventListener("click", async () => {
+    const days = parseInt(document.getElementById("extSubDays").value, 10);
+    if (!days || days <= 0) return;
+    if (!confirm("Продлить подписку на " + days + " дн.?")) return;
+    const resultEl = document.getElementById("extResult");
+    try {
+      const res = await fetchJson("/api/users/" + currentUserId + "/subscription", {
+        method: "POST", body: JSON.stringify({ days }),
+      });
+      resultEl.textContent = "\u2714 " + res.message + (res.subscription_ends_at ? " (до " + fmtDate(res.subscription_ends_at) + ")" : "");
+      resultEl.hidden = false;
+      currentUserData = null;
+      loadUserDetail(currentUserId, "card");
+    } catch (e) { resultEl.textContent = "\u2718 Ошибка: " + e.message; resultEl.hidden = false; }
+  });
+
+  // Bind extend trial button
+  document.getElementById("btnExtTrial").addEventListener("click", async () => {
+    const days = parseInt(document.getElementById("extTrialDays").value, 10);
+    if (!days || days <= 0) return;
+    if (!confirm("Продлить триал на " + days + " дн.?")) return;
+    const resultEl = document.getElementById("extResult");
+    try {
+      const res = await fetchJson("/api/users/" + currentUserId + "/trial", {
+        method: "POST", body: JSON.stringify({ days }),
+      });
+      resultEl.textContent = "\u2714 " + res.message + (res.trial_ends_at ? " (до " + fmtDate(res.trial_ends_at) + ")" : "");
+      resultEl.hidden = false;
+      currentUserData = null;
+      loadUserDetail(currentUserId, "card");
+    } catch (e) { resultEl.textContent = "\u2718 Ошибка: " + e.message; resultEl.hidden = false; }
+  });
 }
 
 function cardField(label, value, isHtml) {

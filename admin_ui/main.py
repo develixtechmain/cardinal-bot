@@ -33,6 +33,8 @@ from models import (
     PaymentItem,
     BalanceTopUpRequest,
     BalanceTopUpResponse,
+    ExtendSubscriptionRequest,
+    ExtendSubscriptionResponse,
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
@@ -581,6 +583,87 @@ async def top_up_balance(user_id: uuid.UUID, body: BalanceTopUpRequest):
             logger.warning("Failed to send balance notification to %s: %s", tg_user_id, exc)
 
     return BalanceTopUpResponse(new_balance=row["balance"], message=f"Начислено {body.amount} \u20bd", notification_sent=notification_sent)
+
+
+@app.post("/api/users/{user_id}/subscription", dependencies=[Depends(verify_token)])
+async def extend_subscription(user_id: uuid.UUID, body: ExtendSubscriptionRequest):
+    mpool = get_main_pool()
+    async with mpool.acquire() as conn:
+        # Ensure user exists
+        user = await conn.fetchrow("SELECT id FROM users WHERE id = $1", user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        # Ensure subscription row exists
+        sub = await conn.fetchrow("SELECT id, subscription_ends_at FROM user_subscriptions WHERE user_id = $1", user_id)
+        if not sub:
+            sub = await conn.fetchrow(
+                "INSERT INTO user_subscriptions (user_id) VALUES ($1) RETURNING id, subscription_ends_at", user_id,
+            )
+
+        row = await conn.fetchrow(
+            """
+            UPDATE user_subscriptions SET subscription_ends_at = CASE
+                WHEN subscription_ends_at IS NOT NULL AND subscription_ends_at > CURRENT_TIMESTAMP
+                     THEN subscription_ends_at + make_interval(days => $2)
+                ELSE CURRENT_TIMESTAMP + make_interval(days => $2)
+            END WHERE user_id = $1
+            RETURNING subscription_ends_at, trial_ends_at
+            """,
+            user_id, body.days,
+        )
+
+    return ExtendSubscriptionResponse(
+        subscription_ends_at=row["subscription_ends_at"],
+        trial_ends_at=row.get("trial_ends_at"),
+        message=f"Подписка продлена на {body.days} дн.",
+    )
+
+
+@app.post("/api/users/{user_id}/trial", dependencies=[Depends(verify_token)])
+async def extend_trial(user_id: uuid.UUID, body: ExtendSubscriptionRequest):
+    mpool = get_main_pool()
+    async with mpool.acquire() as conn:
+        user = await conn.fetchrow("SELECT id FROM users WHERE id = $1", user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        sub = await conn.fetchrow("SELECT id, trial_ends_at, trial_starts_at FROM user_subscriptions WHERE user_id = $1", user_id)
+        if not sub:
+            sub = await conn.fetchrow(
+                "INSERT INTO user_subscriptions (user_id) VALUES ($1) RETURNING id, trial_ends_at, trial_starts_at", user_id,
+            )
+
+        # If trial never started, set trial_starts_at too
+        if not sub["trial_starts_at"]:
+            row = await conn.fetchrow(
+                """
+                UPDATE user_subscriptions SET
+                    trial_starts_at = CURRENT_TIMESTAMP,
+                    trial_ends_at = CURRENT_TIMESTAMP + make_interval(days => $2)
+                WHERE user_id = $1
+                RETURNING subscription_ends_at, trial_ends_at
+                """,
+                user_id, body.days,
+            )
+        else:
+            row = await conn.fetchrow(
+                """
+                UPDATE user_subscriptions SET trial_ends_at = CASE
+                    WHEN trial_ends_at IS NOT NULL AND trial_ends_at > CURRENT_TIMESTAMP
+                         THEN trial_ends_at + make_interval(days => $2)
+                    ELSE CURRENT_TIMESTAMP + make_interval(days => $2)
+                END WHERE user_id = $1
+                RETURNING subscription_ends_at, trial_ends_at
+                """,
+                user_id, body.days,
+            )
+
+    return ExtendSubscriptionResponse(
+        subscription_ends_at=row.get("subscription_ends_at"),
+        trial_ends_at=row["trial_ends_at"],
+        message=f"Триал продлён на {body.days} дн.",
+    )
 
 
 @app.get("/api/users/{user_id}/tasks", dependencies=[Depends(verify_token)])
