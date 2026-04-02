@@ -544,6 +544,10 @@ button:hover { filter: brightness(1.08); }
   padding: 2rem;
 }
 
+.modal-overlay[hidden] {
+  display: none;
+}
+
 .modal {
   background: var(--panel);
   border: 1px solid var(--line);

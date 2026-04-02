@@ -67,6 +67,7 @@ class UserListItem(BaseModel):
     last_name: Optional[str]
     created_at: datetime
     subscription_ends_at: Optional[datetime]
+    trial_ends_at: Optional[datetime]
     leads_today: int = 0
     leads_month: int = 0
 
